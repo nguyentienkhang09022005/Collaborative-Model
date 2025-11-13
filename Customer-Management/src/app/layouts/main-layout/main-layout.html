@@ -1,0 +1,81 @@
+<div class="flex h-screen bg-slate-50 text-slate-900 font-inter overflow-hidden">
+  <!-- Sidebar -->
+  <aside
+    class="w-64 bg-slate-900 text-slate-100 flex flex-col justify-between p-6 fixed inset-y-0 left-0 shadow-lg z-20">
+    
+    <!-- Logo -->
+    <div>
+      <h1 class="text-2xl font-bold uppercase tracking-wide mb-10 relative after:block after:w-full after:h-px after:bg-slate-700 after:mt-4">
+        DESKBOARD
+      </h1>
+
+      <!-- Menu -->
+      <nav class="flex flex-col space-y-2">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          class="block px-4 py-2.5 rounded-lg text-slate-300 font-medium transition-all duration-200 hover:bg-blue-500/10 hover:text-sky-400 active:translate-x-1 relative overflow-hidden"
+          [routerLinkActiveOptions]="{ exact: true }"> 
+          Dashboard
+        </a>
+
+        <a
+          routerLink="/dean"
+          routerLinkActive="active"
+          class="block px-4 py-2.5 rounded-lg text-slate-300 font-medium transition-all duration-200 hover:bg-blue-500/10 hover:text-sky-400 active:translate-x-1 relative overflow-hidden">
+          Deans
+        </a>
+
+        <a
+          routerLink="/customers"
+          routerLinkActive="active"
+          class="block px-4 py-2.5 rounded-lg text-slate-300 font-medium transition-all duration-200 hover:bg-blue-500/10 hover:text-sky-400 active:translate-x-1 relative overflow-hidden">
+          Customers
+        </a>
+
+        <a
+          routerLink="/contact"
+          routerLinkActive="active"
+          class="block px-4 py-2.5 rounded-lg text-slate-300 font-medium transition-all duration-200 hover:bg-blue-500/10 hover:text-sky-400 active:translate-x-1 relative overflow-hidden">
+          Contacts
+        </a>
+
+        <a
+          routerLink="/deal"
+          routerLinkActive="active"
+          class="block px-4 py-2.5 rounded-lg text-slate-300 font-medium transition-all duration-200 hover:bg-blue-500/10 hover:text-sky-400 active:translate-x-1 relative overflow-hidden">
+          Deals
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Menu -->
+    <div>
+      <a
+        href="#"
+        class="block px-4 py-2.5 rounded-lg text-slate-400 text-sm transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 active:translate-x-1"
+        (click)="onLogout($event)">
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex flex-col flex-1 ml-64 h-screen overflow-hidden">
+    <!-- Topbar -->
+    <header
+      class="h-[70px] bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-8 sticky top-0 z-10">
+      <div class="text-lg font-semibold text-slate-800">Welcome Back 👋</div>
+
+      <input
+        type="text"
+        placeholder="Search anything..."
+        class="w-64 px-4 py-2.5 border border-slate-300 rounded-lg bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+    </header>
+
+    <!-- Page Content -->
+    <section class="flex-1 p-8 overflow-y-auto bg-slate-50">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

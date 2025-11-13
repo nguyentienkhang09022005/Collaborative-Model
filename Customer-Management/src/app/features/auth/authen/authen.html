@@ -1,0 +1,92 @@
+<div class="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+  <div class="flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl">
+
+    <!-- Cột Marketing -->
+    <div
+      class="flex flex-col justify-between bg-[#121A29] text-white p-8 lg:p-12 flex-1 relative bg-cover bg-center"
+      style="background-image: url('https://placehold.co/1200x800/121A29/1c2636?text=Background+Image+Placeholder');">
+      
+      <div>
+        <!-- Logo + Back link -->
+        <div class="flex flex-col gap-3 mb-6">
+          <div class="flex items-center gap-2 text-2xl font-bold">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+              <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M10 9L15 12L10 15V9Z" fill="currentColor"/>
+            </svg>
+            Customer-Management
+          </div>
+        </div>
+
+        <!-- Tiêu đề marketing -->
+        <h1 class="text-2xl lg:text-3xl font-extrabold leading-snug lg:mb-32">
+          Edit Smarter.<br />Export Faster.<br />Create Anywhere.
+        </h1>
+      </div>
+    </div>
+
+    <!-- Cột Form -->
+    <div class="flex flex-col items-center justify-center p-6 lg:p-12 flex-1">
+      <div class="w-full max-w-sm">
+        <h2 class="text-2xl lg:text-3xl font-extrabold mb-2">Welcome Back!</h2>
+        <p class="text-gray-500 text-sm mb-6">Log in to start management</p>
+
+        <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)" class="flex flex-col gap-3">
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <input id="username" name="username" type="text" placeholder="Username"
+              [(ngModel)]="authData.username" required
+              #username="ngModel"
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+            <!-- Dành sẵn không gian cho cảnh báo -->
+            <div class="h-1 text-red-500 text-xs mt-1">
+              <span *ngIf="username.invalid && username.touched">Username is required</span>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input id="password" name="password" type="password" placeholder="Password"
+              [(ngModel)]="authData.password" required
+              #password="ngModel"
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+            <div class="h-1 text-red-500 text-xs mt-1">
+              <span *ngIf="password.invalid && password.touched">Password is required</span>
+            </div>
+          </div>
+
+          <!-- Remember + Forgot -->
+          <div class="flex justify-between items-center text-sm">
+            <label class="flex items-center gap-2 text-gray-700">
+              <input id="remember-me" type="checkbox" class="accent-black">
+              Remember Me
+            </label>
+            <a href="#" class="text-black font-semibold hover:underline">Forgot Password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            class="relative bg-black text-white py-2.5 rounded-lg font-semibold w-full flex justify-center items-center hover:bg-gray-800 transition disabled:opacity-80"
+            [disabled]="isLoading || loginForm.invalid">
+            
+            <!-- Loading Spinner -->
+            <svg *ngIf="isLoading" class="absolute animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+
+            <span [class.invisible]="isLoading">Login</span>
+          </button>
+        </form>
+
+        <p class="text-center mt-6 text-sm text-gray-500">
+          Don't have an account?
+          <a href="/register" class="text-black font-semibold hover:underline">Sign up here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
