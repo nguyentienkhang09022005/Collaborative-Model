@@ -1,5 +1,5 @@
 //----------Request Models----------
-export interface Authen
+export interface Login
 {
     username: string;
     password: string;
@@ -23,6 +23,9 @@ export interface Login
 
 export interface LoginResponse
 {
+    errors?: { 
+        message: string 
+    }[];
     data: {
         login: Login;
     }
@@ -30,6 +33,9 @@ export interface LoginResponse
 
 export interface LogoutResponse
 {
+    errors?: { 
+        message: string 
+    }[];
     data: {
         logout: string;
     }

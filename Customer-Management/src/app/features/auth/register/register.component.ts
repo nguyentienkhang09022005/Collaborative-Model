@@ -14,7 +14,6 @@ import { Register } from '../../../core/models/register.model';
   styleUrls: ['./register.css'],
 })
 export class RegisterComponent {
-[x: string]: any;
 
   // Input Register
   registerData: Register = {} as Register
@@ -31,9 +30,15 @@ export class RegisterComponent {
     this.isLoading = true;
     this.authenService.register(this.registerData).subscribe({
       next: (res) => {
-        console.log("Đăng ký thành công!", res);
+      if (res.errors && res.errors.length > 0) {
+        alert(res.errors[0].message);
         this.isLoading = false;
-        this.router.navigate(['/authen'])
+        return;
+      }
+   
+      console.log(res);
+      this.isLoading = false;
+      this.router.navigate(['/otp-register'])
       },
       error: (err) => {console.log("Lỗi đăng ký!", err);
       this.isLoading = false;
@@ -41,7 +46,5 @@ export class RegisterComponent {
     })
   }
 }
-//djaskdsa
-//dksadas
 
 

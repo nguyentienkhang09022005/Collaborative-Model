@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Authen } from '../../../core/models/auth.models';
+import { Login } from '../../../core/models/auth.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 export class AuthenComponent {
   
   // Input Login
-  authData: Authen = {} as Authen;
+  loginData: Login = {} as Login;
   isLoading: boolean = false;
 
   constructor(private authenService: AuthService, 
@@ -27,9 +27,15 @@ export class AuthenComponent {
     if (form.invalid) return;
 
     this.isLoading = true;
-    this.authenService.authen(this.authData).subscribe({
+    this.authenService.authen(this.loginData).subscribe({
       next: (res) => {
-        console.log("Đăng nhập thành công!", res);
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          this.isLoading = false;
+          return;
+        }
+        
+        console.log(res);
         this.isLoading = false;
         this.router.navigate(['/dashboard'])
       },

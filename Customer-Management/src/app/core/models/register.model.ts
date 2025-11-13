@@ -11,6 +11,9 @@ export interface Register
 //----------Response Models----------
 export interface RegisterResponse
 {
+    errors?: { 
+        message: string 
+    }[];
     data: {
         register: string;
     }

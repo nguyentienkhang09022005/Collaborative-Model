@@ -21,6 +21,11 @@ export class MainLayoutComponent {
     if (event) event.preventDefault(); 
     this.authenService.logout().subscribe({
       next: (res) => {
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        
         console.log("Đăng xuất thành công!", res);
         this.router.navigate(['/authen'])
       },

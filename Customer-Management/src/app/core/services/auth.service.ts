@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 import { map, Observable, tap } from "rxjs";
-import { Authen, InfStaff, LoginResponse, LogoutResponse } from "../models/auth.models";
+import { Login, InfStaff, LoginResponse, LogoutResponse } from "../models/auth.models";
 import { ApiService } from "./api.service";
 import { Register, RegisterResponse } from "../models/register.model";
+import { OTPRegisterResponse, ConfirmOTP } from "../models/otp.model";
 
 @Injectable({
     providedIn: 'root'
@@ -11,11 +12,11 @@ export class AuthService {
     constructor(private api: ApiService) {}
 
     // Login
-    authen(authen: Authen): Observable<LoginResponse>{
+    authen(login: Login): Observable<LoginResponse>{
         const query = {
             query: `
                 mutation {
-                    login(authenticationRequest: { username: "${authen.username}", password: "${authen.password}" }) 
+                    login(authenticationRequest: { username: "${login.username}", password: "${login.password}" }) 
                     {
                         token
                         infStaff {
@@ -78,19 +79,37 @@ export class AuthService {
 
         return this.api.post<RegisterResponse>('graphql', query).pipe(
             tap(res => {
+                localStorage.setItem('email', register.email);
                 return res;
             })
         );
     }
 
-    // Lấy access_token từ localStorage
+    // OTP
+    validateOTP(confirmOTP: ConfirmOTP): Observable<OTPRegisterResponse>{
+        const query = {
+            query: `
+                mutation {
+                    confirmOTPRegister(confirmOTPRequest: {
+                        email: "${confirmOTP.email}", 
+                        otp: "${confirmOTP.otp}"
+                })
+            }`
+        };
+
+        return this.api.post<OTPRegisterResponse>('graphql', query).pipe(
+            tap(res => {
+                return res;
+            })
+        );
+    }
+
     getAccessToken(): string | null{
         return localStorage.getItem('access_token')
     }
 
-    // Lấy inf_staff từ localStorage
     getCurrentStaff(): InfStaff | null {
     const staff = localStorage.getItem('staff_info');
     return staff ? JSON.parse(staff) : null;
-  }
+    }
 }
