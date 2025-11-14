@@ -26,7 +26,6 @@ export class MainLayoutComponent {
           return;
         }
         
-        console.log("Đăng xuất thành công!", res);
         this.router.navigate(['/authen'])
       },
       error: (err) => {console.log("Lỗi đăng xuất!", err)}
