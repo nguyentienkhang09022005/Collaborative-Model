@@ -3,9 +3,7 @@
 
     <!-- Cột Marketing -->
     <div
-      class="flex flex-col justify-between bg-[#121A29] text-white p-8 lg:p-12 flex-1 relative bg-cover bg-center"
-      style="background-image: url('https://placehold.co/1200x800/121A29/1c2636?text=Background+Image+Placeholder');">
-      
+      class="flex flex-col justify-between bg-[#121A29] text-white p-8 lg:p-12 flex-1 relative bg-cover bg-center">
       <div>
         <!-- Logo + Back link -->
         <div class="flex flex-col gap-3 mb-6">
@@ -39,7 +37,7 @@
             <input id="fullName" name="fullName" type="text" placeholder="Full Name"
               [(ngModel)]="registerData.fullName" required 
               #fullname="ngModel"
-              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder:text-slate-500" />
             <div class="h-1 text-red-500 text-xs mt-1">
               <span *ngIf="fullname.invalid && fullname.touched">fullname is required</span>
             </div>
@@ -51,7 +49,7 @@
             <input id="email" name="email" type="email" placeholder="Email"
               [(ngModel)]="registerData.email" required
               #email="ngModel"
-              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder:text-slate-500" />
             <div class="h-1 text-red-500 text-xs mt-1">
               <span *ngIf="email.invalid && email.touched">email is required</span>
             </div>
@@ -63,7 +61,7 @@
             <input id="userName" name="userName" type="text" placeholder="Username"
               [(ngModel)]="registerData.userName" required
               #userName="ngModel"
-              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder:text-slate-500" />
             <div class="h-1 text-red-500 text-xs mt-1">
               <span *ngIf="userName.invalid && userName.touched">userName is required</span>
             </div>
@@ -75,7 +73,7 @@
             <input id="password" name="password" type="password" placeholder="Password"
               [(ngModel)]="registerData.password" required
               #password="ngModel"
-              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder:text-slate-500" />
             <div class="h-1 text-red-500 text-xs mt-1">
               <span *ngIf="password.invalid && password.touched">password is required</span>
             </div>
@@ -87,7 +85,7 @@
             <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm Password"
               [(ngModel)]="registerData.confirmPassword" required
               #confirmPassword="ngModel"
-              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black" />
+              class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder:text-slate-500" />
             <div class="h-1 text-red-500 text-xs mt-1">
               <span *ngIf="confirmPassword.invalid && confirmPassword.touched">confirmPassword is required</span>
             </div>
@@ -96,7 +94,7 @@
           <!-- Submit -->
           <button
             type="submit"
-            class="relative bg-black text-white py-2.5 rounded-lg font-semibold w-full flex justify-center items-center hover:bg-gray-800 transition disabled:opacity-80"
+            class="relative bg-black text-white py-2.5 rounded-lg font-semibold w-full flex justify-center items-center hover:bg-gray-800 transition disabled:opacity-80 cursor-pointer"
             [disabled]="isLoading">
             
             <!-- Loading Spinner -->

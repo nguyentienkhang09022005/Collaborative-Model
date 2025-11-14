@@ -1,37 +1,35 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule, NgForm } from '@angular/forms';
+import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
-import { Register } from '../../../core/models/register.model';
-
+import { sendOTPForgotPassword } from '../../../core/models/otp.model';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-forgot-password',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './register.html',
-  styleUrls: ['./register.css'],
+  templateUrl: './forgot-password.html',
+  styleUrls: ['./forgot-password.css'],
 })
-export class RegisterComponent {
-
-  // Input Register
-  registerData: Register = {} as Register
+export class ForgotPasswordComponent {
+  
+  sendOTPForgotPasswordData: sendOTPForgotPassword = {} as sendOTPForgotPassword;
   isLoading: boolean = false;
 
-  constructor(private authenService: AuthService, 
+  constructor(private authenService: AuthService,
               private router: Router){}
-              
+
   ngOnInit(): void{}
 
-  onRegister(form: NgForm){
+  onSendOTPForgotPassword(form: NgForm){
     Object.values(form.controls).forEach(control => {
       control.markAsTouched(); 
     });
     if (form.invalid) return;
 
     this.isLoading = true;
-    this.authenService.register(this.registerData).subscribe({
+    this.authenService.sendOTPforgotPassword(this.sendOTPForgotPasswordData).subscribe({
       next: (res) => {
       if (res.errors && res.errors.length > 0) {
         alert(res.errors[0].message);
@@ -41,13 +39,11 @@ export class RegisterComponent {
    
       console.log(res);
       this.isLoading = false;
-      this.router.navigate(['/otp-register'])
+      this.router.navigate(['/otp-forgot-password'])
       },
-      error: (err) => {console.log("Lỗi đăng ký!", err);
+      error: (err) => {console.log("Lỗi nhập email!", err);
         this.isLoading = false;
       }
     })
   }
 }
-
-

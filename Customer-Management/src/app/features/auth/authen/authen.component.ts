@@ -24,6 +24,9 @@ export class AuthenComponent {
   ngOnInit(): void{}
 
   onLogin(form: NgForm){
+    Object.values(form.controls).forEach(control => {
+      control.markAsTouched(); 
+    });
     if (form.invalid) return;
 
     this.isLoading = true;
@@ -40,7 +43,7 @@ export class AuthenComponent {
         this.router.navigate(['/dashboard'])
       },
       error: (err) => {console.log("Lỗi đăng nhập!", err);
-      this.isLoading = false;
+        this.isLoading = false;
       }
     })
   }

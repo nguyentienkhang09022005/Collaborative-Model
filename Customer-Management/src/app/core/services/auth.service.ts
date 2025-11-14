@@ -3,7 +3,7 @@ import { map, Observable, tap } from "rxjs";
 import { Login, InfStaff, LoginResponse, LogoutResponse } from "../models/auth.models";
 import { ApiService } from "./api.service";
 import { Register, RegisterResponse } from "../models/register.model";
-import { OTPRegisterResponse, ConfirmOTP } from "../models/otp.model";
+import { OTPRegisterResponse, ConfirmOTPRegister, OTPForgotPasswordResponse, confirmOTPForgotPassword, confirmOTPForgotPasswordResponse, sendOTPForgotPassword } from "../models/otp.model";
 
 @Injectable({
     providedIn: 'root'
@@ -86,19 +86,62 @@ export class AuthService {
     }
 
     // OTP
-    validateOTP(confirmOTP: ConfirmOTP): Observable<OTPRegisterResponse>{
+    confirmOTPRegister(confirmOTPRegister: ConfirmOTPRegister): Observable<OTPRegisterResponse>{
         const query = {
             query: `
                 mutation {
                     confirmOTPRegister(confirmOTPRequest: {
-                        email: "${confirmOTP.email}", 
-                        otp: "${confirmOTP.otp}"
+                        email: "${confirmOTPRegister.email}", 
+                        otp: "${confirmOTPRegister.otp}"
                 })
             }`
         };
 
         return this.api.post<OTPRegisterResponse>('graphql', query).pipe(
             tap(res => {
+                localStorage.removeItem('email');
+                return res;
+            })
+        );
+    }
+
+    confirmOTPForgotPassword(confirmOTPForgotPassword: confirmOTPForgotPassword): Observable<confirmOTPForgotPasswordResponse>{
+        const query = {
+            query: `
+                mutation {
+                    confirmOTPForgotPassword(changePasswordRequest: {
+                        email: "${confirmOTPForgotPassword.email}",
+                        otp: "${confirmOTPForgotPassword.otp}",
+                        newPassword: "${confirmOTPForgotPassword.newPassword}",
+                        confirmPassword: "${confirmOTPForgotPassword.confirmPassword}"
+                    })
+                }`
+        };
+
+        return this.api.post<confirmOTPForgotPasswordResponse>('graphql', query).pipe(
+            tap(res => {
+                localStorage.removeItem('email');
+                localStorage.removeItem('forgot_password_otp');                
+                
+                return res;
+            })
+        );
+    }
+
+    // Forgot Password
+    sendOTPforgotPassword(sendOTPForgotPassword: sendOTPForgotPassword): Observable<OTPForgotPasswordResponse>{
+        const query = {
+            query: `
+                mutation {
+                    sendOTPForgotPassword(forgotPasswordRequest: {
+                        email: "${sendOTPForgotPassword.email}",
+                })
+            }`
+        };
+
+        return this.api.post<OTPForgotPasswordResponse>('graphql', query).pipe(
+            tap(res => {
+                localStorage.setItem('email', sendOTPForgotPassword.email);
                 return res;
             })
         );
