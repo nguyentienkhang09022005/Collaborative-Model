@@ -36,6 +36,7 @@ export class AuthService {
 
                 // Lưu token vào localStorage
                 localStorage.setItem('access_token', loginData.token);
+                localStorage.setItem("staff_info", JSON.stringify(loginData.infStaff));
 
                 return res; 
             })
