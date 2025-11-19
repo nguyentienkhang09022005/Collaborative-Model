@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-slate-100 p-4">
   
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Leads</h1>
+    <h1 class="text-3xl font-bold">Customers</h1>
 
     <div class="flex items-center gap-3">
       <input
@@ -11,7 +11,7 @@
       />
 
       <button class="px-4 py-2 bg-black text-white rounded-xl shadow">
-        + Add Lead
+        + Add Customer
       </button>
     </div>
   </div>
@@ -25,45 +25,41 @@
           <th class="py-3">Email</th>
           <th class="py-3">Phone</th>
           <th class="py-3">Salary</th>
-          <th class="py-3">Resource</th>
           <th class="py-3">Action</th>
         </tr>
       </thead>
 
       <tbody class="text-sm text-slate-700">
-        <tr *ngFor="let l of leads" class="border-b hover:bg-slate-50 transition">
+          <tr *ngFor="let c of customers" 
+          class="border-b hover:bg-slate-50 transition cursor-pointer">
 
           <td class="py-4 font-semibold">
-            {{ l.personResponse?.fullname }}
+            {{ c.personResponse.fullname }}
+          </td>
+
+          <td class="py-4 wrap-break-word">
+            {{ c.personResponse.email }}
           </td>
 
           <td class="py-4">
-            {{ l.personResponse?.email }}
+            {{ c.personResponse.phone }}
           </td>
 
           <td class="py-4">
-            {{ l.personResponse?.phone }}
-          </td>
-
-          <td class="py-4">
-            {{ l.personResponse?.salary | number }} đ
-          </td>
-
-          <td class="py-4">
-            {{ l.resource }}
+            {{ c.personResponse.salary | number }} đ
           </td>
     
-          <!-- Action -->
+          <!-- Action --> 
           <td class="py-4 relative">
 
             <button
-              (click)="toggleMenu(l)"
+              (click)="toggleMenu(c, $event)"
               class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition">
               ...
             </button>
 
             <div
-              *ngIf="openMenu === l"
+              *ngIf="openMenu === c"
               class="absolute right-0 mt-2 w-36 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-20 dropdown-open">
 
               <button

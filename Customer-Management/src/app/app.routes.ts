@@ -9,9 +9,10 @@ import { OtpForgotPasswordComponent } from './shared/components/otp-forgot-passw
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth/auth.guard';
 import { ContactPageComponent } from './features/contact-page/contact-page.component';
-import { CustomerPageComponent } from './features/customer-page/customer-page.component';
+import { CustomerListComponent } from './features/customer/customer-list/customer-list.component';
 import { DealPageComponent } from './features/deal-page/deal-page.component';
-import { LeadPageComponent } from './features/lead-page/lead-page.component';
+import { LeadListComponent } from './features/leads/lead-list/lead-list.component';
+import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.component';
 
 export const routes: Routes = [
     // Authen
@@ -28,14 +29,15 @@ export const routes: Routes = [
         component: MainLayoutComponent,
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        children: [
+        children: 
+        [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent },
-            { path: 'leads', component: LeadPageComponent },
-            { path: 'customers', component: CustomerPageComponent },
+            { path: 'leads', component: LeadListComponent },
+            { path: 'lead-detail', component: LeadDetailComponet },
+            { path: 'customers', component: CustomerListComponent },
             { path: 'contacts', component: ContactPageComponent },
             { path: 'deals', component: DealPageComponent },
-
         ]
     },
 
