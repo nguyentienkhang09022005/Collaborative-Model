@@ -1,6 +1,6 @@
 export interface LeadRequest
 {
-    idLead?: string,
+    idLead: string,
     resource: string;
     fullname: string;
     email: string;
@@ -53,5 +53,15 @@ export interface LeadInfResponse
     }[];
     data: {
         leadById: LeadItem[];
+    }
+}
+
+export interface LeadUpdateResponse
+{
+    errors?: {
+        message: string
+    }[];
+    data: {
+        updateLead: LeadItem[];
     }
 }

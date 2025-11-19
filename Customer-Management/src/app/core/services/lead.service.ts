@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { LeadDeletionResponse, LeadInfResponse, LeadRequest, LeadResponse } from "../models/lead.models";
+import { LeadDeletionResponse, LeadInfResponse, LeadRequest, LeadResponse, LeadUpdateResponse } from "../models/lead.models";
 import { Observable, tap } from "rxjs";
 
 @Injectable({
@@ -113,16 +113,36 @@ export class LeadService {
         );
     }
 
-    updateLead(idLead: string): Observable<LeadResponse>{
+    UpdateLead(LeadRequest: LeadRequest, idLead: string): Observable<LeadUpdateResponse>{
         const query = {
             query: `
                 mutation {
-                    deleteCustomer(idCustomer: "")
-                }`,
-            
+                    updateLead(
+                        idLead: "${idLead}"
+                        leadUpdateRequest: {
+                            resource: "${LeadRequest.resource}",
+                            person: {
+                                fullname: "${LeadRequest.fullname}",
+                                email: "${LeadRequest.email}",
+                                phone: "${LeadRequest.phone}",
+                                salary: ${LeadRequest.salary},
+                                location: "${LeadRequest.location}"
+                            }  
+                        }) {
+                        idLead
+                        resource
+                        personResponse {
+                            fullname
+                            email
+                            phone
+                            salary
+                            location
+                        }
+                    }
+                }`
         };
     
-        return this.api.post<LeadResponse>('graphql', query).pipe(
+        return this.api.post<LeadUpdateResponse>('graphql', query).pipe(
             tap(res => {
                 return res;
             })

@@ -37,12 +37,13 @@ export class LeadDetailComponet {
           return;
         }
 
-        this.leadData = res.data?.leadById ?? []  ;
+        this.leadData = res.data?.leadById ?? [];
 
         const item = this.leadData[0];
         if (!item) return;
 
         this.leadForm = {
+          idLead: item.idLead,
           resource: item.resource,
           fullname: item.personResponse.fullname,
           email: item.personResponse.email,
@@ -53,6 +54,26 @@ export class LeadDetailComponet {
         }
 
         console.log(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
+
+  onUpdateLead(){
+    this.leadService.UpdateLead(this.leadForm, this.leadForm.idLead).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        
+        this.leadData = res.data?.updateLead ?? [];
+        console.log(res);
+        this.onInfLead(this.leadForm.idLead);
       },
       error: (err) => {
         this.isLoading = false;
