@@ -20,10 +20,10 @@
               [style.outline]="'none'"
               [style.whiteSpace]="'nowrap'"
             >
-              <span *ngIf="!isEditing">{{ leadForm.fullname }}</span>
+              <span *ngIf="!isEditing">{{ customerForm.fullname }}</span>
               <input
                 *ngIf="isEditing"
-                [(ngModel)]="leadForm.fullname"
+                [(ngModel)]="customerForm.fullname"
                 class="text-2xl font-semibold text-gray-800 focus:outline-none inline-block w-auto bg-transparent"
               >
             </h2>
@@ -33,10 +33,10 @@
               [attr.contenteditable]="isEditing ? 'true' : 'false'"
               [style.outline]="'none'"
             >
-              <span *ngIf="!isEditing" class="font-medium">{{ leadForm.email }}</span>
+              <span *ngIf="!isEditing" class="font-medium">{{ customerForm.email }}</span>
               <input
                 *ngIf="isEditing"
-                [(ngModel)]="leadForm.email"
+                [(ngModel)]="customerForm.email"
                 class="text-gray-500 focus:outline-none inline-block w-auto bg-transparent"
               >
             </p>
@@ -56,7 +56,7 @@
             <button        
               *ngIf="isEditing" 
               class="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow cursor-pointer text-sm"
-              (click)="onUpdateLead()">
+              (click)="onUpdateCustomer()">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> 
                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /> 
               </svg>
@@ -70,48 +70,38 @@
           <div class="flex justify-between items-center border-b pb-2">
             <span class="text-gray-600">Phone</span>
             <span *ngIf="!isEditing" class="font-medium text-right w-1/2">
-              {{ leadForm.phone }}
+              {{ customerForm.phone }}
             </span>
             <input
               *ngIf="isEditing"
               type="number"
-              [(ngModel)]="leadForm.phone"
+              [(ngModel)]="customerForm.phone"
               class="font-medium text-right w-1/2 focus:outline-none"
             >
           </div>
 
           <div class="flex justify-between border-b pb-2">
             <span class="text-gray-600">Salary</span>
-            <span *ngIf="!isEditing" class="font-medium">{{ leadForm.salary }}</span>
+            <span *ngIf="!isEditing" class="font-medium">{{ customerForm.salary }}</span>
             <input
               *ngIf="isEditing"
               type="number"
-              [(ngModel)]="leadForm.salary"
+              [(ngModel)]="customerForm.salary"
               class="font-medium text-right w-1/2 focus:outline-none"
             >
           </div>
 
-          <div class="flex justify-between border-b pb-2">
-            <span class="text-gray-600">Resource</span>
-            <span *ngIf="!isEditing" class="font-medium">{{ leadForm.resource }}</span>
-            <input
-              *ngIf="isEditing"
-              [(ngModel)]="leadForm.resource"
-              class="font-medium text-right w-1/2 focus:outline-none"
-            >
-          </div>
-
-          <div class="flex justify-between border-b pb-2">
+          <div class="flex justify-between border-b pb-2 col-span-2">
             <span class="text-gray-600">Created At</span>
-            <span class="font-medium">{{ leadForm.createdAt | customDate }}</span>
+            <span class="font-medium">{{ customerForm.createdAt | customDate }}</span>
           </div>
 
           <div class="flex justify-between border-b pb-2 col-span-2">
             <span class="text-gray-600">Location</span>
-            <span *ngIf="!isEditing" class="font-medium">{{ leadForm.location }}</span>
+            <span *ngIf="!isEditing" class="font-medium">{{ customerForm.location }}</span>
             <input
               *ngIf="isEditing"
-              [(ngModel)]="leadForm.location"
+              [(ngModel)]="customerForm.location"
               class="font-medium text-right w-1/2 focus:outline-none"
             >
           </div>

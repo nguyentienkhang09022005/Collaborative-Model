@@ -13,6 +13,7 @@ import { CustomerListComponent } from './features/customer/customer-list/custome
 import { DealPageComponent } from './features/deal-page/deal-page.component';
 import { LeadListComponent } from './features/leads/lead-list/lead-list.component';
 import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.component';
+import { CustomerDetailComponet } from './features/customer/customer-detail/customer-detail.component';
 
 export const routes: Routes = [
     // Authen
@@ -36,6 +37,7 @@ export const routes: Routes = [
             { path: 'leads', component: LeadListComponent },
             { path: 'lead-detail', component: LeadDetailComponet },
             { path: 'customers', component: CustomerListComponent },
+            { path: 'customer-detail', component: CustomerDetailComponet },
             { path: 'contacts', component: ContactPageComponent },
             { path: 'deals', component: DealPageComponent },
         ]

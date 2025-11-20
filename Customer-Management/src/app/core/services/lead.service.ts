@@ -42,6 +42,7 @@ export class LeadService {
             query: `
                 query{
                     leadById(idLead: "${idLead}"){
+                    idLead
                     resource
                     createdAt
                     personResponse{
@@ -62,19 +63,19 @@ export class LeadService {
         );
     }
 
-    createLead(LeadRequest: LeadRequest): Observable<LeadResponse>{
+    createLead(leadRequest: LeadRequest): Observable<LeadResponse>{
         const query = {
             query: `
                 mutation {
                     createLead(
                         leadCreationRequest: {
-                            resource: "${LeadRequest.resource}",
+                            resource: "${leadRequest.resource}",
                             person: {
-                                fullname: "${LeadRequest.fullname}"
-                                email: "${LeadRequest.email}"
-                                phone: "${LeadRequest.phone}"
-                                salary: ${LeadRequest.salary}
-                                location: "${LeadRequest.location}"
+                                fullname: "${leadRequest.fullname}"
+                                email: "${leadRequest.email}"
+                                phone: "${leadRequest.phone}"
+                                salary: ${leadRequest.salary}
+                                location: "${leadRequest.location}"
                             }
                         }) {
                         idLead
@@ -113,20 +114,20 @@ export class LeadService {
         );
     }
 
-    UpdateLead(LeadRequest: LeadRequest, idLead: string): Observable<LeadUpdateResponse>{
+    UpdateLead(leadRequest: LeadRequest, idLead: string): Observable<LeadUpdateResponse>{
         const query = {
             query: `
                 mutation {
                     updateLead(
                         idLead: "${idLead}"
                         leadUpdateRequest: {
-                            resource: "${LeadRequest.resource}",
+                            resource: "${leadRequest.resource}",
                             person: {
-                                fullname: "${LeadRequest.fullname}",
-                                email: "${LeadRequest.email}",
-                                phone: "${LeadRequest.phone}",
-                                salary: ${LeadRequest.salary},
-                                location: "${LeadRequest.location}"
+                                fullname: "${leadRequest.fullname}",
+                                email: "${leadRequest.email}",
+                                phone: "${leadRequest.phone}",
+                                salary: ${leadRequest.salary},
+                                location: "${leadRequest.location}"
                             }  
                         }) {
                         idLead

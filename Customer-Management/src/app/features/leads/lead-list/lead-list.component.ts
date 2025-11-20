@@ -65,6 +65,7 @@ export class LeadListComponent {
 
         this.leadForm = {} as LeadRequest;
 
+        alert("Tạo lead thành công!");
         this.closePopup();
         this.onListLead();
       },

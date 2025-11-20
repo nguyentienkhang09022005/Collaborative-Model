@@ -1,39 +1,39 @@
 import { Component } from '@angular/core';
-import { LeadService } from '../../../core/services/lead.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { LeadItem, LeadRequest } from '../../../core/models/lead.models';
 import { CustomDatePipe } from "../../../shared/pipes/DatePipe ";
+import { CustomerItem, CustomerRequest } from '../../../core/models/customer.model';
+import { CustomerService } from '../../../core/services/customer.service';
 
 @Component({
-  selector: 'app-lead-detail',
+  selector: 'app-customer-detail',
   imports: [CommonModule, FormsModule, CustomDatePipe],
-  templateUrl: './lead-detail.html',
-  styleUrls: ['./lead-detail.css'],
+  templateUrl: './customer-detail.html',
+  styleUrls: ['./customer-detail.css'],
 })
-export class LeadDetailComponet {
+export class CustomerDetailComponet {
 
-  leadForm: LeadRequest = {} as LeadRequest;
-  leadData: LeadItem[] = [];
+  customerForm: CustomerRequest = {} as CustomerRequest;
+  customerData: CustomerItem[] = [];
   isLoading: boolean = false;
   isEditing: boolean = false;
   isSaveEdit: boolean = true;
-  idLead: string = "";
+  idCustomer: string = "";
 
-  constructor(private leadService: LeadService, private route: ActivatedRoute) {}
+  constructor(private customerService: CustomerService, private route: ActivatedRoute) {}
 
   ngOnInit(){
     this.route.queryParams.subscribe(param => {
-      this.idLead = param['id']
-      if (this.idLead){
-        this.onInfLead(this.idLead)
+      this.idCustomer = param['id']
+      if (this.idCustomer){
+        this.onInfCustomer(this.idCustomer)
       }
     })
   }
 
-  onInfLead(idLead: string){
-    this.leadService.GetInfLead(idLead).subscribe({
+  onInfCustomer(idCustomer: string){
+    this.customerService.GetInfCustomer(idCustomer).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res.errors && res.errors.length > 0) {
@@ -41,14 +41,13 @@ export class LeadDetailComponet {
           return;
         }
 
-        this.leadData = res.data?.leadById ?? [];
+        this.customerData = res.data?.customerById ?? [];
 
-        const item = this.leadData[0];
+        const item = this.customerData[0];
         if (!item) return;
 
-        this.leadForm = {
-          idLead: item.idLead,
-          resource: item.resource,
+        this.customerForm = {
+          idCustomer: item.idCustomer,
           fullname: item.personResponse.fullname,
           email: item.personResponse.email,
           phone: +item.personResponse.phone,
@@ -66,8 +65,8 @@ export class LeadDetailComponet {
     })
   }
 
-  onUpdateLead(){
-    this.leadService.UpdateLead(this.leadForm, this.idLead).subscribe({
+  onUpdateCustomer(){
+    this.customerService.UpdateCustomer(this.customerForm, this.idCustomer).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res.errors && res.errors.length > 0) {
@@ -75,9 +74,9 @@ export class LeadDetailComponet {
           return;
         }
         
-        this.leadData = res.data?.updateLead ?? [];
+        this.customerData = res.data?.updateCustomer ?? [];
         console.log(res);
-        this.onInfLead(this.leadForm.idLead);
+        this.onInfCustomer(this.customerForm.idCustomer);
         alert("Cập nhật thông tin thành công!");
 
         this.isEditing = false;

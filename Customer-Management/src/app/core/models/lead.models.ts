@@ -4,7 +4,7 @@ export interface LeadRequest
     resource: string;
     fullname: string;
     email: string;
-    phone: string;
+    phone: number;
     salary: number;
     location: string;
     createdAt: Date
