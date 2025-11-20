@@ -52,6 +52,8 @@ export class LeadListComponent {
   }
 
   submitAddLead(){
+    this.isLoading = true;
+
     this.leadService.createLead(this.leadForm).subscribe({
       next: (res) => {
         this.isLoading = false;
@@ -65,7 +67,7 @@ export class LeadListComponent {
 
         this.leadForm = {} as LeadRequest;
 
-        alert("Tạo lead thành công!");
+        this.isLoading = false;
         this.closePopup();
         this.onListLead();
       },

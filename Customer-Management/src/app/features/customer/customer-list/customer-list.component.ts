@@ -52,6 +52,8 @@ export class CustomerListComponent {
   }
 
   submitAddCustomer(){
+    this.isLoading = true;
+    
     this.customerService.createCustomer(this.customerForm).subscribe({
       next: (res) => {
         this.isLoading = false;
@@ -65,7 +67,7 @@ export class CustomerListComponent {
 
         this.customerForm = {} as CustomerRequest;
 
-        alert("Tạo customer thành công!");
+        this.isLoading = false;
         this.closePopup();
         this.onListCustomer();
       },
