@@ -8,12 +8,13 @@ import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-
 import { OtpForgotPasswordComponent } from './shared/components/otp-forgot-password/otp-forgot-password.component';
 import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
 import { AuthGuard } from './guards/auth/auth.guard';
-import { ContactPageComponent } from './features/contact-page/contact-page.component';
+import { ContactListComponent } from './features/contact/contact-page/contact-list.component';
 import { CustomerListComponent } from './features/customer/customer-list/customer-list.component';
 import { DealPageComponent } from './features/deal-page/deal-page.component';
 import { LeadListComponent } from './features/leads/lead-list/lead-list.component';
 import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.component';
 import { CustomerDetailComponet } from './features/customer/customer-detail/customer-detail.component';
+import { ContactDetailComponent } from './features/contact/contact-detail/contact-detail.component';
 
 export const routes: Routes = [
     // Authen
@@ -38,7 +39,8 @@ export const routes: Routes = [
             { path: 'lead-detail', component: LeadDetailComponet },
             { path: 'customers', component: CustomerListComponent },
             { path: 'customer-detail', component: CustomerDetailComponet },
-            { path: 'contacts', component: ContactPageComponent },
+            { path: 'contacts', component: ContactListComponent },
+            { path: 'contact-detail', component: ContactDetailComponent },
             { path: 'deals', component: DealPageComponent },
         ]
     },
