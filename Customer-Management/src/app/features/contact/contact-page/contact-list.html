@@ -31,7 +31,7 @@
         <p class="text-sm mb-1">
             <span class="font-medium text-slate-600">Status:</span>
             <span
-            class="px-2 py-1 rounded-lg text-white text-xs  font-semibold shadow-sm"
+            class="px-2 py-1 rounded-lg text-white text-xs shadow-sm ml-1"
             [ngClass]="{
                 'bg-yellow-500': c.status === 'Pending',
                 'bg-blue-500': c.status === 'In Progress',
@@ -71,7 +71,7 @@
     *ngIf="showAddPopup"
     class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl relative">
-      <h2 class="text-xl font-bold mb-4">Add New Lead</h2>
+      <h2 class="text-xl font-bold mb-4">Add New Contact</h2>
 
       <button
         class="absolute top-3 right-5 text-3xl hover:text-red-500 text-black cursor-pointer" 
@@ -79,20 +79,22 @@
         x
       </button>
 
-      <form  class="space-y-5">
+      <form  class="space-y-5" (ngSubmit)="submitAddContact()">
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-1">
-            Type
-          </label>
-          <input
-            type="text"
-            name="type"
-            placeholder="Enter type"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
-                  focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
-                  transition placeholder:text-slate-400"
-            required
-          />
+            <label class="block text-sm font-medium text-slate-600 mb-1">
+                Type
+            </label>
+            <select 
+                name="type" 
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
+                focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
+                transition cursor-pointer"
+                [(ngModel)]="contactForm.type">
+                <option value="Call">Call</option>
+                <option value="Email">Email</option>
+                <option value="Meeting">Meeting</option>
+                <option value="Message">Message</option>
+            </select>
         </div>
 
         <div>
@@ -101,11 +103,11 @@
           </label>
           <input
             type="text"
+            [(ngModel)]="contactForm.title"
             name="title"
-            placeholder="Enter title"
             class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
                   focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
-                  transition placeholder:text-slate-400"
+                  transition"
             required
           />
         </div>
@@ -116,42 +118,45 @@
           </label>
           <input
             type="text"
+            [(ngModel)]="contactForm.content"
             name="content"
-            placeholder="Enter content"
             class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
                   focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
-                  transition placeholder:text-slate-400"
+                  transition"
             required
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-1">
-            Staff
-          </label>
-          <input
-            type="number"
-            name="staff"
-            placeholder="Enter salary"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
-                  focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
-                  transition placeholder:text-slate-400"
-            required
-          />
+            <label class="block text-sm font-medium text-slate-600 mb-1">
+                Staff
+            </label>
+            <select 
+                name="staff" 
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
+                    focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
+                    transition cursor-pointer"
+                [(ngModel)]="selectedStaff">
+                <option *ngFor="let s of staffs" [value]="s.idStaff">
+                    {{ s.fullname }}
+                </option>
+            </select>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-1">
-            Lead
-          </label>
-          <input
-            type="text"
-            name="lead"
-            placeholder="Enter location"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
-                  focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
-                  transition placeholder:text-slate-400"
-          />
+            <label class="block text-sm font-medium text-slate-600 mb-1">
+                Lead
+            </label>
+            <select 
+                name="lead" 
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 
+                    focus:bg-white focus:border-black focus:ring-2 focus:ring-black/40 
+                    transition cursor-pointer"
+                [(ngModel)]="selectedLead">
+                <option *ngFor="let l of leads" [value]="l.idLead">
+                    {{ l.personResponse.fullname }}
+                </option>
+            </select>
         </div>
 
         <button

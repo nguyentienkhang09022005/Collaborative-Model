@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-lead-page',
-  imports: [CommonModule, RouterModule, FormsModule, ],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './lead-list.html',
   styleUrls: ['./lead-list.css'],
 })
