@@ -1,63 +1,63 @@
-import { LeadItem } from "./lead.models";
+import { CustomerItem } from "./customer.model";
 import { StaffItem } from "./staff.model";
 //----------Request Models----------
-export interface ContactRequest
+export interface DealRequest
 {
-    type: string,
     title: string,
     content: string,
+    price: number,
     idStaff: string,
-    idLead: string
+    idCustomer: string
 }
 
 //----------Response Models----------
-export interface ContactResponse
+export interface DealResponse
 {
     errors?: {
         message: string
     }[];
     data: {
-        contacts: ContactItem[];
+        deals: DealItem[];
     }
 }
 
-export interface ContactItem {
-    idContact: string,
+export interface DealItem {
+    idDeal: string,
     title: string,
-    type: string,
     content: string,
+    price: number,
     status: string,
     createdAt: Date,
-    infLeadResponse: LeadItem,
+    infCustomerResponse: CustomerItem,
     infStaffResponse: StaffItem,
 }
 
-export interface ContactInfResponse
+export interface DealInfResponse
 {
     errors?: {
         message: string
     }[];
     data: {
-        contactById: ContactItem[];
+        dealById: DealItem[];
     }
 }
 
-export interface ContactDeletionResponse
+export interface DealDeletionResponse
 {
     errors?: {
         message: string
     }[];
     data: {
-        deleteContact: string;
+        deleteDeal: string;
     }
 }
 
-export interface ContactUpdateResponse
+export interface DealUpdateResponse
 {
     errors?: {
         message: string
     }[];
     data: {
-        updateContact: ContactItem[];
+        updateDeal: DealItem[];
     }
 }

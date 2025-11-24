@@ -7,7 +7,7 @@ import { CustomerService } from '../../../core/services/customer.service';
 
 @Component({
   selector: 'app-customer-page',
-  imports: [CommonModule, RouterModule, FormsModule, ],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './customer-list.html',
   styleUrls: ['./customer-list.css'],
 })

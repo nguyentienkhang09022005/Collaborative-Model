@@ -10,7 +10,7 @@ import { ResetPasswordComponent } from './features/auth/reset-password/reset-pas
 import { AuthGuard } from './guards/auth/auth.guard';
 import { ContactListComponent } from './features/contact/contact-page/contact-list.component';
 import { CustomerListComponent } from './features/customer/customer-list/customer-list.component';
-import { DealPageComponent } from './features/deal-page/deal-page.component';
+import { DealListComponent } from './features/deal/deal-page/deal-list.component';
 import { LeadListComponent } from './features/leads/lead-list/lead-list.component';
 import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.component';
 import { CustomerDetailComponet } from './features/customer/customer-detail/customer-detail.component';
@@ -41,7 +41,7 @@ export const routes: Routes = [
             { path: 'customer-detail', component: CustomerDetailComponet },
             { path: 'contacts', component: ContactListComponent },
             { path: 'contact-detail', component: ContactDetailComponent },
-            { path: 'deals', component: DealPageComponent },
+            { path: 'deals', component: DealListComponent },
         ]
     },
 

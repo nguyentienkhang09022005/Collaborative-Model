@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { ContactDeletionResponse, ContactInfResponse, ContactRequest, ContactResponse } from "../models/contact.model";
+import { ContactDeletionResponse, ContactInfResponse, ContactRequest, ContactResponse, ContactUpdateResponse } from "../models/contact.model";
 import { Observable, tap } from "rxjs";
 
 @Injectable({
@@ -125,6 +125,47 @@ export class ContactService {
             };
         
         return this.api.post<ContactResponse>('graphql', query).pipe(
+            tap(res => {
+                return res;
+            })
+        );
+    }
+
+    UpdateContact(status: string, idContact: string): Observable<ContactUpdateResponse>{
+        const query = {
+            query: `
+                mutation UpdateContact {
+                    updateContact(
+                        contactUpdateRequest: {
+                        status: "${status}"
+                    },
+                    idContact: "${idContact}"
+                    ){
+                        idContact
+                        type
+                        title
+                        content
+                        status
+                        createdAt
+                        infLeadResponse {
+                            idLead
+                            resource
+                            createdAt
+                            personResponse {
+                                fullname
+                                email
+                            }
+                        }
+                        infStaffResponse {
+                            fullname
+                            email
+                            role
+                        }
+                    }
+                }`
+            };
+
+        return this.api.post<ContactUpdateResponse>('graphql', query).pipe(
             tap(res => {
                 return res;
             })
