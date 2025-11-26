@@ -1,0 +1,115 @@
+<div class=" bg-slate-100 p-10">
+  <div class="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
+
+    <div class="bg-slate-900 text-white p-6 rounded-t-3xl">
+      <h1 class="text-2xl font-bold mb-2">{{ dealForm.title }}</h1>
+      <div class="grid grid-cols-4 gap-4 text-sm opacity-90">
+        <div>
+            <span class="font-medium ">Price:</span> 
+            <span class="font-medium ml-1">{{ dealForm.price }}</span>
+        </div>
+        <div>
+            <span class="font-medium">Status:</span> 
+            <span 
+            class="px-2 py-1 rounded-lg text-white text-xs shadow-sm ml-1"
+            *ngIf="!isEditing"
+            [ngClass]="{
+                'bg-yellow-500': dealForm.status === 'Pending',
+                'bg-blue-500': dealForm.status === 'Open',
+                'bg-green-500': dealForm.status === 'Won',
+                'bg-red-500': dealForm.status === 'Lost',
+            }">{{ dealForm.status }}</span>
+              <select
+                *ngIf="isEditing"
+                [(ngModel)]="dealForm.status"
+                class="font-medium w-1/2 ml-1 px-2 py-1 border rounded-lg shadow-sm 
+                focus:outline-none text-sm bg-slate-800 text-white"  >
+                  <option value="Pending">Pending</option>
+                  <option value="Open">Open</option>
+                  <option value="Won">Won</option>
+                  <option value="Lost">Lost</option>
+              </select>
+          </div>
+        <div>
+            <span class="font-medium">Created At:</span> 
+            <span class="font-medium ml-1">{{ dealForm.createdAt | customDate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 grid grid-cols-2 gap-6 text-slate-700">
+      <div class="bg-slate-50 p-4 rounded-2xl shadow-sm">
+        <h2 class="text-lg font-semibold mb-3">Customer Information</h2>
+        <div class="space-y-4 text-sm">
+            <div>
+                <span class="font-medium">Full Name:</span> 
+                <span class="font-medium ml-1">{{ dealForm.infCustomerResponse.personResponse.fullname }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Email:</span>
+                <span class="font-medium ml-1">{{ dealForm.infCustomerResponse.personResponse.email }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Phone:</span>
+                <span class="font-medium ml-1">{{ dealForm.infCustomerResponse.personResponse.phone }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Location:</span>
+                <span class="font-medium ml-1">{{ dealForm.infCustomerResponse.personResponse.location }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Salary:</span>
+                <span class="font-medium ml-1">{{ dealForm.infCustomerResponse.personResponse.salary }}</span>
+            </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-2xl shadow-sm">
+        <h2 class="text-lg font-semibold mb-3">Staff Information</h2>
+        <div class="space-y-4 text-sm">
+            <div>
+                <span class="font-medium">Full Name:</span>
+                <span class="font-medium ml-1">{{ dealForm.infStaffResponse.fullname }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Email:</span>
+                <span class="font-medium ml-1">{{ dealForm.infStaffResponse.email }}</span>
+            </div>
+            <div>
+                <span class="font-medium">Role:</span>
+                <span class="font-medium ml-1">{{ dealForm.infStaffResponse.role }}</span>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t text-slate-700">
+      <h2 class="text-lg font-semibold mb-2">Content</h2>
+      <p class="text-sm opacity-90">{{ dealForm.content }}</p>
+    </div>
+
+    <div class="w-full flex justify-center mt-6 gap-4">
+      <button        
+        *ngIf="isSaveEdit" 
+        class="flex items-center gap-2 px-5 py-2 bg-black text-white rounded-lg 
+              hover:bg-slate-800 shadow cursor-pointer text-sm min-w-[120px] justify-center"
+        (click)="onEdit()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> 
+          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /> 
+        </svg>
+        <span>Edit</span>
+      </button>
+
+      <button        
+        *ngIf="isEditing" 
+        class="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg
+              hover:bg-green-700 shadow cursor-pointer text-sm min-w-[120px] justify-center"
+        (click)="onUpdateDeal(dealForm.status)">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> 
+          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /> 
+        </svg>
+        <span>Save</span>
+      </button>
+    </div> 
+  </div>
+</div>

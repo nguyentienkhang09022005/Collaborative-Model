@@ -15,6 +15,7 @@ import { LeadListComponent } from './features/leads/lead-list/lead-list.componen
 import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.component';
 import { CustomerDetailComponet } from './features/customer/customer-detail/customer-detail.component';
 import { ContactDetailComponent } from './features/contact/contact-detail/contact-detail.component';
+import { DealDetailComponent } from './features/deal/deal-detail/deal-detail.component';
 
 export const routes: Routes = [
     // Authen
@@ -42,6 +43,7 @@ export const routes: Routes = [
             { path: 'contacts', component: ContactListComponent },
             { path: 'contact-detail', component: ContactDetailComponent },
             { path: 'deals', component: DealListComponent },
+            { path: 'deal-detail', component: DealDetailComponent },
         ]
     },
 

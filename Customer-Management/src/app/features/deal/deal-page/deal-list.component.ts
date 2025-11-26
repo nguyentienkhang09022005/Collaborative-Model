@@ -32,11 +32,11 @@ export class DealListComponent {
               private router: Router){}
 
   ngOnInit(){
-    this.onListContact();
+    this.onListDeal();
   }
 
-  onListContact(){
-    this.dealService.GetListContact().subscribe({
+  onListDeal(){
+    this.dealService.GetListDeal().subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
           alert(res.errors[0].message);
@@ -53,105 +53,105 @@ export class DealListComponent {
     })
   } 
 
-  // onInfContact(idContact: string){
-  //   this.router.navigate(['/contact-detail'], { queryParams: { id: idContact } })
-  // }
+  onInfDeal(idContact: string){
+    this.router.navigate(['/deal-detail'], { queryParams: { id: idContact } })
+  }
 
-  // submitAddContact(){
-  //   this.isLoading = true;
+  submitAddDeal(){
+    this.isLoading = true;
       
-  //   this.contactService.createContact(this.contactForm, this.selectedStaff, this.selectedLead).subscribe({
-  //     next: (res) => {
-  //       this.isLoading = false;
-  //       if (res.errors && res.errors.length > 0) {
-  //         alert(res.errors[0].message);
-  //         return;
-  //       }
+    this.dealService.createDeal(this.DealForm, this.selectedStaff, this.selectedCustomer).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
           
-  //       this.contacts = res.data?.contacts ?? [];
-  //       console.log(res);
+        this.deals = res.data?.deals ?? [];
+        console.log(res);
   
-  //       this.contactForm = {} as ContactRequest;
+        this.DealForm = {} as DealRequest;
   
-  //       this.isLoading = false;
-  //       this.closePopup();
-  //       this.onListContact();
-  //     },
-  //     error: (err) => {
-  //       this.isLoading = false;
-  //       console.log("Lỗi: ", err);
-  //     }
-  //   })
-  // }
+        this.isLoading = false;
+        this.closePopup();
+        this.onListDeal();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
 
-  // deleteContact(idContact: string, event: MouseEvent){
-  //   event.stopPropagation();
+  deleteDeal(idDeal: string, event: MouseEvent){
+    event.stopPropagation();
 
-  //   this.contactService.DeleteContact(idContact).subscribe({
-  //     next: (res) => {
-  //       this.isLoading = false;
+    this.dealService.DeleteDeal(idDeal).subscribe({
+      next: (res) => {
+        this.isLoading = false;
 
-  //       if (res.errors && res.errors.length > 0) {
-  //         alert(res.errors[0].message);
-  //         return;
-  //       }
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
         
-  //       alert(res.data.deleteContact);
+        alert(res.data.deleteDeal);
 
-  //       this.onListContact();
-  //     },
-  //     error: (err) => {
-  //       this.isLoading = false;
-  //       console.log("Lỗi: ", err);
-  //     }
-  //   })
-  // }
+        this.onListDeal();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
 
-  // onListLead(){
-  //   this.leadService.GetListLead().subscribe({
-  //     next: (res) => {
-  //       this.isLoading = false;
-  //       if (res.errors && res.errors.length > 0) {
-  //         alert(res.errors[0].message);
-  //         return;
-  //       }
+  onListCustomer(){
+    this.customerService.GetListCustomer().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
         
-  //       this.leads = res.data?.leads ?? [];
+        this.customers = res.data?.customers ?? [];
 
-  //       console.log(res);
-  //     },
-  //     error: (err) => {
-  //       this.isLoading = false;
-  //       console.log("Lỗi: ", err);
-  //     }
-  //   })
-  // }
+        console.log(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
 
-  // onListStaff(){
-  //   this.staffService.GetListStaff().subscribe({
-  //     next: (res) => {
-  //       this.isLoading = false;
-  //       if (res.errors && res.errors.length > 0) {
-  //         alert(res.errors[0].message);
-  //         return;
-  //       }
+  onListStaff(){
+    this.staffService.GetListStaff().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
         
-  //       this.staffs = res.data?.staffs ?? [];
+        this.staffs = res.data?.staffs ?? [];
 
-  //       console.log(res);
-  //     },
-  //     error: (err) => {
-  //       this.isLoading = false;
-  //       console.log("Lỗi: ", err);
-  //     }
-  //   })
-  // }
+        console.log(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
 
-  // openAddPopup(){
-  //   this.showAddPopup = true;
-  //   this.onListLead();
-  //   this.onListStaff();
-  // }
+  openAddPopup(){
+    this.showAddPopup = true;
+    this.onListCustomer();
+    this.onListStaff();
+  }
 
   closePopup(){
     this.showAddPopup = false;
