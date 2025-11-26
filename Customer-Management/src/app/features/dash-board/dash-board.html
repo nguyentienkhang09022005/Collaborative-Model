@@ -1,1 +1,148 @@
-<p>dash-board works!</p>
+<div class="p-6 space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+        <div class="p-6 rounded-xl shadow bg-purple-100 flex flex-col justify-between h-full">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-300 flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 
+                            20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 
+                            18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 
+                            0 6 20.25Z" />
+                    </svg>
+                </div>
+
+                <div class="whitespace-nowrap">
+                    <h2 class="text-2xl font-bold">${{statisticsItems.totalProfit}}</h2>
+                    <p class="text-xs text-slate-600">Total Profit</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl shadow bg-orange-100 flex flex-col justify-between h-full">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-300 flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 
+                            1.437M7.5 14.25a3 3 0 0 0-3 
+                            3h15.75m-12.75-3h11.218c1.121-2.3 
+                            2.1-4.684 2.924-7.138a60.114 
+                            60.114 0 0 0-16.536-1.84M7.5 
+                            14.25 5.106 5.272M6 20.25a.75.75 
+                            0 1 1-1.5 0 .75.75 0 0 1 1.5 
+                            0Zm12.75 0a.75.75 0 1 1-1.5 0 
+                            .75.75 0 0 1 1.5 0Z" />
+                    </svg>
+                </div>
+
+                <div class="whitespace-nowrap">
+                    <h2 class="text-2xl font-bold">{{statisticsItems.quantityDeals}}</h2>
+                    <p class="text-xs text-slate-600">Quantity Deals</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl shadow bg-green-100 flex flex-col justify-between h-full">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-300 flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 6.75c0 8.284 6.716 15 
+                            15 15h2.25a2.25 2.25 0 0 0 
+                            2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 
+                            1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 
+                            0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 
+                            3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 
+                            2.25 0 0 0 2.25 4.5v2.25Z" />
+                    </svg>
+                </div>
+
+                <div class="whitespace-nowrap">
+                    <h2 class="text-2xl font-bold">{{statisticsItems.quantityContacts}}</h2>
+                    <p class="text-xs text-slate-600">Quantity Contacts</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl shadow bg-blue-100 flex flex-col justify-between h-full">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-300 flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 1 1-7.5 
+                            0 3.75 3.75 0 0 1 7.5 0ZM4.501 
+                            20.118a7.5 7.5 0 0 1 14.998 
+                            0A17.933 17.933 0 0 1 12 
+                            21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                </div>
+
+                <div class="whitespace-nowrap">
+                    <h2 class="text-2xl font-bold">{{statisticsItems.quantityLeads}}</h2>
+                    <p class="text-xs text-slate-600">Quantity Leads</p>
+                </div>
+            </div>
+
+            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
+        </div>
+    
+        <div class="p-6 rounded-xl shadow bg-teal-100 flex flex-col justify-between h-full">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-teal-300 flex items-center justify-center text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 1 1-7.5 
+                            0 3.75 3.75 0 0 1 7.5 0ZM4.501 
+                            20.118a7.5 7.5 0 0 1 14.998 
+                            0A17.933 17.933 0 0 1 12 
+                            21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                    </svg>
+                </div>
+
+                <div class="whitespace-nowrap">
+                    <h2 class="text-2xl font-bold">{{statisticsItems.quantityCustomers}}</h2>
+                    <p class="text-xs text-slate-600">Quantity Customers</p>
+                </div>
+            </div>
+
+            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="col-span-2 p-6 bg-white rounded-xl shadow h-64 flex items-center justify-center text-slate-400">
+            <canvas baseChart
+                [data]="lineChartData"
+                [labels]="lineChartLabels"
+                [options]="lineChartOptions"
+                [type]="'line'">
+            </canvas>
+        </div>
+        <div class="p-6 bg-white rounded-xl shadow h-64 flex items-center justify-center text-slate-400">
+            Sales Map
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="col-span-2 p-6 bg-white rounded-xl shadow h-64 flex items-center justify-center text-slate-400">
+            Total Revenue Chart
+        </div>
+
+        <div class="p-6 bg-white rounded-xl shadow">
+            <h3 class="text-lg font-semibold mb-4">Top Products</h3>
+            <ul class="space-y-4">
+                <li class="flex justify-between text-sm"><span>Home Decor Range</span><span>45%</span></li>
+                <li class="flex justify-between text-sm"><span>Disney Bag</span><span>29%</span></li>
+                <li class="flex justify-between text-sm"><span>Bathroom Essentials</span><span>18%</span></li>
+                <li class="flex justify-between text-sm"><span>Apple Smartwatch</span><span>25%</span></li>
+            </ul>
+        </div>
+  </div>
+</div>

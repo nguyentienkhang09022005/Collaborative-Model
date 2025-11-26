@@ -15,7 +15,6 @@
             *ngIf="!isEditing"
             [ngClass]="{
                 'bg-yellow-500': dealForm.status === 'Pending',
-                'bg-blue-500': dealForm.status === 'Open',
                 'bg-green-500': dealForm.status === 'Won',
                 'bg-red-500': dealForm.status === 'Lost',
             }">{{ dealForm.status }}</span>
@@ -25,7 +24,6 @@
                 class="font-medium w-1/2 ml-1 px-2 py-1 border rounded-lg shadow-sm 
                 focus:outline-none text-sm bg-slate-800 text-white"  >
                   <option value="Pending">Pending</option>
-                  <option value="Open">Open</option>
                   <option value="Won">Won</option>
                   <option value="Lost">Lost</option>
               </select>
