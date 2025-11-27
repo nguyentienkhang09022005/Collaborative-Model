@@ -44,6 +44,7 @@
                     <p class="text-xs text-slate-600">Quantity Deals</p>
                 </div>
             </div>
+            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
         </div>
 
         <div class="p-6 rounded-xl shadow bg-green-100 flex flex-col justify-between h-full">
@@ -67,6 +68,7 @@
                     <p class="text-xs text-slate-600">Quantity Contacts</p>
                 </div>
             </div>
+            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
         </div>
 
         <div class="p-6 rounded-xl shadow bg-blue-100 flex flex-col justify-between h-full">
@@ -88,8 +90,6 @@
                     <p class="text-xs text-slate-600">Quantity Leads</p>
                 </div>
             </div>
-
-            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
         </div>
     
         <div class="p-6 rounded-xl shadow bg-teal-100 flex flex-col justify-between h-full">
@@ -111,8 +111,6 @@
                     <p class="text-xs text-slate-600">Quantity Customers</p>
                 </div>
             </div>
-
-            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer">Show Detail →</a>
         </div>
     </div>
 
@@ -124,15 +122,25 @@
                 [options]="lineChartOptions"
                 [type]="'line'">
             </canvas>
+            <div class="flex gap-3 mb-4">
+            </div>
         </div>
         <div class="p-6 bg-white rounded-xl shadow h-64 flex items-center justify-center text-slate-400">
-            Sales Map
+            <canvas baseChart
+                    [data]="pieChart"
+                    [options]="pieChartOptions"
+                    [type]="'pie'">
+            </canvas>        
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="col-span-2 p-6 bg-white rounded-xl shadow h-64 flex items-center justify-center text-slate-400">
-            Total Revenue Chart
+            <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="'bar'">
+            </canvas>        
         </div>
 
         <div class="p-6 bg-white rounded-xl shadow">
