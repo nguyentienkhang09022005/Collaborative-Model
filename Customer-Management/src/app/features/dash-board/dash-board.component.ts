@@ -33,6 +33,15 @@ export class DashboardComponent {
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Monthly Lead Count Chart',
+        font: {
+          size: 15
+        }
+      }
+    },
     scales: {
       y: {
         beginAtZero: true,
@@ -57,6 +66,13 @@ export class DashboardComponent {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
+      title: {
+        display: true,
+        text: 'Real Estate Revenue Chart',
+        font: {
+          size: 15
+        }
+      }
     },
     scales: {
       y: { 
@@ -91,7 +107,14 @@ export class DashboardComponent {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'right' }
+      legend: { position: 'right' },
+      title: {
+        display: true,
+        text: 'Contact Classification Chart',
+        font: {
+          size: 20
+        }
+      }
     }
   };
   

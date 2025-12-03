@@ -13,7 +13,6 @@ import { FormsModule } from '@angular/forms';
 })
 export class LeadListComponent {
   
-  idLead: string = "";
   leads: LeadItem[] = [];
   leadForm: LeadRequest = {} as LeadRequest;
   isLoading: boolean = false;

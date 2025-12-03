@@ -13,7 +13,6 @@ import { CustomerService } from '../../../core/services/customer.service';
 })
 export class CustomerListComponent {
   
-  idCustomer: string = "";
   customers: CustomerItem[] = [];
   customerForm: CustomerRequest = {} as CustomerRequest;
   isLoading: boolean = false;

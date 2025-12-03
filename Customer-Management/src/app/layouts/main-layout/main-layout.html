@@ -1,14 +1,12 @@
 <div class="flex h-screen bg-slate-50 text-slate-900 font-inter overflow-hidden">
-  <!-- Sidebar -->
   <aside
     class="w-64 bg-slate-900 text-slate-100 flex flex-col justify-between p-6 fixed inset-y-0 left-0 shadow-lg z-20">
     
     <div>
       <h1 class="text-2xl font-bold uppercase tracking-wide mb-10 relative after:block after:w-full after:h-px after:bg-slate-700 after:mt-4">
-        DESKBOARD
+        SIDEBOARD
       </h1>
 
-      <!-- Menu -->
       <nav class="flex flex-col space-y-2">
         <a
           routerLink="/dashboard"
@@ -48,12 +46,16 @@
       </nav>
     </div>
 
-    <div class="mt-6 flex justify-center">
-        <img 
-  src="assets/download.jpg"
-          alt="Logo" 
-          class="w-24 opacity-70 hover:opacity-100 transition duration-200"
-        />
+    <div class="mt-6 flex flex-col items-center">
+      <img 
+        src="/assets/download.jpg" 
+        alt="Logo" 
+        class="w-20 h-20 rounded-full shadow-md opacity-90 transition duration-300"
+      />
+
+      <span class="mt-4 text-xl font-bold text-sky-400 tracking-wide">
+        Collaborative
+      </span>
     </div>
 
     <div>
@@ -66,9 +68,7 @@
     </div>
   </aside>
 
-  <!-- Main Content -->
   <main class="flex flex-col flex-1 ml-64 h-screen overflow-hidden">
-    <!-- Topbar -->
     <header
       class="h-[70px] bg-white border-b border-slate-200 shadow-sm flex items-center justify-between px-8 sticky top-0 z-10">
 
@@ -89,9 +89,77 @@
       </div>
     </header>
 
-    <!-- Page Content -->
     <section class="flex-1 p-8 overflow-y-auto bg-slate-50">
       <router-outlet></router-outlet>
     </section>
+
+    <div class="fixed bottom-6 right-6 flex flex-col items-end z-50">
+      <button *ngIf="isChatBoxOpen" 
+        class="relative bg-slate-900 text-white rounded-full p-4 shadow-lg hover:bg-slate-700 transition duration-300 focus:outline-none cursor-pointer"
+        (click)="toggleChat()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" color="#f4cc00" fill="none" stroke="#f4cc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 16.5C2.5 17.4293 2.5 17.894 2.57686 18.2804C2.89249 19.8671 4.13288 21.1075 5.71964 21.4231C6.10603 21.5 6.57069 21.5 7.5 21.5M21.5 16.5C21.5 17.4293 21.5 17.894 21.4231 18.2804C21.1075 19.8671 19.8671 21.1075 18.2804 21.4231C17.894 21.5 17.4293 21.5 16.5 21.5M21.5 7.5C21.5 6.57069 21.5 6.10603 21.4231 5.71964C21.1075 4.13288 19.8671 2.89249 18.2804 2.57686C17.894 2.5 17.4293 2.5 16.5 2.5M2.5 7.5C2.5 6.57069 2.5 6.10603 2.57686 5.71964C2.89249 4.13288 4.13288 2.89249 5.71964 2.57686C6.10603 2.5 6.57069 2.5 7.5 2.5" />
+            <path d="M12 8.5V6.5M10 11.5V12M14 11.5V12M11 8.5H13C14.8856 8.5 15.8284 8.5 16.4142 9.08579C17 9.67157 17 10.6144 17 12.5C17 14.3856 17 15.3284 16.4142 15.9142C15.8284 16.5 14.8856 16.5 13 16.5H11C9.11438 16.5 8.17157 16.5 7.58579 15.9142C7 15.3284 7 14.3856 7 12.5C7 10.6144 7 9.67157 7.58579 9.08579C8.17157 8.5 9.11438 8.5 11 8.5Z" />
+        </svg>
+
+        <span *ngIf="isChatThinking"
+          class="absolute -top-10 left-1/2 -translate-x-60
+                bg-slate-600 text-white px-4 py-2 
+                rounded-xl text-xs shadow-lg animate-bounce
+                whitespace-nowrap max-w-none">
+          Xin chào, tôi là CRMie 😊 <br>
+          Tôi có thể giúp gì được cho bạn hôm nay! 👋
+        </span>
+      </button>
+
+      <div 
+        *ngIf="isChatOpen" 
+        class="mt-2 w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden">
+        
+        <div class="bg-slate-900 text-white px-4 py-2 flex justify-between items-center">
+          <span class="font-semibold">CRMie Chat</span>
+          <button (click)="toggleChat()" class="text-white font-bold cursor-pointer">&times;</button>
+        </div>
+
+        <div #chatContainer class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50">
+          <div *ngFor="let msg of historyMessageItem" class="flex w-full">
+            
+            <div *ngIf="msg.role === 'model'" class="flex justify-start w-full">
+              <div class="bg-white p-3 rounded-xl shadow text-slate-800 text-sm max-w-[75%] wrap-break-word leading-relaxed">
+                {{ msg.message }}
+              </div>
+            </div>
+
+            <div *ngIf="msg.role === 'user'" class="flex justify-end w-full">
+              <div class="bg-slate-900 text-white p-3 rounded-xl text-sm max-w-[75%] wrap-break-word leading-relaxed">
+                {{ msg.message }}
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="aiTyping" class="flex justify-start w-full">
+            <div class="bg-white p-3 rounded-xl shadow text-slate-800 text-sm max-w-[20%]">
+              <span class="animate-pulse">•••</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-2 border-t border-slate-200 flex items-center space-x-2">
+          <input 
+            type="text" 
+            placeholder="Type a message..." 
+            class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+            [(ngModel)]="newMessage"
+            (keyup.enter)="sendMessage()"
+          />
+          <button 
+            class="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition duration-300 cursor-pointer"
+            (click)="sendMessage()"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
