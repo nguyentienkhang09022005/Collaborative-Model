@@ -1,3 +1,3 @@
 export const environment = {
-    api_url: 'https://localhost:7109',
+    api_url: 'https://customer-managerment.onrender.com',
 }
