@@ -1,8 +1,10 @@
+//----------Request Models----------
 export interface ChatRequest {
     idStaff: string;
     userMessage: string;
 }
 
+//----------Response Models----------
 export interface ChatResponse{
     errors?: {
         message: string

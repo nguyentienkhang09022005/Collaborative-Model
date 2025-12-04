@@ -8,6 +8,8 @@
         type="text"
         placeholder="Search…"
         class="px-4 py-2 bg-white rounded-xl shadow border border-slate-200 w-64 placeholder-gray-500"
+        [(ngModel)]="searchInput.keyword"
+        (keyup.enter)="SearchLead()"
       />
 
       <button 

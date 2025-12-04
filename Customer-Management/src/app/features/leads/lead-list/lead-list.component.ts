@@ -4,6 +4,8 @@ import { LeadService } from '../../../core/services/lead.service';
 import { LeadItem, LeadRequest } from '../../../core/models/lead.models';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { SearchService } from '../../../core/services/search.service';
+import { SearchRequest } from '../../../core/models/elasticsearch.model';
 
 @Component({
   selector: 'app-lead-page',
@@ -15,11 +17,13 @@ export class LeadListComponent {
   
   leads: LeadItem[] = [];
   leadForm: LeadRequest = {} as LeadRequest;
+  searchInput: SearchRequest = {} as SearchRequest;
   isLoading: boolean = false;
   openMenu: any = null;
   showAddPopup: boolean = false;
   
   constructor(private leadService: LeadService, 
+              private searchService: SearchService,
               private router: Router){}
 
   ngOnInit(){
@@ -96,6 +100,22 @@ export class LeadListComponent {
       },
       error: (err) => {
         this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
+
+  SearchLead(){
+    this.searchService.SearchLead(this.searchInput.keyword).subscribe({
+      next: (res) => {
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        
+        this.leads = res.data?.searchLeads ?? [];
+      },
+      error: (err) => {
         console.log("Lỗi: ", err);
       }
     })

@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CustomerItem, CustomerRequest } from '../../../core/models/customer.model';
 import { CustomerService } from '../../../core/services/customer.service';
+import { SearchService } from '../../../core/services/search.service';
+import { SearchRequest } from '../../../core/models/elasticsearch.model';
 
 @Component({
   selector: 'app-customer-page',
@@ -15,11 +17,13 @@ export class CustomerListComponent {
   
   customers: CustomerItem[] = [];
   customerForm: CustomerRequest = {} as CustomerRequest;
+  searchInput: SearchRequest = {} as SearchRequest;
   isLoading: boolean = false;
   openMenu: any = null;
   showAddPopup: boolean = false;
   
   constructor(private customerService: CustomerService, 
+              private searchService: SearchService,
               private router: Router){}
 
   ngOnInit(){
@@ -96,6 +100,22 @@ export class CustomerListComponent {
       },
       error: (err) => {
         this.isLoading = false;
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
+
+  SearchCustomer(){
+    this.searchService.SearchCustomer(this.searchInput.keyword).subscribe({
+      next: (res) => {
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        
+        this.customers = res.data?.searchCustomers ?? [];
+      },
+      error: (err) => {
         console.log("Lỗi: ", err);
       }
     })
