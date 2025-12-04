@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "framework": "angular",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/customer-management",
+  "routes": [
+    { "src": "/(.*)", "dest": "/" }
+  ]
+}
