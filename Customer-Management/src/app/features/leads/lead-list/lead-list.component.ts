@@ -21,6 +21,8 @@ export class LeadListComponent {
   isLoading: boolean = false;
   openMenu: any = null;
   showAddPopup: boolean = false;
+  showUploadPopup: boolean = false;
+  selectedFile!: File;
   
   constructor(private leadService: LeadService, 
               private searchService: SearchService,
@@ -121,6 +123,30 @@ export class LeadListComponent {
     })
   }
 
+  uploadExcel(){
+    if (!this.selectedFile) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.searchService.SearchLead(this.searchInput.keyword).subscribe({
+      next: (res) => {
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        this.closeUploadPopup();
+        this.onListLead();
+      },
+      error: (err) => {
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
+
   toggleMenu(item: any, event: MouseEvent) {
     event.stopPropagation();
     this.openMenu = this.openMenu === item ? null : item;
@@ -134,4 +160,15 @@ export class LeadListComponent {
     this.showAddPopup = false;
   }
 
+  openUploadPopup() {
+    this.showUploadPopup = true;
+  }
+
+  closeUploadPopup() {
+    this.showUploadPopup = false;
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
 }

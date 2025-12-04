@@ -16,6 +16,7 @@ import { LeadDetailComponet } from './features/leads/lead-detail/lead-detail.com
 import { CustomerDetailComponet } from './features/customer/customer-detail/customer-detail.component';
 import { ContactDetailComponent } from './features/contact/contact-detail/contact-detail.component';
 import { DealDetailComponent } from './features/deal/deal-detail/deal-detail.component';
+import { LeadMarkComponent } from './features/leads/lead-mark/lead-mark.component';
 
 export const routes: Routes = [
     // Authen
@@ -25,6 +26,9 @@ export const routes: Routes = [
     { path: 'otp-register', component: OtpRegisterComponent },
     { path: 'otp-forgot-password', component: OtpForgotPasswordComponent },
     { path: 'reset-password', component: ResetPasswordComponent },
+
+    // Mark
+    { path: 'lead-mark', component: LeadMarkComponent },
 
     // Main
     {
