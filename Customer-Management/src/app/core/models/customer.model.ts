@@ -63,3 +63,13 @@ export interface CustomerUpdateResponse
         updateCustomer: CustomerItem[];
     }
 }
+
+export interface UploadCustomerFileResponse
+{
+    errors?: {
+        message: string
+    }[];
+    data: {
+        importCustomerExcel: string;
+    }
+}

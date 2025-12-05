@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
 import { Observable, tap } from "rxjs";
-import { CustomerDeletionResponse, CustomerInfResponse, CustomerRequest, CustomerResponse, CustomerUpdateResponse } from "../models/customer.model";
+import { CustomerDeletionResponse, CustomerInfResponse, CustomerRequest, CustomerResponse, CustomerUpdateResponse, UploadCustomerFileResponse } from "../models/customer.model";
+import { HttpHeaders } from "@angular/common/http";
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +11,6 @@ import { CustomerDeletionResponse, CustomerInfResponse, CustomerRequest, Custome
 export class CustomerService {
     constructor(private api : ApiService){}
 
-    // List Customer
     GetListCustomer(): Observable<CustomerResponse>{
         const query = {
             query: `
@@ -140,6 +140,34 @@ export class CustomerService {
         return this.api.post<CustomerUpdateResponse>('graphql', query).pipe(
             tap(res => {
                 return res;
+            })
+        );
+    }
+
+    UploadExcelCustomer(file: File): Observable<UploadCustomerFileResponse>{
+        const formData = new FormData();
+
+        formData.append(
+        "operations",
+        JSON.stringify({
+            query: `
+                mutation ImportCustomer($file: Upload!) {
+                    importCustomerExcel(file: $file)
+                }`,
+                variables: { file: null }
+            })
+        );
+
+        formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
+
+        formData.append("0", file);
+
+        const headers = new HttpHeaders({
+            "GraphQL-Preflight": "1"
+        });
+        return this.api.Post<UploadCustomerFileResponse>('graphql', formData, { headers }).pipe(
+            tap(res => {
+                 return res
             })
         );
     }

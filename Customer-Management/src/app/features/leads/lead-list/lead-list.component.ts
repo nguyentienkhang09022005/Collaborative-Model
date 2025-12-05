@@ -125,19 +125,18 @@ export class LeadListComponent {
 
   uploadExcel(){
     if (!this.selectedFile) {
-      alert("Please select a file to upload.");
+      alert("Hãy chọn file để tải lên!");
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-
-    this.searchService.SearchLead(this.searchInput.keyword).subscribe({
+    this.leadService.UploadExcelLead(this.selectedFile).subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
           alert(res.errors[0].message);
           return;
         }
+        
+        alert("Tải lên danh sách khách hàng tiềm năng thành công!");
         this.closeUploadPopup();
         this.onListLead();
       },

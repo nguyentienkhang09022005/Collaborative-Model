@@ -4,7 +4,7 @@ import { Router, RouterModule, RouterOutlet } from "@angular/router";
 import { AuthService } from '../../core/services/auth.service';
 import { InfStaff } from '../../core/models/auth.models';
 import { AiService } from '../../core/services/ai.service';
-import { ChatMessageItem, ChatRequest, HistoryMessageItem } from '../../core/models/ai.model';
+import { ChatRequest, HistoryMessageItem } from '../../core/models/ai.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({

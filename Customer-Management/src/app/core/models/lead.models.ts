@@ -65,3 +65,13 @@ export interface LeadUpdateResponse
         updateLead: LeadItem[];
     }
 }
+
+export interface UploadLeadFileResponse
+{
+    errors?: {
+        message: string
+    }[];
+    data: {
+        importLeadExcel: string;
+    }
+}

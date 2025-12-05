@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { LeadDeletionResponse, LeadInfResponse, LeadRequest, LeadResponse, LeadUpdateResponse } from "../models/lead.models";
-import { Observable, tap } from "rxjs";
+import { LeadDeletionResponse, LeadInfResponse, LeadRequest, LeadResponse, LeadUpdateResponse, UploadLeadFileResponse } from "../models/lead.models";
+import { Observable, tap, filter, map } from "rxjs";
+import { HttpHeaders, HttpResponse } from "@angular/common/http";
 
 @Injectable({
     providedIn: 'root'
@@ -146,6 +147,34 @@ export class LeadService {
         return this.api.post<LeadUpdateResponse>('graphql', query).pipe(
             tap(res => {
                 return res;
+            })
+        );
+    }
+
+    UploadExcelLead(file: File): Observable<UploadLeadFileResponse>{
+        const formData = new FormData();
+
+        formData.append(
+        "operations",
+        JSON.stringify({
+            query: `
+                mutation ImportLead($file: Upload!) {
+                    importLeadExcel(file: $file)
+                }`,
+                variables: { file: null }
+            })
+        );
+
+        formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
+
+        formData.append("0", file);
+
+        const headers = new HttpHeaders({
+            "GraphQL-Preflight": "1"
+        });
+        return this.api.Post<UploadLeadFileResponse>('graphql', formData, { headers }).pipe(
+            tap(res => {
+                 return res
             })
         );
     }

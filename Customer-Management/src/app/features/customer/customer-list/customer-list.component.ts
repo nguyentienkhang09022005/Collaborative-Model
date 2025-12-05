@@ -21,6 +21,8 @@ export class CustomerListComponent {
   isLoading: boolean = false;
   openMenu: any = null;
   showAddPopup: boolean = false;
+  showUploadPopup: boolean = false;
+  selectedFile!: File;
   
   constructor(private customerService: CustomerService, 
               private searchService: SearchService,
@@ -121,6 +123,29 @@ export class CustomerListComponent {
     })
   }
 
+  uploadExcel(){
+    if (!this.selectedFile) {
+      alert("Hãy chọn file để tải lên!");
+      return;
+    }
+
+    this.customerService.UploadExcelCustomer(this.selectedFile).subscribe({
+      next: (res) => {
+        if (res.errors && res.errors.length > 0) {
+          alert(res.errors[0].message);
+          return;
+        }
+        
+        alert("Tải lên danh sách khách hàng thành công!");
+        this.closeUploadPopup();
+        this.onListCustomer();
+      },
+      error: (err) => {
+        console.log("Lỗi: ", err);
+      }
+    })
+  }
+
   toggleMenu(item: any, event: MouseEvent) {
     event.stopPropagation();
     this.openMenu = this.openMenu === item ? null : item;
@@ -134,4 +159,15 @@ export class CustomerListComponent {
     this.showAddPopup = false;
   }
 
+  openUploadPopup() {
+    this.showUploadPopup = true;
+  }
+
+  closeUploadPopup() {
+    this.showUploadPopup = false;
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
 }
