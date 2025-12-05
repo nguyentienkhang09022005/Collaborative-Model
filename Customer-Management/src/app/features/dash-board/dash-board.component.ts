@@ -23,6 +23,9 @@ export class DashboardComponent {
   chartDealItems: ChartDealItem = {} as ChartDealItem;
   leads: LeadItem[] = [];
   contacts: ContactItem[] = [];
+  showModal: boolean = false;
+  popupType = '';
+  popupTitle = '';
 
   // Bar Chart
   public barChartData: ChartConfiguration<'bar'>['data'] = {
@@ -280,5 +283,24 @@ export class DashboardComponent {
       },
       error: (err) => console.log("Lỗi: ", err)
     });
+  }
+
+  openDetail(type: string) {
+  this.popupType = type;
+
+  switch (type) {
+      case 'deal':
+        this.popupTitle = 'Detail of Deals';
+        break;
+
+      case 'contact':
+        this.popupTitle = 'Detail of Contacts';
+        break;
+    }
+    this.showModal = true;
+  }
+
+  closeDetail() {
+    this.showModal = false;
   }
 }

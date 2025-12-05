@@ -24,8 +24,8 @@ export interface StatisticsItem {
     quantityContacts: number
     quantityCustomers: number
     quantityLeads: number
-    quantityStatisticsDetailContactResponse: DetailQuantityContact[];
-    quantityStatisticsDetailDealResponse: DetailQuantityDeal[];
+    quantityStatisticsDetailContactResponse: DetailQuantityContact;
+    quantityStatisticsDetailDealResponse: DetailQuantityDeal;
 }
 
 export interface DetailQuantityContact {
