@@ -44,9 +44,10 @@
                     <p class="text-xs text-slate-600">Number of Deal</p>
                 </div>
             </div>
-            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer"
+            <a class="relative text-sm text-blue-600 font-medium mt-4 self-end cursor-pointer hover:text-blue-700 transition"
                 (click)="openDetail('deal')">
                 Show Detail →
+                <span class="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </a>
         </div>
 
@@ -71,9 +72,10 @@
                     <p class="text-xs text-slate-600">Number of Contact</p>
                 </div>
             </div>
-            <a class="text-xs text-blue-600 mt-4 self-end cursor-pointer"
-                (click)="openDetail('contact')">
+            <a class="relative text-sm text-blue-600 font-medium mt-4 self-end cursor-pointer hover:text-blue-700 transition"
+                (click)="openDetail('deal')">
                 Show Detail →
+                <span class="absolute left-0 -bottom-0.5 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </a>
         </div>
 
@@ -177,7 +179,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-slate-800">{{ popupTitle }}</h2>
                 <button
-                    class="text-3xl font-light hover:text-red-500 transition cursor-pointer"
+                    class="text-3xl font-light hover:text-red-400 transition cursor-pointer"
                     (click)="closeDetail()">
                     &times;
                 </button>
