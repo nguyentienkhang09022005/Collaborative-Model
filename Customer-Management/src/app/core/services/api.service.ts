@@ -16,9 +16,17 @@ export class ApiService {
     }
 
     Post<T>(url: string, body: any, options: any = {}){
-        return this.http.post<T>(`${this.baseUrl}/${url}`, body, { 
+        return this.http.post<T>(`${this.baseUrl}/${url}`, body, {
             withCredentials: true,
-            ...options 
+            ...options
         }) as Observable<T>;
+    }
+
+    graphql<T>(query: string, variables?: Record<string, unknown>): Observable<T> {
+        const body = {
+            query,
+            ...(variables && { variables })
+        };
+        return this.http.post<T>(`${this.baseUrl}/graphql`, body, { withCredentials: true });
     }
 }   

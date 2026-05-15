@@ -6,11 +6,12 @@ import { InfStaff } from '../../core/models/auth.models';
 import { AiService } from '../../core/services/ai.service';
 import { ChatRequest, HistoryMessageItem } from '../../core/models/ai.model';
 import { FormsModule } from '@angular/forms';
+import { ToastComponent } from '../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, RouterModule, FormsModule, ToastComponent],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css',
 })
@@ -27,9 +28,12 @@ export class MainLayoutComponent {
   aiTyping: boolean = false;
   isChatThinking: boolean = false;
 
-  constructor (private authenService: AuthService, 
-               private aiService: AiService, 
-               private router: Router){}
+  import { ToastService } from '../../core/services/toast.service';
+
+  constructor (private authenService: AuthService,
+               private aiService: AiService,
+               private router: Router,
+               private toastService: ToastService){}
 
   ngOnInit(): void{
     this.currentStaff = this.authenService.getCurrentStaff();
@@ -63,7 +67,7 @@ export class MainLayoutComponent {
     this.authenService.logout().subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
+          this.toastService.error(res.errors[0].message);
           return;
         }
         
@@ -77,7 +81,7 @@ export class MainLayoutComponent {
     this.aiService.ListHistoryMessage(idStaff).subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
+          this.toastService.error(res.errors[0].message);
           return;
         }
 
@@ -110,7 +114,7 @@ export class MainLayoutComponent {
         this.aiTyping = false;
 
         if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
+          this.toastService.error(res.errors[0].message);
           return;
         }
           

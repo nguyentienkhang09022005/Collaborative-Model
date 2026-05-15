@@ -6,29 +6,21 @@ import { Observable, tap } from "rxjs";
 @Injectable({
     providedIn: 'root'
 })
-
 export class StaffService {
-    constructor(private api : ApiService){}
+    constructor(private api: ApiService) {}
 
-    // List Staff
     GetListStaff(): Observable<StaffResponse>{
-        const query = {
-            query: `
-                query {
-                    staffs {
-                        idStaff
-                        fullname
-                        email
-                        role
-                        createdAt
-                    }
-                }`
-        };
-    
-        return this.api.post<StaffResponse>('graphql', query).pipe(
-            tap(res => {
-                return res;
-            })
-        );
+        const query = `
+            query {
+                staffs {
+                    idStaff
+                    fullname
+                    email
+                    role
+                    createdAt
+                }
+            }`;
+
+        return this.api.graphql<StaffResponse>(query);
     }
 }

@@ -11,74 +11,64 @@ import { OTPRegisterResponse, ConfirmOTPRegister, OTPForgotPasswordResponse, con
 export class AuthService {
     constructor(private api: ApiService) {}
 
-    // Login
     authen(login: Login): Observable<LoginResponse>{
-        const query = {
-            query: `
-                mutation {
-                    login(authenticationRequest: { username: "${login.username}", password: "${login.password}" }) 
-                    {
-                        token
-                        infStaff {
-                            idStaff
-                            email
-                            role
-                            createdAt
-                            fullname
-                        }
+        const query = `
+            mutation Login($username: String!, $password: String!) {
+                login(authenticationRequest: { username: $username, password: $password }) {
+                    token
+                    infStaff {
+                        idStaff
+                        email
+                        role
+                        createdAt
+                        fullname
                     }
                 }
-            `
-        };
-        return this.api.post<LoginResponse>('graphql', query).pipe(
+            }`;
+
+        return this.api.graphql<LoginResponse>(query, {
+            username: login.username,
+            password: login.password
+        }).pipe(
             map(res => {
                 const loginData = res.data.login;
-
-                // Lưu token vào localStorage
                 localStorage.setItem('access_token', loginData.token);
                 localStorage.setItem("staff_info", JSON.stringify(loginData.infStaff));
-
-                return res; 
+                return res;
             })
         );
     }
 
-    // Logout
     logout(): Observable<LogoutResponse>{
-        const query = {
-            query: `
-                mutation {
-                    logout
-                }
-            `
-        };
-        return this.api.post<LogoutResponse>('graphql', query).pipe(
+        const query = `
+            mutation Logout {
+                logout
+            }`;
+
+        return this.api.graphql<LogoutResponse>(query).pipe(
             tap((res) => {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('staff_info');
-
                 return res;
             })
-        );   
+        );
     }
 
-    // Register
     register(register: Register): Observable<RegisterResponse> {
-        const query = {
-            query: `
-                mutation {
-                    register(registerRequest: {
-                        fullName: "${register.fullName}",
-                        email: "${register.email}",
-                        userName: "${register.userName}",
-                        password: "${register.password}",
-                        confirmPassword: "${register.confirmPassword}"
-                    })
-                }
-            `
+        const query = `
+            mutation Register($input: RegisterRequest!) {
+                register(registerRequest: $input)
+            }`;
+
+        const input = {
+            fullName: register.fullName,
+            email: register.email,
+            userName: register.userName,
+            password: register.password,
+            confirmPassword: register.confirmPassword
         };
 
-        return this.api.post<RegisterResponse>('graphql', query).pipe(
+        return this.api.graphql<RegisterResponse>(query, { input }).pipe(
             tap(res => {
                 localStorage.setItem('email', register.email);
                 return res;
@@ -86,19 +76,16 @@ export class AuthService {
         );
     }
 
-    // OTP
     confirmOTPRegister(confirmOTPRegister: ConfirmOTPRegister): Observable<OTPRegisterResponse>{
-        const query = {
-            query: `
-                mutation {
-                    confirmOTPRegister(confirmOTPRequest: {
-                        email: "${confirmOTPRegister.email}", 
-                        otp: "${confirmOTPRegister.otp}"
-                })
-            }`
-        };
+        const query = `
+            mutation ConfirmOTPRegister($email: String!, $otp: String!) {
+                confirmOTPRegister(confirmOTPRequest: { email: $email, otp: $otp })
+            }`;
 
-        return this.api.post<OTPRegisterResponse>('graphql', query).pipe(
+        return this.api.graphql<OTPRegisterResponse>(query, {
+            email: confirmOTPRegister.email,
+            otp: confirmOTPRegister.otp
+        }).pipe(
             tap(res => {
                 localStorage.removeItem('email');
                 return res;
@@ -107,40 +94,36 @@ export class AuthService {
     }
 
     confirmOTPForgotPassword(confirmOTPForgotPassword: confirmOTPForgotPassword): Observable<confirmOTPForgotPasswordResponse>{
-        const query = {
-            query: `
-                mutation {
-                    confirmOTPForgotPassword(changePasswordRequest: {
-                        email: "${confirmOTPForgotPassword.email}",
-                        otp: "${confirmOTPForgotPassword.otp}",
-                        newPassword: "${confirmOTPForgotPassword.newPassword}",
-                        confirmPassword: "${confirmOTPForgotPassword.confirmPassword}"
-                    })
-                }`
+        const query = `
+            mutation ConfirmOTPForgotPassword($input: ChangePasswordRequest!) {
+                confirmOTPForgotPassword(changePasswordRequest: $input)
+            }`;
+
+        const input = {
+            email: confirmOTPForgotPassword.email,
+            otp: confirmOTPForgotPassword.otp,
+            newPassword: confirmOTPForgotPassword.newPassword,
+            confirmPassword: confirmOTPForgotPassword.confirmPassword
         };
 
-        return this.api.post<confirmOTPForgotPasswordResponse>('graphql', query).pipe(
+        return this.api.graphql<confirmOTPForgotPasswordResponse>(query, { input }).pipe(
             tap(res => {
                 localStorage.removeItem('email');
-                localStorage.removeItem('forgot_password_otp');                
-                
+                localStorage.removeItem('forgot_password_otp');
                 return res;
             })
         );
     }
 
-    // Forgot Password
     sendOTPforgotPassword(sendOTPForgotPassword: sendOTPForgotPassword): Observable<OTPForgotPasswordResponse>{
-        const query = {
-            query: `
-                mutation {
-                    sendOTPForgotPassword(forgotPasswordRequest: {
-                        email: "${sendOTPForgotPassword.email}",
-                })
-            }`
-        };
+        const query = `
+            mutation SendOTPForgotPassword($email: String!) {
+                sendOTPForgotPassword(forgotPasswordRequest: { email: $email })
+            }`;
 
-        return this.api.post<OTPForgotPasswordResponse>('graphql', query).pipe(
+        return this.api.graphql<OTPForgotPasswordResponse>(query, {
+            email: sendOTPForgotPassword.email
+        }).pipe(
             tap(res => {
                 localStorage.setItem('email', sendOTPForgotPassword.email);
                 return res;
@@ -153,7 +136,7 @@ export class AuthService {
     }
 
     getCurrentStaff(): InfStaff | null {
-    const staff = localStorage.getItem('staff_info');
-    return staff ? JSON.parse(staff) : null;
+        const staff = localStorage.getItem('staff_info');
+        return staff ? JSON.parse(staff) : null;
     }
 }
