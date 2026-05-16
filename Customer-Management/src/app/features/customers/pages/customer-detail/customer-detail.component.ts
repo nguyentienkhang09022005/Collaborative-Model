@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { CustomerItem, CustomerRequest } from '../../../../core/models/customer.model';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-customer-detail',
@@ -19,6 +20,9 @@ export class CustomerDetailComponet implements OnInit {
   isLoading: boolean = false;
   isEditing: boolean = false;
   idCustomer: string = "";
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private customerService: CustomerService,

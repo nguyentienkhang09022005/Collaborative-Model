@@ -124,17 +124,14 @@ export class NotificationService {
         );
     }
 
-    markAsRead(idNotification: string): Observable<NotificationItem> {
+    markAsRead(idNotification: string): Observable<boolean> {
         const query = `
             mutation MarkAsRead($idNotification: UUID!) {
-                markAsRead(idNotification: $idNotification) {
-                    idNotification
-                    isRead
-                }
+                markAsRead(idNotification: $idNotification)
             }`;
 
-        return this.api.graphql<NotificationMutationResponse>(query, { idNotification }).pipe(
-            map((res: any) => res.markAsRead)
+        return this.api.graphql<{ data: { markAsRead: boolean } }>(query, { idNotification }).pipe(
+            map(res => (res as any)?.markAsRead ?? false)
         );
     }
 
@@ -149,28 +146,25 @@ export class NotificationService {
         );
     }
 
-    pinNotification(idNotification: string): Observable<NotificationItem> {
+    pinNotification(idNotification: string): Observable<boolean> {
         const query = `
             mutation PinNotification($idNotification: UUID!) {
-                pinNotification(idNotification: $idNotification) {
-                    idNotification
-                    isPinned
-                }
+                pinNotification(idNotification: $idNotification)
             }`;
 
-        return this.api.graphql<NotificationMutationResponse>(query, { idNotification }).pipe(
-            map((res: any) => res.pinNotification)
+        return this.api.graphql<{ data: { pinNotification: boolean } }>(query, { idNotification }).pipe(
+            map(res => (res as any)?.pinNotification ?? false)
         );
     }
 
-    deleteNotification(idNotification: string): Observable<string> {
+    deleteNotification(idNotification: string): Observable<boolean> {
         const query = `
             mutation DeleteNotification($idNotification: UUID!) {
                 deleteNotification(idNotification: $idNotification)
             }`;
 
-        return this.api.graphql<NotificationMutationResponse>(query, { idNotification }).pipe(
-            map((res: any) => res.deleteNotification)
+        return this.api.graphql<{ data: { deleteNotification: boolean } }>(query, { idNotification }).pipe(
+            map(res => (res as any)?.deleteNotification ?? false)
         );
     }
 }

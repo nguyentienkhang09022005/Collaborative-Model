@@ -7,8 +7,7 @@ import {
   RevenueChartItem,
   PipelineFunnelItem,
   StaffPerformanceItem,
-  LeadConversionItem,
-  ReportResponse
+  LeadConversionItem
 } from "../models/report.model";
 
 @Injectable({
@@ -17,9 +16,9 @@ import {
 export class ReportService {
     constructor(private api: ApiService) {}
 
-    GetDashboardSummary(fromDate?: string, toDate?: string): Observable<DashboardSummaryItem | null> {
+    GetDashboardSummary(fromDate: string, toDate: string): Observable<DashboardSummaryItem | null> {
         const query = `
-            query($fromDate: DateTime, $toDate: DateTime) {
+            query($fromDate: DateTime!, $toDate: DateTime!) {
                 dashboardSummary(fromDate: $fromDate, toDate: $toDate) {
                     totalRevenue
                     totalLeads
@@ -27,9 +26,6 @@ export class ReportService {
                     activeDeals
                     conversionRate
                     averageDealValue
-                    totalTasks
-                    completedTasks
-                    pendingTasks
                 }
             }`;
 
@@ -42,29 +38,35 @@ export class ReportService {
         const query = `
             query($fromDate: DateTime!, $toDate: DateTime!, $groupBy: String) {
                 revenueChart(fromDate: $fromDate, toDate: $toDate, groupBy: $groupBy) {
-                    date
-                    revenue
-                    dealsCount
+                    dataPoints {
+                        date
+                        wonAmount
+                        lostAmount
+                        pipelineValue
+                    }
                 }
             }`;
 
-        return this.api.graphql<{ data: { revenueChart: RevenueChartItem[] } }>(query, { fromDate, toDate, groupBy }).pipe(
-            map(res => (res as any)?.revenueChart ?? [])
+        return this.api.graphql<{ data: { revenueChart: { dataPoints: RevenueChartItem[] } } }>(query, { fromDate, toDate, groupBy }).pipe(
+            map(res => (res as any)?.revenueChart?.dataPoints ?? [])
         );
     }
 
-    GetPipelineFunnel(): Observable<PipelineFunnelItem[]> {
+    GetPipelineFunnel(): Observable<PipelineFunnelItem | null> {
         const query = `
             query {
                 pipelineFunnel {
-                    stage
-                    count
-                    value
+                    openDealsCount
+                    negotiatingDealsCount
+                    wonDealsCount
+                    openDealsValue
+                    negotiatingDealsValue
+                    wonDealsValue
                 }
             }`;
 
-        return this.api.graphql<{ data: { pipelineFunnel: PipelineFunnelItem[] } }>(query).pipe(
-            map(res => (res as any)?.pipelineFunnel ?? [])
+        return this.api.graphql<{ data: { pipelineFunnel: PipelineFunnelItem } }>(query).pipe(
+            map(res => (res as any)?.pipelineFunnel ?? null)
         );
     }
 
@@ -72,28 +74,30 @@ export class ReportService {
         const query = `
             query($limit: Int!) {
                 topPerformingStaff(limit: $limit) {
-                    idStaff
-                    staffName
-                    totalDealsCreated
-                    wonDeals
-                    lostDeals
-                    winRate
-                    totalRevenue
-                    avgDealValue
-                    contactsCreated
-                    leadsCreated
-                    tasksCompleted
+                    staffPerformances {
+                        idStaff
+                        staffName
+                        totalDealsCreated
+                        wonDeals
+                        lostDeals
+                        winRate
+                        totalRevenue
+                        averageDealValue
+                        contactsCreated
+                        leadsCreated
+                        tasksCompleted
+                    }
                 }
             }`;
 
-        return this.api.graphql<{ data: { topPerformingStaff: StaffPerformanceItem[] } }>(query, { limit }).pipe(
-            map(res => (res as any)?.topPerformingStaff ?? [])
+        return this.api.graphql<{ data: { topPerformingStaff: { staffPerformances: StaffPerformanceItem[] } } }>(query, { limit }).pipe(
+            map(res => (res as any)?.topPerformingStaff?.staffPerformances ?? [])
         );
     }
 
-    GetStaffPerformanceReport(idStaff: string, fromDate?: string, toDate?: string): Observable<StaffPerformanceItem | null> {
+    GetStaffPerformanceReport(idStaff: string, fromDate: string, toDate: string): Observable<StaffPerformanceItem | null> {
         const query = `
-            query($idStaff: UUID!, $fromDate: DateTime, $toDate: DateTime) {
+            query($idStaff: UUID!, $fromDate: DateTime!, $toDate: DateTime!) {
                 staffPerformanceReport(idStaff: $idStaff, fromDate: $fromDate, toDate: $toDate) {
                     idStaff
                     staffName
@@ -102,7 +106,7 @@ export class ReportService {
                     lostDeals
                     winRate
                     totalRevenue
-                    avgDealValue
+                    averageDealValue
                     contactsCreated
                     leadsCreated
                     tasksCompleted
@@ -114,12 +118,12 @@ export class ReportService {
         );
     }
 
-    GetLeadConversionReport(fromDate?: string, toDate?: string): Observable<LeadConversionItem | null> {
+    GetLeadConversionReport(fromDate: string, toDate: string): Observable<LeadConversionItem | null> {
         const query = `
-            query($fromDate: DateTime, $toDate: DateTime) {
+            query($fromDate: DateTime!, $toDate: DateTime!) {
                 leadConversionReport(fromDate: $fromDate, toDate: $toDate) {
                     totalLeads
-                    convertedCustomers
+                    convertedLeads
                     conversionRate
                 }
             }`;

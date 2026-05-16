@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { TaskService } from '../../../../core/services/task.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import { TaskItem } from '../../../../core/models/task.model';
 import { StaffItem } from '../../../../core/models/staff.model';
 import {
@@ -49,6 +50,9 @@ export class TaskDetailComponent implements OnInit {
   priorityColors = TASK_PRIORITY_COLORS;
   statusLabels = TASK_STATUS_LABELS;
   statusColors = TASK_STATUS_COLORS;
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private route: ActivatedRoute,
@@ -206,6 +210,15 @@ export class TaskDetailComponent implements OnInit {
   }
 
   getStatusClass(status: string): string {
+    if (this.themeConfig().id === 'dark') {
+      const darkColors: Record<string, string> = {
+        'PENDING': 'bg-slate-700 text-slate-200',
+        'IN_PROGRESS': 'bg-blue-900 text-blue-200',
+        'COMPLETED': 'bg-green-900 text-green-200',
+        'CANCELED': 'bg-red-900 text-red-200'
+      };
+      return darkColors[status] || 'bg-slate-700 text-slate-200';
+    }
     return this.statusColors[status] || 'bg-slate-100 text-slate-600';
   }
 

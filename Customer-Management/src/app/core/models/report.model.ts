@@ -7,21 +7,22 @@ export interface DashboardSummaryItem {
   activeDeals: number;
   conversionRate: number;
   averageDealValue: number;
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
 }
 
 export interface RevenueChartItem {
   date: string;
-  revenue: number;
-  dealsCount: number;
+  wonAmount: number;
+  lostAmount: number;
+  pipelineValue: number;
 }
 
 export interface PipelineFunnelItem {
-  stage: string;
-  count: number;
-  value: number;
+  openDealsCount: number;
+  negotiatingDealsCount: number;
+  wonDealsCount: number;
+  openDealsValue: number;
+  negotiatingDealsValue: number;
+  wonDealsValue: number;
 }
 
 export interface StaffPerformanceItem {
@@ -32,7 +33,7 @@ export interface StaffPerformanceItem {
   lostDeals: number;
   winRate: number;
   totalRevenue: number;
-  avgDealValue: number;
+  averageDealValue: number;
   contactsCreated: number;
   leadsCreated: number;
   tasksCompleted: number;
@@ -40,7 +41,7 @@ export interface StaffPerformanceItem {
 
 export interface LeadConversionItem {
   totalLeads: number;
-  convertedCustomers: number;
+  convertedLeads: number;
   conversionRate: number;
 }
 

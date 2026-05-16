@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ContactItem, ContactRequest } from '../../../../core/models/contact.model';
@@ -10,6 +10,7 @@ import { StaffService } from '../../../../core/services/staff.service';
 import { LeadService } from '../../../../core/services/lead.service';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   CONTACT_STATUS,
   CONTACT_STATUS_LABELS,
@@ -31,6 +32,9 @@ export class ContactListComponent implements OnInit {
   selectedLead: string = '';
   leads: LeadItem[] = [];
   staffs: StaffItem[] = [];
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   // Expose constants to template
   contactStatusList = Object.values(CONTACT_STATUS);

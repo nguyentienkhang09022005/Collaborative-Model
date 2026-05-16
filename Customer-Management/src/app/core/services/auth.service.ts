@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { map, Observable, tap } from "rxjs";
 import { Login, InfStaff, LoginResponse, LogoutResponse } from "../models/auth.models";
 import { ApiService } from "./api.service";
-import { Register, RegisterResponse } from "../models/register.model";
 import { OTPRegisterResponse, ConfirmOTPRegister, OTPForgotPasswordResponse, confirmOTPForgotPassword, confirmOTPForgotPasswordResponse, sendOTPForgotPassword } from "../models/otp.model";
 
 @Injectable({
@@ -61,28 +60,7 @@ export class AuthService {
         );
     }
 
-    register(register: Register): Observable<RegisterResponse> {
-        const query = `
-            mutation Register($input: RegisterRequest!) {
-                register(registerRequest: $input)
-            }`;
-
-        const input = {
-            fullName: register.fullName,
-            email: register.email,
-            userName: register.userName,
-            password: register.password,
-            confirmPassword: register.confirmPassword
-        };
-
-        return this.api.graphql<RegisterResponse>(query, { input }).pipe(
-            tap(res => {
-                localStorage.setItem('email', register.email);
-                return res;
-            })
-        );
-    }
-
+    
     confirmOTPRegister(confirmOTPRegister: ConfirmOTPRegister): Observable<OTPRegisterResponse>{
         const query = `
             mutation ConfirmOTPRegister($email: String!, $otp: String!) {
@@ -102,7 +80,7 @@ export class AuthService {
 
     confirmOTPForgotPassword(confirmOTPForgotPassword: confirmOTPForgotPassword): Observable<confirmOTPForgotPasswordResponse>{
         const query = `
-            mutation ConfirmOTPForgotPassword($input: ChangePasswordRequest!) {
+            mutation ConfirmOTPForgotPassword($input: ChangePasswordRequestInput!) {
                 confirmOTPForgotPassword(changePasswordRequest: $input)
             }`;
 

@@ -1,12 +1,12 @@
-<div class="bg-slate-100 min-h-screen p-6">
+<div [class]="themeConfig().contentBg + ' min-h-screen p-6'">
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900">Calendar</h1>
-      <p class="text-sm text-slate-500 mt-1">Manage your events and meetings</p>
+      <h1 class="text-2xl font-bold" [class]="themeConfig().textPrimary">Calendar</h1>
+      <p class="text-sm mt-1" [class]="themeConfig().textSecondary">Manage your events and meetings</p>
     </div>
     <button (click)="openCreateModal()"
-      class="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2">
+      [class]="'px-5 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2 ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -15,39 +15,39 @@
   </div>
 
   <!-- Date Range Filter -->
-  <div class="bg-white rounded-xl shadow-md border border-slate-200 p-4 mb-6">
+  <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-4 mb-6'">
     <div class="flex items-center gap-4">
       <div>
-        <label class="block text-sm font-semibold text-slate-500 mb-1">From</label>
+        <label [class]="'block text-sm font-semibold mb-1 ' + (themeConfig().id === 'dark' ? 'text-slate-400' : 'text-slate-500')">From</label>
         <input type="date" [(ngModel)]="fromDate" (change)="loadEvents()"
-          class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+          [class]="'px-4 py-2 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')">
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-500 mb-1">To</label>
+        <label [class]="'block text-sm font-semibold mb-1 ' + (themeConfig().id === 'dark' ? 'text-slate-400' : 'text-slate-500')">To</label>
         <input type="date" [(ngModel)]="toDate" (change)="loadEvents()"
-          class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+          [class]="'px-4 py-2 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')">
       </div>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="flex justify-center py-16">
-    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+    <div [class]="'animate-spin rounded-full h-10 w-10 border-3 ' + (themeConfig().id === 'dark' ? 'border-slate-700 border-t-slate-300' : 'border-slate-200 border-t-slate-800')"></div>
   </div>
 
   <!-- Events List -->
   <div *ngIf="!isLoading" class="space-y-6">
     <!-- Upcoming Events -->
     <div>
-      <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Upcoming Events</h2>
+      <h2 [class]="'text-sm font-semibold uppercase tracking-wider mb-3 ' + themeConfig().textSecondary">Upcoming Events</h2>
       <div class="space-y-3">
         <ng-container *ngFor="let event of getUpcomingEvents()">
-          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-5 cursor-pointer hover:shadow-lg transition-shadow'"
             (click)="openDetailModal(event)">
             <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-slate-100 rounded-xl flex flex-col items-center justify-center">
-                <span class="text-xs font-semibold text-slate-500">{{ formatDate(event.startTime).split(' ')[0] }}</span>
-                <span class="text-lg font-bold text-slate-700">{{ formatDate(event.startTime).split(' ')[1] }}</span>
+              <div [class]="'w-14 h-14 rounded-xl flex flex-col items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+                <span [class]="'text-xs font-semibold ' + (themeConfig().id === 'dark' ? 'text-slate-400' : 'text-slate-500')">{{ formatDate(event.startTime).split(' ')[0] }}</span>
+                <span [class]="'text-lg font-bold ' + themeConfig().textPrimary">{{ formatDate(event.startTime).split(' ')[1] }}</span>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
@@ -58,8 +58,8 @@
                     {{ statusLabels[event.status] }}
                   </span>
                 </div>
-                <h3 class="font-semibold text-slate-900">{{ event.title }}</h3>
-                <div class="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                <h3 [class]="'font-semibold ' + themeConfig().textPrimary">{{ event.title }}</h3>
+                <div [class]="'flex items-center gap-3 text-sm mt-1 ' + themeConfig().textSecondary">
                   <span class="flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -74,29 +74,29 @@
                   </span>
                 </div>
               </div>
-              <div class="text-sm text-slate-500">
+              <div [class]="'text-sm ' + themeConfig().textSecondary">
                 {{ getStaffName(event.idStaff) }}
               </div>
             </div>
           </div>
         </ng-container>
-        <div *ngIf="getUpcomingEvents().length === 0" class="bg-white rounded-xl shadow-md border border-slate-200 p-8 text-center">
-          <p class="text-slate-500">No upcoming events</p>
+        <div *ngIf="getUpcomingEvents().length === 0" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-8 text-center'">
+          <p [class]="themeConfig().textSecondary">No upcoming events</p>
         </div>
       </div>
     </div>
 
     <!-- Past Events -->
     <div *ngIf="getPastEvents().length > 0">
-      <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Past Events</h2>
+      <h2 [class]="'text-sm font-semibold uppercase tracking-wider mb-3 ' + themeConfig().textSecondary">Past Events</h2>
       <div class="space-y-3">
         <ng-container *ngFor="let event of getPastEvents()">
-          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5 cursor-pointer hover:shadow-lg transition-shadow opacity-75"
+          <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-5 cursor-pointer hover:shadow-lg transition-shadow opacity-75'"
             (click)="openDetailModal(event)">
             <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-slate-100 rounded-xl flex flex-col items-center justify-center">
-                <span class="text-xs font-semibold text-slate-500">{{ formatDate(event.startTime).split(' ')[0] }}</span>
-                <span class="text-lg font-bold text-slate-700">{{ formatDate(event.startTime).split(' ')[1] }}</span>
+              <div [class]="'w-14 h-14 rounded-xl flex flex-col items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+                <span [class]="'text-xs font-semibold ' + (themeConfig().id === 'dark' ? 'text-slate-400' : 'text-slate-500')">{{ formatDate(event.startTime).split(' ')[0] }}</span>
+                <span [class]="'text-lg font-bold ' + themeConfig().textPrimary">{{ formatDate(event.startTime).split(' ')[1] }}</span>
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
@@ -107,12 +107,12 @@
                     {{ statusLabels[event.status] }}
                   </span>
                 </div>
-                <h3 class="font-semibold text-slate-900">{{ event.title }}</h3>
-                <div class="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                <h3 [class]="'font-semibold ' + themeConfig().textPrimary">{{ event.title }}</h3>
+                <div [class]="'flex items-center gap-3 text-sm mt-1 ' + themeConfig().textSecondary">
                   <span>{{ formatTime(event.startTime) }} - {{ formatTime(event.endTime) }}</span>
                 </div>
               </div>
-              <div class="text-sm text-slate-500">
+              <div [class]="'text-sm ' + themeConfig().textSecondary">
                 {{ getStaffName(event.idStaff) }}
               </div>
             </div>
@@ -123,16 +123,16 @@
 
     <!-- Empty State -->
     <div *ngIf="events.length === 0 && !isLoading"
-      class="bg-white rounded-xl shadow-md border border-slate-200 p-16 text-center">
-      <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-16 text-center'">
+      <div [class]="'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+        <svg [class]="'w-10 h-10 ' + (themeConfig().id === 'dark' ? 'text-slate-400' : 'text-slate-400')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
       </div>
-      <p class="text-slate-500 font-medium text-lg mb-2">No events</p>
-      <p class="text-slate-400 mb-4">Create your first event to get started</p>
+      <p [class]="'font-medium text-lg mb-2 ' + themeConfig().textPrimary">No events</p>
+      <p [class]="'mb-4 ' + themeConfig().textSecondary">Create your first event to get started</p>
       <button (click)="openCreateModal()"
-        class="px-5 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium">
+        [class]="'px-5 py-2.5 rounded-lg text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
         New Event
       </button>
     </div>
@@ -142,12 +142,12 @@
 <!-- Create Event Modal -->
 <div *ngIf="showCreateModal"
   class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl">
-    <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+  <div [class]="themeConfig().cardBg + ' w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden'">
+    <div [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-slate-50 to-white')">
       <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-slate-900">New Event</h2>
-        <button (click)="closeModals()" class="p-2 hover:bg-slate-100 rounded-lg">
-          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h2 class="text-lg font-bold" [class]="themeConfig().textPrimary">New Event</h2>
+        <button (click)="closeModals()" [class]="'p-2 rounded-lg transition-all ' + (themeConfig().id === 'dark' ? 'hover:bg-slate-700' : 'hover:bg-slate-100')">
+          <svg [class]="'w-5 h-5 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
@@ -155,21 +155,21 @@
     </div>
     <div class="p-6 space-y-4">
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Title *</label>
+        <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Title *</label>
         <input type="text" [(ngModel)]="eventForm.title"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm"
+          [class]="'w-full px-4 py-2.5 border rounded-lg text-sm transition-all ' + themeConfig().placeholderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20')"
           placeholder="Enter event title">
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Description</label>
+        <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Description</label>
         <textarea [(ngModel)]="eventForm.description" rows="2"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm"
+          [class]="'w-full px-4 py-2.5 border rounded-lg text-sm transition-all resize-none ' + themeConfig().placeholderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20')"
           placeholder="Enter description"></textarea>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Event Type</label>
+        <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Event Type</label>
         <select [(ngModel)]="eventForm.eventType"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+          [class]="'w-full px-4 py-2.5 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200 bg-white')">
           <option value="MEETING">Meeting</option>
           <option value="CALL">Call</option>
           <option value="TASK_DEADLINE">Task Deadline</option>
@@ -178,30 +178,30 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Start Time *</label>
+          <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Start Time *</label>
           <input type="datetime-local" [(ngModel)]="eventForm.startTime"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm">
+            [class]="'w-full px-4 py-2.5 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')">
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">End Time *</label>
+          <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">End Time *</label>
           <input type="datetime-local" [(ngModel)]="eventForm.endTime"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm">
+            [class]="'w-full px-4 py-2.5 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')">
         </div>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Location</label>
+        <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Location</label>
         <input type="text" [(ngModel)]="eventForm.location"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm"
+          [class]="'w-full px-4 py-2.5 border rounded-lg text-sm ' + themeConfig().placeholderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')"
           placeholder="Enter location">
       </div>
       <div class="flex items-center gap-2">
         <input type="checkbox" [(ngModel)]="eventForm.isAllDay" id="isAllDay" class="w-4 h-4">
-        <label for="isAllDay" class="text-sm text-slate-700">All day event</label>
+        <label for="isAllDay" [class]="'text-sm ' + themeConfig().textSecondary">All day event</label>
       </div>
       <div>
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Reminder (minutes before)</label>
+        <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Reminder (minutes before)</label>
         <select [(ngModel)]="eventForm.reminderMinutes"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+          [class]="'w-full px-4 py-2.5 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200 bg-white')">
           <option [value]="0">No reminder</option>
           <option [value]="5">5 minutes</option>
           <option [value]="15">15 minutes</option>
@@ -210,13 +210,13 @@
         </select>
       </div>
     </div>
-    <div class="px-6 py-4 border-t border-slate-200 flex gap-3 justify-end">
+    <div [class]="'px-6 py-4 border-t flex gap-3 justify-end ' + themeConfig().borderColor">
       <button (click)="closeModals()"
-        class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium">
+        [class]="'px-4 py-2 border rounded-lg text-sm font-medium transition-all ' + (themeConfig().id === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700' : 'border-slate-300 text-slate-700 hover:bg-slate-50')">
         Cancel
       </button>
       <button (click)="createEvent()"
-        class="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium">
+        [class]="'px-4 py-2 rounded-lg text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
         Create
       </button>
     </div>
@@ -226,8 +226,8 @@
 <!-- Event Detail Modal -->
 <div *ngIf="showDetailModal && selectedEvent"
   class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl">
-    <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+  <div [class]="themeConfig().cardBg + ' w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden'">
+    <div [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-slate-50 to-white')">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 rounded-lg text-xs font-semibold" [ngClass]="getTypeClass(selectedEvent.eventType)">
@@ -237,49 +237,49 @@
             {{ statusLabels[selectedEvent.status] }}
           </span>
         </div>
-        <button (click)="closeModals()" class="p-2 hover:bg-slate-100 rounded-lg">
-          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button (click)="closeModals()" [class]="'p-2 rounded-lg transition-all ' + (themeConfig().id === 'dark' ? 'hover:bg-slate-700' : 'hover:bg-slate-100')">
+          <svg [class]="'w-5 h-5 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
     </div>
     <div class="p-6">
-      <h2 class="text-xl font-bold text-slate-900 mb-4">{{ selectedEvent.title }}</h2>
+      <h2 class="text-xl font-bold mb-4" [class]="themeConfig().textPrimary">{{ selectedEvent.title }}</h2>
       <div class="space-y-4">
         <div class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg [class]="'w-5 h-5 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <span class="text-slate-700">{{ formatDateTime(selectedEvent.startTime) }} - {{ formatDateTime(selectedEvent.endTime) }}</span>
+          <span [class]="themeConfig().textSecondary">{{ formatDateTime(selectedEvent.startTime) }} - {{ formatDateTime(selectedEvent.endTime) }}</span>
         </div>
         <div *ngIf="selectedEvent.location" class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg [class]="'w-5 h-5 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           </svg>
-          <span class="text-slate-700">{{ selectedEvent.location }}</span>
+          <span [class]="themeConfig().textSecondary">{{ selectedEvent.location }}</span>
         </div>
         <div *ngIf="selectedEvent.description" class="pt-2">
-          <p class="text-sm text-slate-600">{{ selectedEvent.description }}</p>
+          <p [class]="'text-sm ' + themeConfig().textSecondary">{{ selectedEvent.description }}</p>
         </div>
         <!-- Participants -->
-        <div *ngIf="selectedEvent.participants && selectedEvent.participants.length > 0" class="pt-4 border-t border-slate-100">
-          <h4 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Participants</h4>
+        <div *ngIf="selectedEvent.participants && selectedEvent.participants.length > 0" [class]="'pt-4 border-t ' + themeConfig().borderColor">
+          <h4 [class]="'text-sm font-semibold uppercase tracking-wider mb-3 ' + themeConfig().textSecondary">Participants</h4>
           <div class="space-y-2">
             <div *ngFor="let p of selectedEvent.participants" class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
-                  <span class="text-sm font-semibold text-slate-600">{{ getStaffName(p.idStaff).charAt(0) }}</span>
+                <div [class]="'w-8 h-8 rounded-full flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+                  <span [class]="'text-sm font-semibold ' + themeConfig().textSecondary">{{ getStaffName(p.idStaff).charAt(0) }}</span>
                 </div>
-                <span class="text-sm text-slate-700">{{ getStaffName(p.idStaff) }}</span>
+                <span [class]="'text-sm ' + themeConfig().textSecondary">{{ getStaffName(p.idStaff) }}</span>
               </div>
-              <span class="text-xs text-slate-500">{{ participantStatusLabels[p.status] }}</span>
+              <span [class]="'text-xs ' + themeConfig().textSecondary">{{ participantStatusLabels[p.status] }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div *ngIf="canManageEvent(selectedEvent)" class="px-6 py-4 border-t border-slate-200 flex gap-3">
+    <div *ngIf="canManageEvent(selectedEvent)" [class]="'px-6 py-4 border-t flex gap-3 ' + themeConfig().borderColor">
       <button *ngIf="selectedEvent.status === 'SCHEDULED'" (click)="updateEventStatus(selectedEvent.idEvent, 'IN_PROGRESS')"
         class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-lg text-sm font-medium">
         Start Event
@@ -289,7 +289,7 @@
         Complete
       </button>
       <button *ngIf="selectedEvent.status === 'SCHEDULED' || selectedEvent.status === 'IN_PROGRESS'" (click)="cancelEvent(selectedEvent.idEvent)"
-        class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium">
+        [class]="'px-4 py-2 border rounded-lg text-sm font-medium transition-all ' + (themeConfig().id === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700' : 'border-slate-300 text-slate-700 hover:bg-slate-50')">
         Cancel
       </button>
       <button (click)="deleteEvent(selectedEvent.idEvent)"

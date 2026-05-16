@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService } from '../../../../core/services/audit-log.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import { AuditLogItem } from '../../../../core/models/audit-log.model';
 import {
   AUDIT_ACTION_LABELS,
@@ -35,6 +36,9 @@ export class AuditLogListComponent implements OnInit {
 
   auditActions = AUDIT_ACTION;
   auditEntityTypes = AUDIT_ENTITY_TYPE;
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private auditLogService: AuditLogService,

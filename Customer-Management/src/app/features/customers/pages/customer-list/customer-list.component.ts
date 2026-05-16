@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CustomerItem, CustomerRequest } from '../../../../core/models/customer.model';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
+import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-customer-page',
@@ -20,6 +21,9 @@ export class CustomerListComponent implements OnInit {
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
   selectedFile?: File;
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private customerService: CustomerService,

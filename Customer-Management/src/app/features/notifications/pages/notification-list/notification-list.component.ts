@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import { NotificationItem } from '../../../../core/models/notification.model';
 import {
   NOTIFICATION_TYPE_LABELS,
@@ -20,6 +21,9 @@ export class NotificationListComponent implements OnInit, OnDestroy {
   notifications: NotificationItem[] = [];
   isLoading = true;
   currentStaffId = '';
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   typeLabels = NOTIFICATION_TYPE_LABELS;
   typeColors = NOTIFICATION_TYPE_COLORS;
@@ -123,22 +127,48 @@ export class NotificationListComponent implements OnInit, OnDestroy {
     }
 
     if (notification.relatedEntityType && notification.relatedEntityId) {
-      const route = this.getRouteForEntity(notification.relatedEntityType, notification.relatedEntityId);
-      this.router.navigate([route]);
+      const routeMap: Record<string, { path: string; useQueryParam: boolean }> = {
+        'Task': { path: '/tasks', useQueryParam: false },
+        'Lead': { path: '/lead-detail', useQueryParam: true },
+        'Customer': { path: '/customer-detail', useQueryParam: true },
+        'Contact': { path: '/contact-detail', useQueryParam: true },
+        'Deal': { path: '/deal-detail', useQueryParam: true }
+      };
+      const route = routeMap[notification.relatedEntityType];
+      if (route) {
+        if (route.useQueryParam) {
+          this.router.navigate([route.path], { queryParams: { id: notification.relatedEntityId } });
+        } else {
+          this.router.navigate([route.path, notification.relatedEntityId]);
+        }
+      } else {
+        this.router.navigate(['/notifications']);
+      }
     }
   }
 
   getRouteForEntity(entityType: string, entityId: string): string {
     switch (entityType) {
-      case 'Lead': return `/leads/${entityId}`;
-      case 'Customer': return `/customers/${entityId}`;
-      case 'Deal': return `/deals/${entityId}`;
+      case 'Lead': return '/lead-detail';
+      case 'Customer': return '/customer-detail';
+      case 'Contact': return '/contact-detail';
+      case 'Deal': return '/deal-detail';
       case 'Task': return `/tasks/${entityId}`;
-      default: return '/dashboard';
+      default: return '/notifications';
     }
   }
 
   getTypeClass(type: string): string {
+    if (this.themeConfig().id === 'dark') {
+      const darkColors: Record<string, string> = {
+        'SUCCESS': 'bg-green-900 text-green-200',
+        'WARNING': 'bg-amber-900 text-amber-200',
+        'ERROR': 'bg-red-900 text-red-200',
+        'INFO': 'bg-blue-900 text-blue-200',
+        'APPOINTMENT': 'bg-purple-900 text-purple-200'
+      };
+      return darkColors[type] || 'bg-slate-700 text-slate-200';
+    }
     return this.typeColors[type] || 'bg-slate-100 text-slate-600';
   }
 

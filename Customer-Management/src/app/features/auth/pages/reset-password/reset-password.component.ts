@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ToastComponent } from '../../../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css',
 })
@@ -17,6 +18,8 @@ export class ResetPasswordComponent {
 
   confirmOTPForgotPasswordData: confirmOTPForgotPassword = {} as confirmOTPForgotPassword;
   isLoading: boolean = false;
+  showNewPassword: boolean = false;
+  showConfirmPassword: boolean = false;
 
   constructor(
     private authenService: AuthService,
@@ -31,6 +34,14 @@ export class ResetPasswordComponent {
       this.confirmOTPForgotPasswordData.email = email;
       this.confirmOTPForgotPasswordData.otp = otp;
     }
+  }
+
+  toggleNewPassword(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   onResetPassword(form: NgForm){
@@ -48,11 +59,12 @@ export class ResetPasswordComponent {
           return;
         }
 
+        this.toastService.success('Password reset successfully!');
         this.isLoading = false;
-        this.router.navigate(['/authen']);
+        setTimeout(() => this.router.navigate(['/authen']), 2000);
       },
       error: (err) => {
-        this.toastService.error('Failed to reset password');
+        this.toastService.error(err.message || 'Failed to reset password');
         this.isLoading = false;
       }
     });

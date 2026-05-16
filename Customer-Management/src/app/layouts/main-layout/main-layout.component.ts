@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild, OnDestroy, HostListener } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnDestroy, HostListener, inject, computed } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from "@angular/router";
 import { AuthService } from '../../core/services/auth.service';
 import { InfStaff } from '../../core/models/auth.models';
-// import { AiService } from '../../core/services/ai.service';
-// import { ChatRequest, HistoryMessageItem } from '../../core/models/ai.model';
 import { FormsModule } from '@angular/forms';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { NotificationItem } from '../../core/models/notification.model';
+import { PreferenceService } from '../../core/services/preference.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -30,16 +29,17 @@ export class MainLayoutComponent implements OnDestroy {
   showNotificationDropdown: boolean = false;
   recentNotifications: NotificationItem[] = [];
 
-  // historyMessageItem: HistoryMessageItem[] = [];
-  // chatForm: ChatRequest = {} as ChatRequest;
-
   isChatOpen = false;
-  isChatBoxOpen = false; // Disabled - AI refactor pending
+  isChatBoxOpen = false;
   newMessage: string = '';
   aiTyping: boolean = false;
   isChatThinking: boolean = false;
 
   private notificationPollInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Preference service for theme
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private authenService: AuthService,
@@ -128,22 +128,22 @@ export class MainLayoutComponent implements OnDestroy {
 
         // Navigate based on related entity
         if (relatedEntityType && relatedEntityId) {
-          const routeMap: Record<string, string[]> = {
-            'TASK': ['/tasks', relatedEntityId],
-            'LEAD': ['/lead-detail'],
-            'CUSTOMER': ['/customer-detail'],
-            'CONTACT': ['/contact-detail'],
-            'DEAL': ['/deal-detail']
+          const routeMap: Record<string, { path: string; useQueryParam: boolean }> = {
+            'Task': { path: '/tasks', useQueryParam: false },
+            'Lead': { path: '/lead-detail', useQueryParam: true },
+            'Customer': { path: '/customer-detail', useQueryParam: true },
+            'Contact': { path: '/contact-detail', useQueryParam: true },
+            'Deal': { path: '/deal-detail', useQueryParam: true }
           };
           const route = routeMap[relatedEntityType];
           if (route) {
-            if (route.length === 2 && relatedEntityType === 'TASK') {
-              this.router.navigate(['/tasks', relatedEntityId]);
+            if (route.useQueryParam) {
+              this.router.navigate([route.path], { queryParams: { id: relatedEntityId } });
             } else {
-              this.router.navigate([route[0]], { queryParams: { id: relatedEntityId } });
+              this.router.navigate([route.path, relatedEntityId]);
             }
           } else {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/notifications']);
           }
         } else {
           this.router.navigate(['/notifications']);
@@ -169,6 +169,18 @@ export class MainLayoutComponent implements OnDestroy {
   }
 
   getNotificationTypeClass(type: string): string {
+    if (this.themeConfig().id === 'dark') {
+      const darkColors: Record<string, string> = {
+        'TASK_ASSIGNED': 'bg-blue-900/50 text-blue-300',
+        'TASK_COMPLETED': 'bg-green-900/50 text-green-300',
+        'DEAL_UPDATED': 'bg-amber-900/50 text-amber-300',
+        'CONTACT_STATUS_CHANGED': 'bg-purple-900/50 text-purple-300',
+        'MENTION': 'bg-cyan-900/50 text-cyan-300',
+        'SYSTEM': 'bg-slate-700 text-slate-300',
+        'NotificationReminder': 'bg-orange-900/50 text-orange-300'
+      };
+      return darkColors[type] || darkColors['SYSTEM'];
+    }
     const colors: Record<string, string> = {
       'TASK_ASSIGNED': 'bg-blue-100 text-blue-600',
       'TASK_COMPLETED': 'bg-green-100 text-green-600',
@@ -224,6 +236,10 @@ export class MainLayoutComponent implements OnDestroy {
 
   isAdmin(): boolean {
     return this.currentStaff?.role === 'ADMIN';
+  }
+
+  isRouteActive(path: string, exact?: boolean): boolean {
+    return this.router.isActive(path, exact ?? false);
   }
 
   onLogout(event?: Event){

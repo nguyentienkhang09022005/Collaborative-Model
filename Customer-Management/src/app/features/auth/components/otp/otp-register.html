@@ -1,33 +1,46 @@
-<div class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-white flex items-center justify-center p-6">
+  <app-toast></app-toast>
   <div class="w-full max-w-sm">
     <div class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-slate-900 tracking-wide">SIDEBOARD</h1>
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-4 shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold bg-gradient-to-r from-sky-600 to-emerald-500 bg-clip-text text-transparent tracking-wide">SIDEBOARD</h1>
     </div>
 
-    <div class="bg-white border border-slate-200 p-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
       <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
         <h2 class="text-xl font-bold text-slate-900">OTP Verification</h2>
         <p class="text-sm text-slate-500 mt-1">Enter 6-digit code sent to your email</p>
       </div>
 
       <form #otpForm="ngForm" (ngSubmit)="onConfirmRegisterOTP(otpForm)" class="space-y-4">
-        <div>
-          <label for="otp" class="block text-sm font-medium text-slate-700 mb-1">OTP Code</label>
-          <input id="otp" name="otp" type="text" maxlength="6" placeholder="Enter 6 digits"
-            [(ngModel)]="confirmOTPData.otp" required #otp="ngModel"
-            class="w-full px-3 py-2.5 border border-slate-300 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 text-sm text-center text-xl tracking-widest" />
-          <p *ngIf="otp.invalid && otp.touched" class="text-red-500 text-xs mt-1">OTP is required (6 digits)</p>
+        <div class="flex gap-2 justify-center">
+          <input *ngFor="let i of [0,1,2,3,4,5]" type="text" maxlength="1"
+            class="w-12 h-14 text-center text-xl font-bold border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 transition-all placeholder:text-slate-400 text-slate-900"
+            [(ngModel)]="otpDigits[i]" [name]="'otp' + i" required
+            (input)="onOtpInput($event, i)"
+            (keydown)="onOtpKeydown($event, i)">
         </div>
 
         <button type="submit" [disabled]="isLoading"
-          class="w-full py-2.5 bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium disabled:opacity-50">
+          class="w-full py-3 bg-gradient-to-r from-sky-600 to-sky-700 text-white rounded-xl font-semibold
+                 shadow-lg hover:shadow-xl hover:from-sky-700 hover:to-sky-800
+                 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
           Verify OTP
         </button>
       </form>
 
       <p class="text-center text-sm text-slate-500 mt-6">
         Already verified?
-        <a href="/authen" class="text-sky-500 hover:text-sky-600 font-medium">Sign in</a>
+        <a href="/authen" class="font-medium text-sky-600 hover:text-sky-700 hover:underline">Sign in</a>
       </p>
     </div>
   </div>

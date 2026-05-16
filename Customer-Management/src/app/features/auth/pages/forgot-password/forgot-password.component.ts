@@ -5,11 +5,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { sendOTPForgotPassword } from '../../../../core/models/otp.model';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ToastComponent } from '../../../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './forgot-password.html',
   styleUrls: ['./forgot-password.css'],
 })
@@ -41,11 +42,12 @@ export class ForgotPasswordComponent {
           return;
         }
 
+        this.toastService.success('Reset link sent! Check your email.');
         this.isLoading = false;
         this.router.navigate(['/otp-forgot-password']);
       },
       error: (err) => {
-        this.toastService.error('Failed to send OTP');
+        this.toastService.error(err.message || 'Failed to send reset link');
         this.isLoading = false;
       }
     });

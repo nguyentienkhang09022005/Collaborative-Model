@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CalendarService } from '../../../../core/services/calendar.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import { CalendarEventItem, EventParticipantItem } from '../../../../core/models/calendar.model';
 import { StaffItem } from '../../../../core/models/staff.model';
 import {
@@ -26,6 +27,9 @@ export class CalendarListComponent implements OnInit {
   events: CalendarEventItem[] = [];
   staffList: StaffItem[] = [];
   isLoading = true;
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   showCreateModal = false;
   showDetailModal = false;

@@ -1,0 +1,14 @@
+/* Hide scrollbar but keep scrolling functionality */
+aside nav::-webkit-scrollbar {
+  display: none;
+}
+
+aside nav {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth scroll behavior */
+aside nav {
+  scroll-behavior: smooth;
+}

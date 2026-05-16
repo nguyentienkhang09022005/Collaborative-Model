@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { DealItem } from '../../../../core/models/deal.model';
 import { DealService } from '../../../../core/services/deal.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   DEAL_STATUS,
   DEAL_STATUS_LABELS,
@@ -26,6 +27,9 @@ export class DealDetailComponent {
 
   // Expose constants to template
   dealStatusList = Object.values(DEAL_STATUS);
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private dealService: DealService,

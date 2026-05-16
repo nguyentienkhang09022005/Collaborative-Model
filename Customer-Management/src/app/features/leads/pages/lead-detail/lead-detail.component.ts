@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { LeadService } from '../../../../core/services/lead.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-lead-detail',
@@ -19,6 +20,9 @@ export class LeadDetailComponet implements OnInit {
   isLoading: boolean = false;
   isEditing: boolean = false;
   idLead: string = "";
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private leadService: LeadService,

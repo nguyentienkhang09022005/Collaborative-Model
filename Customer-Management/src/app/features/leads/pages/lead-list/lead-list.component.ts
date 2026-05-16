@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { LeadService } from '../../../../core/services/lead.service';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
+import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-lead-page',
@@ -20,6 +21,9 @@ export class LeadListComponent implements OnInit {
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
   selectedFile?: File;
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private leadService: LeadService,

@@ -1,6 +1,6 @@
-<div class="bg-slate-100 min-h-screen p-6">
+<div [class]="themeConfig().contentBg + ' min-h-screen p-6'">
   <!-- Back Button -->
-  <button (click)="onBack()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 text-sm font-medium transition-colors">
+  <button (click)="onBack()" [class]="'flex items-center gap-2 mb-6 text-sm font-medium transition-colors ' + themeConfig().textSecondary">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
     </svg>
@@ -9,39 +9,39 @@
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="flex justify-center py-16">
-    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+    <div [class]="'animate-spin rounded-full h-10 w-10 border-3 ' + (themeConfig().id === 'dark' ? 'border-slate-700 border-t-slate-300' : 'border-slate-200 border-t-slate-800')"></div>
   </div>
 
   <!-- Form Card -->
   <div *ngIf="!isLoading && customerData" class="space-y-6">
 
     <!-- Main Info Card -->
-    <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-white">
+    <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
+      <div [class]="'px-6 py-5 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-teal-50 to-white')">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <div class="w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-800 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-md">
               {{ customerData.person.fullname.charAt(0).toUpperCase() }}
             </div>
             <div>
-              <h1 class="text-xl font-bold text-slate-900">{{ customerData.person.fullname }}</h1>
-              <p class="text-sm text-slate-500 mt-1">Customer</p>
+              <h1 class="text-xl font-bold" [class]="themeConfig().textPrimary">{{ customerData.person.fullname }}</h1>
+              <p [class]="'text-sm mt-1 ' + themeConfig().textSecondary">Customer</p>
             </div>
           </div>
           <div class="flex gap-2">
             <button *ngIf="!isEditing" (click)="onEdit()"
-              class="px-4 py-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:from-slate-900 hover:to-slate-800 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2">
+              [class]="'px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2 ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
               </svg>
               Edit
             </button>
             <ng-container *ngIf="isEditing">
-              <button (click)="onCancel()" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium transition-all">
+              <button (click)="onCancel()" [class]="'px-4 py-2 border rounded-lg text-sm font-medium transition-all ' + (themeConfig().id === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700' : 'border-slate-300 text-slate-700 hover:bg-slate-50')">
                 Cancel
               </button>
               <button (click)="onUpdateCustomer()"
-                class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2">
+                [class]="'px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2 ' + (themeConfig().id === 'dark' ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700')">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
@@ -54,10 +54,10 @@
     </div>
 
     <!-- Contact Info Card -->
-    <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-        <h3 class="font-semibold text-slate-800 flex items-center gap-2">
-          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
+      <div [class]="'px-5 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-slate-50 to-white')">
+        <h3 [class]="'font-semibold flex items-center gap-2 ' + themeConfig().textPrimary">
+          <svg [class]="'w-4 h-4 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
           </svg>
           Contact Information
@@ -65,38 +65,38 @@
       </div>
       <div class="p-5">
         <div class="grid grid-cols-2 gap-6">
-          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div [class]="'flex items-center gap-3 p-4 rounded-lg ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-slate-50')">
+            <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-blue-900/50' : 'bg-blue-100')">
+              <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-blue-400' : 'text-blue-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
               </svg>
             </div>
             <div>
-              <p class="text-xs text-slate-500 mb-1">Email</p>
-              <p class="font-semibold text-slate-900">{{ customerData.person.email }}</p>
+              <p [class]="'text-xs mb-1 ' + themeConfig().textSecondary">Email</p>
+              <p [class]="'font-semibold ' + themeConfig().textPrimary">{{ customerData.person.email }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div [class]="'flex items-center gap-3 p-4 rounded-lg ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-slate-50')">
+            <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-emerald-900/50' : 'bg-emerald-100')">
+              <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-emerald-400' : 'text-emerald-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
               </svg>
             </div>
             <div>
-              <p class="text-xs text-slate-500 mb-1">Phone</p>
-              <p class="font-semibold text-slate-900">{{ customerForm.phone || 'Not provided' }}</p>
+              <p [class]="'text-xs mb-1 ' + themeConfig().textSecondary">Phone</p>
+              <p [class]="'font-semibold ' + themeConfig().textPrimary">{{ customerForm.phone || 'Not provided' }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-lg col-span-2">
-            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div [class]="'flex items-center gap-3 p-4 rounded-lg col-span-2 ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-slate-50')">
+            <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-purple-900/50' : 'bg-purple-100')">
+              <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-purple-400' : 'text-purple-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
             </div>
             <div>
-              <p class="text-xs text-slate-500 mb-1">Location</p>
-              <p class="font-semibold text-slate-900">{{ customerForm.location || 'Not provided' }}</p>
+              <p [class]="'text-xs mb-1 ' + themeConfig().textSecondary">Location</p>
+              <p [class]="'font-semibold ' + themeConfig().textPrimary">{{ customerForm.location || 'Not provided' }}</p>
             </div>
           </div>
         </div>
@@ -104,29 +104,29 @@
     </div>
 
     <!-- Editable Fields -->
-    <div *ngIf="isEditing" class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-teal-50 to-white">
-        <h3 class="font-semibold text-slate-800">Edit Customer Information</h3>
+    <div *ngIf="isEditing" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
+      <div [class]="'px-5 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-teal-50 to-white')">
+        <h3 [class]="'font-semibold ' + themeConfig().textPrimary">Edit Customer Information</h3>
       </div>
       <div class="p-5 space-y-4">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Phone</label>
+          <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Phone</label>
           <input type="text" [(ngModel)]="customerForm.phone"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm transition-all"
+            [class]="'w-full px-4 py-2.5 border rounded-lg text-sm transition-all ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')"
             placeholder="Enter phone number">
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Location</label>
+          <label [class]="'block text-sm font-semibold mb-2 ' + themeConfig().textSecondary">Location</label>
           <input type="text" [(ngModel)]="customerForm.location"
-            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm transition-all"
+            [class]="'w-full px-4 py-2.5 border rounded-lg text-sm transition-all ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-slate-200')"
             placeholder="Enter location">
         </div>
       </div>
     </div>
 
     <!-- Timestamp -->
-    <div class="bg-white rounded-xl shadow-md border border-slate-100 px-6 py-4">
-      <div class="flex items-center gap-2 text-sm text-slate-500">
+    <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' px-6 py-4'">
+      <div [class]="'flex items-center gap-2 text-sm ' + themeConfig().textSecondary">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
@@ -137,14 +137,14 @@
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!isLoading && !customerData" class="bg-white rounded-xl shadow-md border border-slate-100 p-16 text-center">
-    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-      <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div *ngIf="!isLoading && !customerData" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-16 text-center'">
+    <div [class]="'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-slate-100')">
+      <svg [class]="'w-10 h-10 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
       </svg>
     </div>
-    <p class="text-slate-500 font-medium text-lg mb-2">Customer not found</p>
-    <button (click)="onBack()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-lg hover:from-slate-900 hover:to-slate-800 text-sm font-medium shadow-md transition-all">
+    <p [class]="'font-medium text-lg mb-2 ' + themeConfig().textPrimary">Customer not found</p>
+    <button (click)="onBack()" [class]="'mt-4 px-5 py-2.5 rounded-lg text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
       Back to Customers
     </button>
   </div>

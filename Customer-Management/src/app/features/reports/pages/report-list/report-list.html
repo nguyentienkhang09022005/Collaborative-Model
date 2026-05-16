@@ -1,235 +1,327 @@
-<div class="bg-slate-100 min-h-screen p-6">
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900">Reports</h1>
-      <p class="text-sm text-slate-500 mt-1">Analytics and performance metrics</p>
+<div [class]="themeConfig().contentBg + ' min-h-screen p-6'">
+  <!-- Header with Icon -->
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <div [class]="'w-12 h-12 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-sky-600' : 'bg-gradient-to-br from-sky-500 to-emerald-500')">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 [class]="'text-2xl font-bold ' + (themeConfig().id === 'dark' ? 'text-white' : 'bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent')">Reports & Analytics</h1>
+        <p class="text-sm mt-1" [class]="themeConfig().textSecondary">Track your business performance metrics</p>
+      </div>
     </div>
     <button (click)="refreshReports()"
-      class="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2">
+      [class]="'px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg transition-all ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
       </svg>
-      Refresh
+      Refresh Data
     </button>
   </div>
 
-  <!-- Date Range Filter -->
-  <div class="bg-white rounded-xl shadow-md border border-slate-200 p-4 mb-6">
-    <div class="flex items-center gap-4">
-      <div>
-        <label class="block text-sm font-semibold text-slate-500 mb-1">From</label>
-        <input type="date" [(ngModel)]="fromDate" (change)="refreshReports()"
-          class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+  <!-- Date Range Filter - Styled Bar -->
+  <div [class]="'rounded-2xl border shadow-md p-5 mb-8 ' + themeConfig().cardBg + ' ' + themeConfig().borderColor">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+          <svg [class]="'w-5 h-5 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs font-medium uppercase tracking-wider" [class]="themeConfig().textSecondary">Reporting Period</p>
+          <p class="text-sm font-semibold" [class]="themeConfig().textPrimary">{{ formatDate(fromDate) }} — {{ formatDate(toDate) }}</p>
+        </div>
       </div>
-      <div>
-        <label class="block text-sm font-semibold text-slate-500 mb-1">To</label>
-        <input type="date" [(ngModel)]="toDate" (change)="refreshReports()"
-          class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+      <div class="flex items-center gap-4">
+        <div>
+          <label [class]="'block text-xs font-medium mb-1.5 ' + themeConfig().textSecondary">From</label>
+          <input type="date" [(ngModel)]="fromDate" (change)="refreshReports()"
+            [class]="'px-4 py-2.5 rounded-xl border text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-slate-50 border-slate-200')">
+        </div>
+        <div class="w-8 h-px" [class]="themeConfig().id === 'dark' ? 'bg-slate-600' : 'bg-slate-300'"></div>
+        <div>
+          <label [class]="'block text-xs font-medium mb-1.5 ' + themeConfig().textSecondary">To</label>
+          <input type="date" [(ngModel)]="toDate" (change)="refreshReports()"
+            [class]="'px-4 py-2.5 rounded-xl border text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-slate-50 border-slate-200')">
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="isLoading" class="flex justify-center py-16">
-    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+  <div *ngIf="isLoading" class="flex justify-center py-20">
+    <div [class]="'animate-spin rounded-full h-12 w-12 border-4 ' + (themeConfig().id === 'dark' ? 'border-slate-700 border-t-sky-400' : 'border-slate-200 border-t-sky-600')"></div>
   </div>
 
   <!-- Dashboard Content -->
-  <div *ngIf="!isLoading" class="space-y-6">
+  <div *ngIf="!isLoading" class="space-y-8">
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Total Revenue</span>
-          <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Summary Stats - 4 Column Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total Revenue -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-emerald-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-emerald-50 to-white border-emerald-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-emerald-400' : 'text-emerald-600'">Total Revenue</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-emerald-500/20' : 'bg-emerald-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-emerald-400' : 'text-emerald-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ formatCurrency(dashboardSummary?.totalRevenue || 0) }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ formatCurrency(dashboardSummary?.totalRevenue || 0) }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-emerald-400/70' : 'text-emerald-500'">+12.5% from last period</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Total Leads</span>
-          <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+      <!-- Total Leads -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-blue-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-blue-50 to-white border-blue-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-blue-400' : 'text-blue-600'">Total Leads</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-blue-500/20' : 'bg-blue-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-blue-400' : 'text-blue-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ dashboardSummary?.totalLeads || 0 }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ dashboardSummary?.totalLeads || 0 }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-blue-400/70' : 'text-blue-500'">+8.3% from last period</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Total Customers</span>
-          <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+      <!-- Total Customers -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-purple-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-purple-50 to-white border-purple-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-purple-400' : 'text-purple-600'">Customers</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-purple-500/20' : 'bg-purple-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-purple-400' : 'text-purple-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ dashboardSummary?.totalCustomers || 0 }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ dashboardSummary?.totalCustomers || 0 }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-purple-400/70' : 'text-purple-500'">+5.1% from last period</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Active Deals</span>
-          <div class="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Active Deals -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-amber-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-amber-50 to-white border-amber-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-amber-400' : 'text-amber-600'">Active Deals</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-amber-500/20' : 'bg-amber-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-amber-400' : 'text-amber-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ dashboardSummary?.activeDeals || 0 }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ dashboardSummary?.activeDeals || 0 }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-amber-400/70' : 'text-amber-500'">+3.2% from last period</p>
       </div>
     </div>
 
     <!-- Second Row Stats -->
-    <div class="grid grid-cols-4 gap-4">
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Conversion Rate</span>
-          <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Conversion Rate -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-green-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-green-50 to-white border-green-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-green-400' : 'text-green-600'">Conversion Rate</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-green-500/20' : 'bg-green-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-green-400' : 'text-green-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ formatPercent(dashboardSummary?.conversionRate) }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ formatPercent(dashboardSummary?.conversionRate) }}</p>
+        <div [class]="'mt-3 h-2 rounded-full overflow-hidden ' + (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-slate-100')">
+          <div [class]="'h-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-500'" [style.width.%]="dashboardSummary?.conversionRate || 0"></div>
+        </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Avg Deal Value</span>
-          <div class="w-8 h-8 bg-cyan-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Avg Deal Value -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-cyan-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-cyan-50 to-white border-cyan-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-cyan-400' : 'text-cyan-600'">Avg Deal Value</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-cyan-500/20' : 'bg-cyan-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-cyan-400' : 'text-cyan-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ formatCurrency(dashboardSummary?.averageDealValue || 0) }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ formatCurrency(dashboardSummary?.averageDealValue || 0) }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-cyan-400/70' : 'text-cyan-500'">Per deal average</p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Total Tasks</span>
-          <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      <!-- Win Rate -->
+      <div [class]="'rounded-2xl p-5 border shadow-md ' + (themeConfig().id === 'dark' ? 'bg-gradient-to-br from-rose-900/40 to-slate-800 border-slate-700/50' : 'bg-gradient-to-br from-rose-50 to-white border-rose-100')">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold uppercase tracking-wider" [class]="themeConfig().id === 'dark' ? 'text-rose-400' : 'text-rose-600'">Win Rate</span>
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-rose-500/20' : 'bg-rose-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-rose-400' : 'text-rose-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
             </svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-slate-900">{{ dashboardSummary?.totalTasks || 0 }}</p>
-      </div>
-
-      <div class="bg-white rounded-xl shadow-md border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-medium text-slate-500">Completed Tasks</span>
-          <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-        <p class="text-2xl font-bold text-slate-900">{{ dashboardSummary?.completedTasks || 0 }}</p>
+        <p class="text-2xl font-bold" [class]="themeConfig().textPrimary">{{ getWinRate() }}</p>
+        <p class="text-xs mt-1" [class]="themeConfig().id === 'dark' ? 'text-rose-400/70' : 'text-rose-500'">Deals won vs total</p>
       </div>
     </div>
 
-    <!-- Pipeline Funnel -->
-    <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-200">
-        <h2 class="text-lg font-bold text-slate-900">Pipeline Funnel</h2>
-      </div>
-      <div class="p-6">
-        <div class="flex items-center justify-between gap-4">
-          <ng-container *ngFor="let stage of pipelineFunnel; let i = index; let last = last">
-            <div class="flex-1 text-center">
-              <div class="h-12 bg-gradient-to-b from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-2">
-                <span class="text-white font-bold">{{ stage.count }}</span>
+    <!-- Pipeline Funnel & Lead Conversion - 2 Columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Pipeline Funnel -->
+      <div [class]="'lg:col-span-2 rounded-2xl border shadow-md overflow-hidden ' + themeConfig().cardBg + ' ' + themeConfig().borderColor">
+        <div [class]="'px-6 py-5 border-b flex items-center gap-3 ' + themeConfig().borderColor">
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-sky-500/20' : 'bg-sky-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-sky-400' : 'text-sky-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold" [class]="themeConfig().textPrimary">Pipeline Funnel</h2>
+            <p class="text-xs" [class]="themeConfig().textSecondary">Deal stages overview</p>
+          </div>
+        </div>
+        <div class="p-6" *ngIf="pipelineFunnel">
+          <div class="flex items-center gap-3">
+            <!-- Open -->
+            <div class="flex-1">
+              <div [class]="'rounded-xl p-4 mb-3 bg-gradient-to-br from-blue-500 to-blue-600'">
+                <p class="text-3xl font-bold text-white text-center">{{ pipelineFunnel.openDealsCount }}</p>
               </div>
-              <p class="text-sm font-medium text-slate-600">{{ stage.stage }}</p>
-              <p class="text-xs text-slate-500">{{ formatCurrency(stage.value) }}</p>
+              <p class="text-center font-semibold" [class]="themeConfig().textPrimary">Open</p>
+              <p class="text-center text-sm" [class]="themeConfig().id === 'dark' ? 'text-blue-400' : 'text-blue-600'">{{ formatCurrency(pipelineFunnel.openDealsValue) }}</p>
             </div>
-            <div *ngIf="!last" class="w-8 text-center text-slate-400">→</div>
-          </ng-container>
-          <div *ngIf="pipelineFunnel.length === 0" class="w-full text-center text-slate-500 py-8">
-            No pipeline data available
+            <!-- Arrow -->
+            <div class="flex flex-col items-center justify-center px-2">
+              <svg [class]="'w-6 h-6 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </div>
+            <!-- Negotiating -->
+            <div class="flex-1">
+              <div [class]="'rounded-xl p-4 mb-3 bg-gradient-to-br from-amber-500 to-amber-600'">
+                <p class="text-3xl font-bold text-white text-center">{{ pipelineFunnel.negotiatingDealsCount }}</p>
+              </div>
+              <p class="text-center font-semibold" [class]="themeConfig().textPrimary">Negotiating</p>
+              <p class="text-center text-sm" [class]="themeConfig().id === 'dark' ? 'text-amber-400' : 'text-amber-600'">{{ formatCurrency(pipelineFunnel.negotiatingDealsValue) }}</p>
+            </div>
+            <!-- Arrow -->
+            <div class="flex flex-col items-center justify-center px-2">
+              <svg [class]="'w-6 h-6 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </div>
+            <!-- Won -->
+            <div class="flex-1">
+              <div [class]="'rounded-xl p-4 mb-3 bg-gradient-to-br from-emerald-500 to-emerald-600'">
+                <p class="text-3xl font-bold text-white text-center">{{ pipelineFunnel.wonDealsCount }}</p>
+              </div>
+              <p class="text-center font-semibold" [class]="themeConfig().textPrimary">Won</p>
+              <p class="text-center text-sm" [class]="themeConfig().id === 'dark' ? 'text-emerald-400' : 'text-emerald-600'">{{ formatCurrency(pipelineFunnel.wonDealsValue) }}</p>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!pipelineFunnel" [class]="'w-full text-center py-12 ' + themeConfig().textSecondary">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <p>No pipeline data available</p>
+        </div>
+      </div>
+
+      <!-- Lead Conversion -->
+      <div *ngIf="leadConversion" [class]="'rounded-2xl border shadow-md overflow-hidden ' + themeConfig().cardBg + ' ' + themeConfig().borderColor">
+        <div [class]="'px-6 py-5 border-b flex items-center gap-3 ' + themeConfig().borderColor">
+          <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-purple-500/20' : 'bg-purple-100')">
+            <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-purple-400' : 'text-purple-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold" [class]="themeConfig().textPrimary">Lead Conversion</h2>
+            <p class="text-xs" [class]="themeConfig().textSecondary">Conversion metrics</p>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="text-center mb-6">
+            <p class="text-4xl font-bold" [class]="themeConfig().id === 'dark' ? 'text-purple-400' : 'text-purple-600'">{{ formatPercent(leadConversion.conversionRate) }}</p>
+            <p class="text-sm" [class]="themeConfig().textSecondary">Conversion Rate</p>
+          </div>
+          <div class="space-y-4">
+            <div [class]="'rounded-xl p-4 ' + (themeConfig().id === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50')">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium" [class]="themeConfig().textSecondary">Total Leads</span>
+                <span class="text-lg font-bold" [class]="themeConfig().textPrimary">{{ leadConversion.totalLeads }}</span>
+              </div>
+              <div [class]="'h-2 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-slate-600' : 'bg-slate-200')">
+                <div class="h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600" style="width: 100%"></div>
+              </div>
+            </div>
+            <div [class]="'rounded-xl p-4 ' + (themeConfig().id === 'dark' ? 'bg-slate-700/50' : 'bg-slate-50')">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium" [class]="themeConfig().textSecondary">Converted</span>
+                <span class="text-lg font-bold text-emerald-500">{{ leadConversion.convertedLeads }}</span>
+              </div>
+              <div [class]="'h-2 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-slate-600' : 'bg-slate-200')">
+                <div class="h-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600" [style.width]="formatPercent(leadConversion.conversionRate)"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Top Performing Staff -->
-    <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-200">
-        <h2 class="text-lg font-bold text-slate-900">Top Performing Staff</h2>
+    <div [class]="'rounded-2xl border shadow-md overflow-hidden ' + themeConfig().cardBg + ' ' + themeConfig().borderColor">
+      <div [class]="'px-6 py-5 border-b flex items-center gap-3 ' + themeConfig().borderColor">
+        <div [class]="'w-10 h-10 rounded-xl flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-amber-500/20' : 'bg-amber-100')">
+          <svg [class]="'w-5 h-5 ' + (themeConfig().id === 'dark' ? 'text-amber-400' : 'text-amber-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h2 class="text-lg font-bold" [class]="themeConfig().textPrimary">Top Performing Staff</h2>
+          <p class="text-xs" [class]="themeConfig().textSecondary">Staff performance rankings</p>
+        </div>
       </div>
-      <table class="w-full">
-        <thead>
-          <tr class="bg-slate-50 border-b border-slate-200">
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Staff</th>
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Won Deals</th>
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Lost Deals</th>
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Win Rate</th>
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Revenue</th>
-            <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Avg Deal</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr *ngFor="let staff of topPerformingStaff" class="hover:bg-slate-50">
-            <td class="px-5 py-4">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center">
-                  <span class="text-sm font-semibold text-slate-600">{{ staff.staffName?.charAt(0) }}</span>
-                </div>
-                <span class="font-medium text-slate-700">{{ staff.staffName }}</span>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let staff of topPerformingStaff; let i = index"
+            [class]="'rounded-xl p-5 border transition-all hover:shadow-lg ' + (themeConfig().id === 'dark' ? 'bg-slate-800/50 border-slate-700 hover:border-slate-500' : 'bg-slate-50 border-slate-100 hover:border-slate-200')">
+            <div class="flex items-center gap-4 mb-4">
+              <div [class]="'w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ' + (i === 0 ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white' : i === 1 ? 'bg-gradient-to-br from-slate-400 to-slate-500 text-white' : i === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white' : themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-600')">
+                {{ staff.staffName?.charAt(0) }}
               </div>
-            </td>
-            <td class="px-5 py-4">
-              <span class="text-sm text-slate-700">{{ staff.wonDeals }}</span>
-            </td>
-            <td class="px-5 py-4">
-              <span class="text-sm text-slate-700">{{ staff.lostDeals }}</span>
-            </td>
-            <td class="px-5 py-4">
-              <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold">
-                {{ formatPercent(staff.winRate) }}
-              </span>
-            </td>
-            <td class="px-5 py-4">
-              <span class="text-sm font-medium text-slate-700">{{ formatCurrency(staff.totalRevenue) }}</span>
-            </td>
-            <td class="px-5 py-4">
-              <span class="text-sm text-slate-500">{{ formatCurrency(staff.avgDealValue) }}</span>
-            </td>
-          </tr>
-          <tr *ngIf="topPerformingStaff.length === 0">
-            <td colspan="6" class="px-5 py-8 text-center text-slate-500">No staff performance data</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Lead Conversion -->
-    <div *ngIf="leadConversion" class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
-      <h2 class="text-lg font-bold text-slate-900 mb-4">Lead Conversion</h2>
-      <div class="grid grid-cols-3 gap-6">
-        <div class="text-center">
-          <p class="text-3xl font-bold text-slate-900 mb-1">{{ leadConversion.totalLeads }}</p>
-          <p class="text-sm text-slate-500">Total Leads</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-slate-900 mb-1">{{ leadConversion.convertedCustomers }}</p>
-          <p class="text-sm text-slate-500">Converted to Customers</p>
-        </div>
-        <div class="text-center">
-          <p class="text-3xl font-bold text-emerald-600 mb-1">{{ formatPercent(leadConversion.conversionRate) }}</p>
-          <p class="text-sm text-slate-500">Conversion Rate</p>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold truncate" [class]="themeConfig().textPrimary">{{ staff.staffName }}</p>
+                <p class="text-xs" [class]="themeConfig().textSecondary">
+                  <span [class]="themeConfig().id === 'dark' ? 'text-emerald-400' : 'text-emerald-600'">{{ staff.wonDeals }}</span> won ·
+                  <span [class]="themeConfig().id === 'dark' ? 'text-red-400' : 'text-red-600'">{{ staff.lostDeals }}</span> lost
+                </p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs" [class]="themeConfig().textSecondary">Win Rate</span>
+                <span [class]="'px-3 py-1 rounded-lg text-xs font-bold ' + (staff.winRate >= 50 ? (themeConfig().id === 'dark' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-emerald-100 text-emerald-700') : (themeConfig().id === 'dark' ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-700'))">
+                  {{ formatPercent(staff.winRate) }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs" [class]="themeConfig().textSecondary">Revenue</span>
+                <span class="text-sm font-semibold" [class]="themeConfig().textPrimary">{{ formatCurrency(staff.totalRevenue) }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs" [class]="themeConfig().textSecondary">Avg Deal</span>
+                <span class="text-sm" [class]="themeConfig().textSecondary">{{ formatCurrency(staff.averageDealValue) }}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="topPerformingStaff.length === 0" [class]="'col-span-full text-center py-12 ' + themeConfig().textSecondary">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <p>No staff performance data</p>
+          </div>
         </div>
       </div>
     </div>

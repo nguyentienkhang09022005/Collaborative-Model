@@ -5,17 +5,19 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { ConfirmOTPRegister } from '../../../../core/models/otp.model';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ToastComponent } from '../../../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-otp',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ToastComponent],
   templateUrl: './otp-register.html',
   styleUrls: ['./otp-register.css'],
 })
 export class OtpRegisterComponent {
   confirmOTPData: ConfirmOTPRegister = {} as ConfirmOTPRegister;
   isLoading: boolean = false;
+  otpDigits: string[] = ['', '', '', '', '', ''];
 
   constructor(
     private authenService: AuthService,
@@ -30,11 +32,38 @@ export class OtpRegisterComponent {
     }
   }
 
+  onOtpInput(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.replace(/[^0-9]/g, '');
+    this.otpDigits[index] = value;
+
+    if (value && index < 5) {
+      const nextInput = input.nextElementSibling as HTMLInputElement;
+      if (nextInput) nextInput.focus();
+    }
+
+    this.updateOtpValue();
+  }
+
+  onOtpKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
+      const prevInput = (event.target as HTMLInputElement).previousElementSibling as HTMLInputElement;
+      if (prevInput) {
+        this.otpDigits[index - 1] = '';
+        prevInput.focus();
+      }
+    }
+  }
+
+  private updateOtpValue(): void {
+    this.confirmOTPData.otp = this.otpDigits.join('');
+  }
+
   onConfirmRegisterOTP(form: NgForm) {
-    Object.values(form.controls).forEach(control => {
-      control.markAsTouched();
-    });
-    if (form.invalid) return;
+    if (this.otpDigits.join('').length !== 6) {
+      this.toastService.error('Please enter complete 6-digit OTP');
+      return;
+    }
 
     this.isLoading = true;
     this.authenService.confirmOTPRegister(this.confirmOTPData).subscribe({
@@ -45,11 +74,12 @@ export class OtpRegisterComponent {
           return;
         }
 
+        this.toastService.success('Account verified successfully!');
         this.isLoading = false;
-        this.router.navigate(['/authen']);
+        setTimeout(() => this.router.navigate(['/authen']), 2000);
       },
       error: (err) => {
-        this.toastService.error('OTP verification failed');
+        this.toastService.error(err.message || 'OTP verification failed');
         this.isLoading = false;
       }
     });

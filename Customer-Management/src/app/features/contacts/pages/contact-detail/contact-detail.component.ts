@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ContactItem } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   CONTACT_STATUS,
   CONTACT_STATUS_LABELS,
@@ -26,6 +27,9 @@ export class ContactDetailComponent {
 
   // Expose constants to template
   contactStatusList = Object.values(CONTACT_STATUS);
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private contactService: ContactService,

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DealItem, DealRequest } from '../../../../core/models/deal.model';
@@ -10,6 +10,7 @@ import { StaffService } from '../../../../core/services/staff.service';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   DEAL_STATUS,
   DEAL_STATUS_LABELS,
@@ -31,6 +32,9 @@ export class DealListComponent implements OnInit {
   selectedCustomer: string = '';
   customers: CustomerItem[] = [];
   staffs: StaffItem[] = [];
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   // Expose constants to template
   dealStatusList = Object.values(DEAL_STATUS);

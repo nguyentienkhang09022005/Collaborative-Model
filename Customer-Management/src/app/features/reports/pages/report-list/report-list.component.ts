@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportService } from '../../../../core/services/report.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   DashboardSummaryItem,
   RevenueChartItem,
@@ -23,7 +24,7 @@ export class ReportListComponent implements OnInit {
 
   // Charts
   revenueChart: RevenueChartItem[] = [];
-  pipelineFunnel: PipelineFunnelItem[] = [];
+  pipelineFunnel: PipelineFunnelItem | null = null;
 
   // Staff Performance
   topPerformingStaff: StaffPerformanceItem[] = [];
@@ -32,6 +33,9 @@ export class ReportListComponent implements OnInit {
   isLoading = true;
   fromDate = '';
   toDate = '';
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private reportService: ReportService,
@@ -141,6 +145,13 @@ export class ReportListComponent implements OnInit {
 
   formatPercent(value: number | undefined): string {
     return (value || 0).toFixed(1) + '%';
+  }
+
+  getWinRate(): string {
+    if (!this.dashboardSummary) return '0%';
+    const total = this.dashboardSummary.totalLeads || 0;
+    if (total === 0) return '0%';
+    return ((this.dashboardSummary.totalCustomers / total) * 100).toFixed(1) + '%';
   }
 
   formatDate(dateStr: string): string {

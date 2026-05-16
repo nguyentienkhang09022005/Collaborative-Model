@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { AuthenComponent } from './features/auth/pages/authen/authen.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/pages/dashboard/dash-board.component';
-import { RegisterComponent } from './features/auth/pages/register/register.component';
 import { OtpRegisterComponent } from './features/auth/components/otp/otp-register.component';
 import { ForgotPasswordComponent } from './features/auth/pages/forgot-password/forgot-password.component';
 import { OtpForgotPasswordComponent } from './features/auth/components/otp/otp-forgot-password.component';
@@ -24,11 +23,11 @@ import { CalendarListComponent } from './features/calendar/pages/calendar-list/c
 import { AuditLogListComponent } from './features/audit-log/pages/audit-log-list/audit-log-list.component';
 import { ReportListComponent } from './features/reports/pages/report-list/report-list.component';
 import { StaffListComponent } from './features/staff/pages/staff-list/staff-list.component';
+import { SettingsComponent } from './features/settings/pages/settings/settings.component';
 
 export const routes: Routes = [
     // Authen
     { path: 'authen', component: AuthenComponent },
-    { path: 'register', component: RegisterComponent },
     { path: 'forgot-password', component: ForgotPasswordComponent },
     { path: 'otp-register', component: OtpRegisterComponent },
     { path: 'otp-forgot-password', component: OtpForgotPasswordComponent },
@@ -64,6 +63,7 @@ export const routes: Routes = [
             { path: 'calendar', component: CalendarListComponent },
             { path: 'audit-log', component: AuditLogListComponent },
             { path: 'reports', component: ReportListComponent },
+            { path: 'settings', component: SettingsComponent },
         ]
     },
 

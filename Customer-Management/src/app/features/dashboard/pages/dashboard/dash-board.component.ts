@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { ChartDealItem, StatisticsItem } from '../../../../core/models/dashboard.model';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { LeadItem } from '../../../../core/models/lead.models';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ContactItem } from '../../../../core/models/contact.model';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-dash-board',
@@ -28,6 +29,9 @@ export class DashboardComponent {
   popupType = '';
   popupTitle = '';
 
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
+
   public barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: []
@@ -36,20 +40,28 @@ export class DashboardComponent {
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
+    elements: { bar: { borderRadius: 6, borderSkipped: false } },
     plugins: {
-      title: {
-        display: true,
-        text: 'Monthly Lead Count Chart',
-        font: { size: 15 }
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+        bodyFont: { family: 'Inter', size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: { label: (context) => ` ${context.parsed.y} leads` }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Leads' },
-        ticks: { stepSize: 1, precision: 0 }
-      }
-    }
+        title: { display: true, text: 'Leads', color: '#64748b' },
+        grid: { color: 'rgba(148, 163, 184, 0.1)' },
+        ticks: { color: '#94a3b8', stepSize: 1, precision: 0 }
+      },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+    },
+    animation: { duration: 1200, easing: 'easeOutQuart' }
   };
 
   public lineChartData: ChartConfiguration<'line'>['data'] = {
@@ -61,18 +73,31 @@ export class DashboardComponent {
   public lineChartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    elements: {
+      line: { tension: 0.4, borderWidth: 3 },
+      point: { radius: 0, hoverRadius: 6 }
+    },
     plugins: {
-      legend: { position: 'top' },
-      title: {
-        display: true,
-        text: 'Real Estate Revenue Chart',
-        font: { size: 15 }
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+        bodyFont: { family: 'Inter', size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: { label: (context) => ` $${(context.parsed.y ?? 0).toLocaleString()}` }
       }
     },
     scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Price ($)' } },
-      x: { beginAtZero: true },
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Revenue ($)', color: '#64748b' },
+        grid: { color: 'rgba(148, 163, 184, 0.1)' },
+        ticks: { color: '#94a3b8', callback: (value) => `$${Number(value).toLocaleString()}` }
+      },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
     },
+    animation: { duration: 1500, easing: 'easeOutQuart' }
   };
 
   public pieChartLabels: string[] = [];
@@ -89,14 +114,134 @@ export class DashboardComponent {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'right' },
-      title: {
-        display: true,
-        text: 'Contact Classification Chart',
-        font: { size: 20 }
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 16,
+          font: { family: 'Inter', size: 11 }
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+        bodyFont: { family: 'Inter', size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        callbacks: { label: (context) => ` ${context.parsed} contacts` }
       }
-    }
+    },
+    animation: { animateRotate: true, animateScale: true, duration: 1500 }
   };
+
+  // Chart colors based on theme
+  get axisLabelColor(): string {
+    return this.themeConfig().id === 'dark' ? '#cbd5e1' : '#64748b';
+  }
+
+  get gridColor(): string {
+    return this.themeConfig().id === 'dark' ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.1)';
+  }
+
+  get tooltipBackground(): string {
+    return this.themeConfig().id === 'dark' ? 'rgba(30, 41, 59, 0.95)' : 'rgba(15, 23, 42, 0.9)';
+  }
+
+  // Dynamic chart options
+  get barChartOptionsAdaptive(): ChartOptions<'bar'> {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      elements: { bar: { borderRadius: 6, borderSkipped: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: this.tooltipBackground,
+          titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+          bodyFont: { family: 'Inter', size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: { label: (context) => ` ${context.parsed.y} leads` }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Leads', color: this.axisLabelColor },
+          grid: { color: this.gridColor },
+          ticks: { color: this.axisLabelColor, stepSize: 1, precision: 0 }
+        },
+        x: { grid: { display: false }, ticks: { color: this.axisLabelColor } }
+      },
+      animation: { duration: 1200, easing: 'easeOutQuart' }
+    };
+  }
+
+  get lineChartOptionsAdaptive(): ChartOptions<'line'> {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      elements: {
+        line: { tension: 0.4, borderWidth: 3 },
+        point: { radius: 0, hoverRadius: 6 }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 20,
+            color: this.axisLabelColor
+          }
+        },
+        tooltip: {
+          backgroundColor: this.tooltipBackground,
+          titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+          bodyFont: { family: 'Inter', size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: { label: (context) => ` $${(context.parsed.y ?? 0).toLocaleString()}` }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Revenue ($)', color: this.axisLabelColor },
+          grid: { color: this.gridColor },
+          ticks: { color: this.axisLabelColor, callback: (value) => `$${Number(value).toLocaleString()}` }
+        },
+        x: { grid: { display: false }, ticks: { color: this.axisLabelColor } }
+      },
+      animation: { duration: 1500, easing: 'easeOutQuart' }
+    };
+  }
+
+  get pieChartOptionsAdaptive(): ChartOptions<'pie'> {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            padding: 16,
+            font: { family: 'Inter', size: 11 },
+            color: this.axisLabelColor
+          }
+        },
+        tooltip: {
+          backgroundColor: this.tooltipBackground,
+          titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+          bodyFont: { family: 'Inter', size: 12 },
+          padding: 12,
+          cornerRadius: 8,
+          callbacks: { label: (context) => ` ${context.parsed} contacts` }
+        }
+      },
+      animation: { animateRotate: true, animateScale: true, duration: 1500 }
+    };
+  }
 
   constructor(
     private dashboardService: DashboardService,

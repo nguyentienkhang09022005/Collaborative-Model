@@ -318,7 +318,7 @@ export class CalendarService {
     addParticipant(request: EventParticipantRequest): Observable<EventParticipantItem> {
         const query = `
             mutation AddParticipant($input: EventParticipantInput!) {
-                addParticipant(eventParticipantInput: $input) {
+                addParticipant(input: $input) {
                     id
                     idEvent
                     idStaff

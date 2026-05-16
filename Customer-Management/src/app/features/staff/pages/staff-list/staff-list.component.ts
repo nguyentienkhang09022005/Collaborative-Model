@@ -1,11 +1,12 @@
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StaffService } from '../../../../core/services/staff.service';
 import { RouterModule } from '@angular/router';
 import { StaffItem } from '../../../../core/models/staff.model';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PreferenceService } from '../../../../core/services/preference.service';
 import {
   STAFF_ROLE,
   STAFF_ROLE_LABELS,
@@ -24,6 +25,9 @@ export class StaffListComponent implements OnInit {
 
   // Expose constants to template
   staffRoleList = Object.values(STAFF_ROLE);
+
+  private preferenceService = inject(PreferenceService);
+  readonly themeConfig = this.preferenceService.themeConfig;
 
   constructor(
     private staffService: StaffService,

@@ -58,10 +58,14 @@ export class ApiService {
                 let errorMessage = 'An unexpected error occurred';
                 if (err instanceof Error) {
                     errorMessage = err.message;
+                } else if (err.status === 409 && err.error?.errors?.[0]?.message) {
+                    errorMessage = err.error.errors[0].message;
                 } else if (err.error instanceof ErrorEvent) {
                     errorMessage = err.error.message;
                 } else if (err.status === 0) {
                     errorMessage = 'Network error. Please check your connection.';
+                } else if (err.message) {
+                    errorMessage = err.message;
                 }
                 console.error('GraphQL Error:', errorMessage);
                 return throwError(() => new Error(errorMessage));
