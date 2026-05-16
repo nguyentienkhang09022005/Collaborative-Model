@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LeadService } from '../../../../core/services/lead.service';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-lead-mark',
@@ -18,39 +19,35 @@ export class LeadMarkComponent {
   leadForm: LeadRequest = {} as LeadRequest;
   showAddPopup: boolean = false;
 
-  constructor(private leadService: LeadService ){}
+  constructor(
+    private leadService: LeadService,
+    private toastService: ToastService
+  ) {}
 
-  ngOnInit(){}
+  ngOnInit() {}
 
-  submitAddLead(){
+  submitAddLead() {
     this.isLoading = true;
-  
+
     this.leadService.createLead(this.leadForm).subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }  
         this.leadForm = {} as LeadRequest;
-  
-        this.isLoading = false;
-        alert("Đăng ký tư vấn thành công!");
-  
-        console.log(res);
+        this.toastService.success('Đăng ký tư vấn thành công!');
+        this.closePopup();
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to register');
       }
-    })
+    });
   }
-  
-  openAddPopup(){
+
+  openAddPopup() {
     this.showAddPopup = true;
   }
 
-  closePopup(){
+  closePopup() {
     this.showAddPopup = false;
   }
 }

@@ -1,7 +1,15 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { DealDeletionResponse, DealInfResponse, DealRequest, DealResponse, DealUpdateResponse } from "../models/deal.model";
-import { Observable, tap } from "rxjs";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import {
+  DealRequest,
+  DealResponse,
+  DealByIdResponse,
+  DealMutationResponse,
+  DealDeleteResponse,
+  DealItem
+} from "../models/deal.model";
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +17,7 @@ import { Observable, tap } from "rxjs";
 export class DealService {
     constructor(private api: ApiService) {}
 
-    GetListDeal(): Observable<DealResponse>{
+    GetListDeal(): Observable<DealItem[]> {
         const query = `
             query {
                 deals {
@@ -17,96 +25,120 @@ export class DealService {
                     title
                     content
                     price
-                    createdAt
                     status
-                    infCustomerResponse {
-                        idCustomer
+                    createdAt
+                    updatedAt
+                    customer {
+                        id
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
                             phone
+                            location
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
-        return this.api.graphql<DealResponse>(query);
+        return this.api.graphql<DealResponse>(query).pipe(
+            map(res => (res as any)?.deals ?? [])
+        );
     }
 
-    GetInfDeal(idDeal: string): Observable<DealInfResponse>{
+    GetInfDeal(idDeal: string): Observable<DealItem | null> {
         const query = `
-            query($idDeal: String!) {
-                dealById(idDeal: $idDeal) {
+            query($id: UUID!) {
+                dealById(idDeal: $id) {
                     idDeal
                     title
                     content
                     price
                     status
                     createdAt
-                    infCustomerResponse {
-                        idCustomer
+                    updatedAt
+                    customer {
+                        id
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
                             phone
                             location
-                            salary
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
-        return this.api.graphql<DealInfResponse>(query, { idDeal });
+        return this.api.graphql<DealByIdResponse>(query, { id: idDeal }).pipe(
+            map(res => (res as any)?.dealById?.[0] ?? null)
+        );
     }
 
-    DeleteDeal(idDeal: string): Observable<DealDeletionResponse>{
+    createDeal(dealRequest: DealRequest, idStaff: string, idCustomer: string): Observable<DealItem> {
         const query = `
-            mutation DeleteDeal($idDeal: String!) {
-                deleteDeal(idDeal: $idDeal)
-            }`;
-
-        return this.api.graphql<DealDeletionResponse>(query, { idDeal });
-    }
-
-    createDeal(dealRequest: DealRequest, idStaff: string, idCustomer: string): Observable<DealResponse>{
-        const query = `
-            mutation CreateDeal($input: DealCreationRequest!) {
+            mutation CreateDeal($input: DealCreationRequestInput!) {
                 createDeal(dealCreationRequest: $input) {
                     idDeal
                     title
+                    content
                     price
+                    status
                     createdAt
-                    infCustomerResponse {
-                        idCustomer
+                    customer {
+                        id
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
                             phone
-                            salary
                             location
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
                         createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
@@ -115,44 +147,69 @@ export class DealService {
             title: dealRequest.title,
             content: dealRequest.content,
             price: dealRequest.price,
-            idStaff,
-            idCustomer
+            idStaff: idStaff,
+            idCustomer: idCustomer
         };
 
-        return this.api.graphql<DealResponse>(query, { input });
+        return this.api.graphql<DealMutationResponse>(query, { input }).pipe(
+            map((res: any) => res.createDeal)
+        );
     }
 
-    UpdateDeal(status: string, idDeal: string): Observable<DealUpdateResponse>{
+    UpdateDeal(status: string, idDeal: string): Observable<DealItem> {
         const query = `
-            mutation UpdateDeal($idDeal: String!, $input: DealUpdateRequest!) {
-                updateDeal(idDeal: $idDeal, dealUpdateRequest: $input) {
+            mutation UpdateDeal($id: UUID!, $input: DealUpdateRequestInput!) {
+                updateDeal(dealUpdateRequest: $input, idDeal: $id) {
                     idDeal
                     title
-                    status
+                    content
                     price
-                    infCustomerResponse {
-                        idCustomer
+                    status
+                    createdAt
+                    updatedAt
+                    customer {
+                        id
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
                             phone
-                            salary
                             location
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
                         createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
-        const input = { status };
+        const input = { status: status };
 
-        return this.api.graphql<DealUpdateResponse>(query, { idDeal, input });
+        return this.api.graphql<DealMutationResponse>(query, { id: idDeal, input }).pipe(
+            map((res: any) => res.updateDeal)
+        );
+    }
+
+    DeleteDeal(idDeal: string): Observable<string> {
+        const query = `
+            mutation DeleteDeal($id: UUID!) {
+                deleteDeal(idDeal: $id)
+            }`;
+
+        return this.api.graphql<DealDeleteResponse>(query, { id: idDeal }).pipe(
+            map((res: any) => res.deleteDeal)
+        );
     }
 }

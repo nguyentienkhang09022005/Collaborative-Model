@@ -4,7 +4,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Register } from '../../../../core/models/register.model';
-
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -15,39 +15,39 @@ import { Register } from '../../../../core/models/register.model';
 })
 export class RegisterComponent {
 
-  // Input Register
-  registerData: Register = {} as Register
+  registerData: Register = {} as Register;
   isLoading: boolean = false;
 
-  constructor(private authenService: AuthService, 
-              private router: Router){}
-              
-  ngOnInit(): void{}
+  constructor(
+    private authenService: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit(): void {}
 
   onRegister(form: NgForm){
     Object.values(form.controls).forEach(control => {
-      control.markAsTouched(); 
+      control.markAsTouched();
     });
     if (form.invalid) return;
 
     this.isLoading = true;
     this.authenService.register(this.registerData).subscribe({
       next: (res) => {
-      if (res.errors && res.errors.length > 0) {
-        alert(res.errors[0].message);
+        if (res.errors && res.errors.length > 0) {
+          this.toastService.error(res.errors[0].message);
+          this.isLoading = false;
+          return;
+        }
+
         this.isLoading = false;
-        return;
-      }
-   
-      console.log(res);
-      this.isLoading = false;
-      this.router.navigate(['/otp-register'])
+        this.router.navigate(['/otp-register']);
       },
-      error: (err) => {console.log("Lỗi đăng ký!", err);
+      error: (err) => {
+        this.toastService.error('Registration failed');
         this.isLoading = false;
       }
-    })
+    });
   }
 }
-
-

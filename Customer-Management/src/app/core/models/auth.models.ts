@@ -6,16 +6,23 @@ export interface Login
 }
 
 //----------Response Models----------
-export interface InfStaff 
+export interface InfStaff
 {
-    idStaff: string;
-    email: string;
+    id: string;
+    username: string;
     role: string;
     createdAt: string;
-    fullname: string;
+    person: PersonInfo;
 }
 
-export interface Login 
+export interface PersonInfo {
+    fullname: string;
+    email: string;
+    phone?: string;
+    location?: string;
+}
+
+export interface Login
 {
     token: string;
     infStaff: InfStaff;
@@ -23,8 +30,8 @@ export interface Login
 
 export interface LoginResponse
 {
-    errors?: { 
-        message: string 
+    errors?: {
+        message: string
     }[];
     data: {
         login: Login;
@@ -33,8 +40,8 @@ export interface LoginResponse
 
 export interface LogoutResponse
 {
-    errors?: { 
-        message: string 
+    errors?: {
+        message: string
     }[];
     data: {
         logout: string;

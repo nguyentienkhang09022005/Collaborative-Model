@@ -1,11 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface Toast {
   id: number;
   message: string;
   type: ToastType;
+  duration?: number;
 }
 
 @Injectable({
@@ -15,30 +16,38 @@ export class ToastService {
   private toastId = 0;
   toasts = signal<Toast[]>([]);
 
-  private show(message: string, type: ToastType): void {
+  private show(message: string, type: ToastType, duration: number = 4000): void {
     const id = ++this.toastId;
-    const toast: Toast = { id, message, type };
+    const toast: Toast = { id, message, type, duration };
 
     this.toasts.update(current => [...current, toast]);
 
     setTimeout(() => {
       this.dismiss(id);
-    }, 4000);
+    }, duration);
   }
 
-  success(message: string): void {
-    this.show(message, 'success');
+  success(message: string, duration?: number): void {
+    this.show(message, 'success', duration);
   }
 
-  error(message: string): void {
-    this.show(message, 'error');
+  error(message: string, duration: number = 5000): void {
+    this.show(message, 'error', duration);
   }
 
-  info(message: string): void {
-    this.show(message, 'info');
+  warning(message: string, duration?: number): void {
+    this.show(message, 'warning', duration);
+  }
+
+  info(message: string, duration?: number): void {
+    this.show(message, 'info', duration);
   }
 
   dismiss(id: number): void {
     this.toasts.update(current => current.filter(t => t.id !== id));
+  }
+
+  clear(): void {
+    this.toasts.set([]);
   }
 }

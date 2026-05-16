@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { DealItem, DealRequest } from '../../../../core/models/deal.model';
@@ -9,6 +9,12 @@ import { DealService } from '../../../../core/services/deal.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
+import { ToastService } from '../../../../core/services/toast.service';
+import {
+  DEAL_STATUS,
+  DEAL_STATUS_LABELS,
+  DEAL_STATUS_COLORS
+} from '../../../../core/constants/enums';
 
 @Component({
   selector: 'app-deal-page',
@@ -16,9 +22,9 @@ import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
   templateUrl: './deal-list.html',
   styleUrls: ['./deal-list.css'],
 })
-export class DealListComponent {
+export class DealListComponent implements OnInit {
   deals: DealItem[] = [];
-  DealForm: DealRequest = {} as DealRequest;
+  dealForm: DealRequest = this.getEmptyForm();
   isLoading: boolean = false;
   showAddPopup: boolean = false;
   selectedStaff: string = '';
@@ -26,134 +32,131 @@ export class DealListComponent {
   customers: CustomerItem[] = [];
   staffs: StaffItem[] = [];
 
-  constructor(private dealService: DealService, 
-              private staffService: StaffService, 
-              private customerService: CustomerService ,
-              private router: Router){}
+  // Expose constants to template
+  dealStatusList = Object.values(DEAL_STATUS);
 
-  ngOnInit(){
-    this.onListDeal();
+  constructor(
+    private dealService: DealService,
+    private staffService: StaffService,
+    private customerService: CustomerService,
+    private toastService: ToastService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadDeals();
   }
 
-  onListDeal(){
-    this.dealService.GetListDeal().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.deals = res.data?.deals ?? [];
-
-        console.log(res);
-      },
-      error: (err) => {
-        console.log("Lỗi: ", err);
-      }
-    })
-  } 
-
-  onInfDeal(idContact: string){
-    this.router.navigate(['/deal-detail'], { queryParams: { id: idContact } })
-  }
-
-  submitAddDeal(){
+  loadDeals() {
     this.isLoading = true;
-      
-    this.dealService.createDeal(this.DealForm, this.selectedStaff, this.selectedCustomer).subscribe({
-      next: (res) => {
+    this.dealService.GetListDeal().subscribe({
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-          
-        this.deals = res.data?.deals ?? [];
-        console.log(res);
-  
-        this.DealForm = {} as DealRequest;
-  
-        this.isLoading = false;
-        this.closePopup();
-        this.onListDeal();
+        this.deals = data;
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load deals');
       }
-    })
+    });
   }
 
-  deleteDeal(idDeal: string, event: MouseEvent){
+  onInfDeal(idDeal: string) {
+    this.router.navigate(['/deal-detail'], { queryParams: { id: idDeal } });
+  }
+
+  submitAddDeal() {
+    if (!this.selectedStaff || !this.selectedCustomer) {
+      this.toastService.error('Please select staff and customer');
+      return;
+    }
+
+    this.isLoading = true;
+    this.dealService.createDeal(this.dealForm, this.selectedStaff, this.selectedCustomer).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Deal created successfully');
+        this.dealForm = this.getEmptyForm();
+        this.closePopup();
+        this.loadDeals();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to create deal');
+      }
+    });
+  }
+
+  deleteDeal(idDeal: string, event: MouseEvent) {
     event.stopPropagation();
+    if (!confirm('Are you sure you want to delete this deal?')) return;
 
     this.dealService.DeleteDeal(idDeal).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert(res.data.deleteDeal);
-
-        this.onListDeal();
+      next: () => {
+        this.toastService.success('Deal deleted successfully');
+        this.loadDeals();
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to delete deal');
       }
-    })
+    });
   }
 
-  onListCustomer(){
+  loadCustomers() {
     this.customerService.GetListCustomer().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.customers = res.data?.customers ?? [];
-
-        console.log(res);
+      next: (data) => {
+        this.customers = data;
       },
-      error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+      error: () => {
+        this.toastService.error('Failed to load customers');
       }
-    })
+    });
   }
 
-  onListStaff(){
+  loadStaffs() {
     this.staffService.GetListStaff().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.staffs = res.data?.staffs ?? [];
-
-        console.log(res);
+      next: (data) => {
+        this.staffs = data;
       },
-      error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+      error: () => {
+        this.toastService.error('Failed to load staff');
       }
-    })
+    });
   }
 
-  openAddPopup(){
+  openAddPopup() {
+    this.dealForm = this.getEmptyForm();
+    this.selectedStaff = '';
+    this.selectedCustomer = '';
     this.showAddPopup = true;
-    this.onListCustomer();
-    this.onListStaff();
+    this.loadCustomers();
+    this.loadStaffs();
   }
 
-  closePopup(){
+  closePopup() {
     this.showAddPopup = false;
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'bg-slate-500';
+    return DEAL_STATUS_COLORS[status] || 'bg-slate-500';
+  }
+
+  getStatusLabel(status: string | undefined): string {
+    if (!status) return 'Unknown';
+    return DEAL_STATUS_LABELS[status] || status;
+  }
+
+  formatPrice(price: number | undefined): string {
+    if (price == null) return '-';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  }
+
+  countByStatus(status: string): number {
+    return this.deals.filter(d => d.status === status).length;
+  }
+
+  private getEmptyForm(): DealRequest {
+    return { title: '', content: '', price: 0, idStaff: '', idCustomer: '' };
   }
 }

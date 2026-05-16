@@ -1,0 +1,128 @@
+<div class="bg-slate-100 min-h-screen p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Notifications</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        {{ getUnreadCount() > 0 ? getUnreadCount() + ' unread' : 'All caught up' }}
+      </p>
+    </div>
+    <button *ngIf="getUnreadCount() > 0" (click)="markAllAsRead()"
+      class="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      Mark All as Read
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-16">
+    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+  </div>
+
+  <!-- Notifications List -->
+  <div *ngIf="!isLoading" class="space-y-4">
+    <!-- Pinned Section -->
+    <div *ngIf="getPinnedNotifications().length > 0" class="mb-6">
+      <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Pinned</h2>
+      <div class="space-y-3">
+        <div *ngFor="let notification of getPinnedNotifications()"
+          class="bg-white rounded-xl shadow-md border border-slate-200 p-5 cursor-pointer hover:shadow-lg transition-shadow"
+          (click)="navigateToEntity(notification)">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-xs font-semibold" [ngClass]="getTypeClass(notification.type)">
+                  {{ getTypeLabel(notification.type) }}
+                </span>
+                <span *ngIf="!notification.isRead" class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span class="text-xs text-slate-400 ml-auto">{{ formatDate(notification.createdAt) }}</span>
+              </div>
+              <h3 class="font-semibold text-slate-900 mb-1">{{ notification.title }}</h3>
+              <p class="text-sm text-slate-600">{{ notification.message }}</p>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button (click)="pinNotification(notification.idNotification); $event.stopPropagation()"
+                class="p-2 hover:bg-slate-100 rounded-lg text-amber-500">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M16 4V2H8v2H5v6l3 3 2-1.5L12 17l2 1.5 2-1.5 3-3V4h-3z"/>
+                </svg>
+              </button>
+              <button (click)="deleteNotification(notification.idNotification); $event.stopPropagation()"
+                class="p-2 hover:bg-red-50 rounded-lg text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Notifications -->
+    <div>
+      <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">All Notifications</h2>
+      <div class="space-y-3">
+        <ng-container *ngFor="let notification of notifications">
+          <div *ngIf="!notification.isPinned"
+            class="bg-white rounded-xl shadow-md border border-slate-200 p-5 cursor-pointer hover:shadow-lg transition-shadow"
+            [class.border-l-4]="!notification.isRead"
+            [class.border-l-blue-500]="!notification.isRead"
+            (click)="navigateToEntity(notification)">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="px-2 py-0.5 rounded text-xs font-semibold" [ngClass]="getTypeClass(notification.type)">
+                    {{ getTypeLabel(notification.type) }}
+                  </span>
+                  <span *ngIf="!notification.isRead" class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  <span class="text-xs text-slate-400 ml-auto">{{ formatDate(notification.createdAt) }}</span>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-1">{{ notification.title }}</h3>
+                <p class="text-sm text-slate-600">{{ notification.message }}</p>
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <button *ngIf="!notification.isPinned" (click)="pinNotification(notification.idNotification); $event.stopPropagation()"
+                  class="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                  </svg>
+                </button>
+                <button (click)="deleteNotification(notification.idNotification); $event.stopPropagation()"
+                  class="p-2 hover:bg-red-50 rounded-lg text-red-500">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="notifications.length === 0 && !isLoading"
+      class="bg-white rounded-xl shadow-md border border-slate-200 p-16 text-center">
+      <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+      </div>
+      <p class="text-slate-500 font-medium text-lg mb-2">No notifications</p>
+      <p class="text-slate-400">You're all caught up!</p>
+    </div>
+  </div>
+</div>

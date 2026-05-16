@@ -1,161 +1,113 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CustomerItem, CustomerRequest } from '../../../../core/models/customer.model';
 import { CustomerService } from '../../../../core/services/customer.service';
-import { SearchService } from '../../../../core/services/search.service';
-import { SearchRequest } from '../../../../core/models/elasticsearch.model';
+import { ToastService } from '../../../../core/services/toast.service';
+import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 
 @Component({
   selector: 'app-customer-page',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe],
   templateUrl: './customer-list.html',
   styleUrls: ['./customer-list.css'],
 })
-export class CustomerListComponent {
-  
+export class CustomerListComponent implements OnInit {
   customers: CustomerItem[] = [];
-  customerForm: CustomerRequest = {} as CustomerRequest;
-  searchInput: SearchRequest = {} as SearchRequest;
+  customerForm: CustomerRequest = this.getEmptyForm();
   isLoading: boolean = false;
-  openMenu: any = null;
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
-  selectedFile!: File;
-  
-  constructor(private customerService: CustomerService, 
-              private searchService: SearchService,
-              private router: Router){}
+  selectedFile?: File;
 
-  ngOnInit(){
-    this.onListCustomer();
+  constructor(
+    private customerService: CustomerService,
+    private toastService: ToastService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadCustomers();
   }
 
-  onListCustomer(){
-    this.customerService.GetListCustomer().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.customers = res.data?.customers ?? [];
-
-        console.log(res);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
-      }
-    })
-  }
-
-  onInfCustomer(idCustomer: string){
-    this.router.navigate(['/customer-detail'], { queryParams: { id: idCustomer } })
-  }
-
-  submitAddCustomer(){
+  loadCustomers() {
     this.isLoading = true;
-    
-    this.customerService.createCustomer(this.customerForm).subscribe({
-      next: (res) => {
+    this.customerService.GetListCustomer().subscribe({
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.customers = res.data?.customers ?? [];
-        console.log(res);
-
-        this.customerForm = {} as CustomerRequest;
-
-        this.isLoading = false;
-        this.closePopup();
-        this.onListCustomer();
+        this.customers = data;
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load customers');
       }
-    })
+    });
   }
 
-  deleteCustomer(idCustomer: string, event: MouseEvent){
+  onInfCustomer(idCustomer: string) {
+    this.router.navigate(['/customer-detail'], { queryParams: { id: idCustomer } });
+  }
+
+  submitAddCustomer() {
+    this.isLoading = true;
+    this.customerService.createCustomer(this.customerForm).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Customer created successfully');
+        this.customerForm = this.getEmptyForm();
+        this.closePopup();
+        this.loadCustomers();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to create customer');
+      }
+    });
+  }
+
+  deleteCustomer(idCustomer: string, event: MouseEvent) {
     event.stopPropagation();
+    if (!confirm('Are you sure you want to delete this customer?')) return;
 
     this.customerService.DeleteCustomer(idCustomer).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert(res.data.deleteCustomer);
-
-        this.openMenu = null;
-        this.onListCustomer();
+      next: () => {
+        this.toastService.success('Customer deleted successfully');
+        this.loadCustomers();
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to delete customer');
       }
-    })
+    });
   }
 
-  SearchCustomer(){
-    this.searchService.SearchCustomer(this.searchInput.keyword).subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.customers = res.data?.searchCustomers ?? [];
-      },
-      error: (err) => {
-        console.log("Lỗi: ", err);
-      }
-    })
-  }
-
-  uploadExcel(){
+  uploadExcel() {
     if (!this.selectedFile) {
-      alert("Hãy chọn file để tải lên!");
+      this.toastService.error('Please select a file to upload');
       return;
     }
 
+    this.isLoading = true;
     this.customerService.UploadExcelCustomer(this.selectedFile).subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert("Tải lên danh sách khách hàng thành công!");
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Customers imported successfully');
         this.closeUploadPopup();
-        this.onListCustomer();
+        this.loadCustomers();
       },
       error: (err) => {
-        console.log("Lỗi: ", err);
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to import customers');
       }
-    })
+    });
   }
 
-  toggleMenu(item: any, event: MouseEvent) {
-    event.stopPropagation();
-    this.openMenu = this.openMenu === item ? null : item;
-  }
-
-  openAddPopup(){
+  openAddPopup() {
+    this.customerForm = this.getEmptyForm();
     this.showAddPopup = true;
   }
 
-  closePopup(){
+  closePopup() {
     this.showAddPopup = false;
   }
 
@@ -165,9 +117,25 @@ export class CustomerListComponent {
 
   closeUploadPopup() {
     this.showUploadPopup = false;
+    this.selectedFile = undefined;
   }
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  private getEmptyForm(): CustomerRequest {
+    return { fullname: '', email: '', phone: '', location: '' };
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.action-menu') && !target.closest('.action-btn')) {
+      // Close menus if needed
+    }
   }
 }

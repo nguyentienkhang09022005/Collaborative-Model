@@ -4,7 +4,8 @@
       "Bash(dotnet build *)",
       "Bash(dotnet test *)",
       "Bash(dotnet run *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5114/graphql -X POST -H \"Content-Type: application/json\" -d '{\"query\":\"{ __typename }\"}')"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5114/graphql -X POST -H \"Content-Type: application/json\" -d '{\"query\":\"{ __typename }\"}')",
+      "Bash(npm run *)"
     ]
   }
 }

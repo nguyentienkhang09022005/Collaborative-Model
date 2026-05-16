@@ -1,161 +1,113 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LeadService } from '../../../../core/services/lead.service';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SearchService } from '../../../../core/services/search.service';
-import { SearchRequest } from '../../../../core/models/elasticsearch.model';
+import { ToastService } from '../../../../core/services/toast.service';
+import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 
 @Component({
   selector: 'app-lead-page',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe],
   templateUrl: './lead-list.html',
   styleUrls: ['./lead-list.css'],
 })
-export class LeadListComponent {
-  
+export class LeadListComponent implements OnInit {
   leads: LeadItem[] = [];
-  leadForm: LeadRequest = {} as LeadRequest;
-  searchInput: SearchRequest = {} as SearchRequest;
+  leadForm: LeadRequest = this.getEmptyForm();
   isLoading: boolean = false;
-  openMenu: any = null;
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
-  selectedFile!: File;
-  
-  constructor(private leadService: LeadService, 
-              private searchService: SearchService,
-              private router: Router){}
+  selectedFile?: File;
 
-  ngOnInit(){
-    this.onListLead();
+  constructor(
+    private leadService: LeadService,
+    private toastService: ToastService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadLeads();
   }
 
-  onListLead(){
-    this.leadService.GetListLead().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leads = res.data?.leads ?? [];
-
-        console.log(res);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
-      }
-    })
-  }
-
-  onInfLead(idLead: string){
-    this.router.navigate(['/lead-detail'], { queryParams: { id: idLead } })
-  }
-
-  submitAddLead(){
+  loadLeads() {
     this.isLoading = true;
-
-    this.leadService.createLead(this.leadForm).subscribe({
-      next: (res) => {
+    this.leadService.GetListLead().subscribe({
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leads = res.data?.leads ?? [];
-        console.log(res);
-
-        this.leadForm = {} as LeadRequest;
-
-        this.isLoading = false;
-        this.closePopup();
-        this.onListLead();
+        this.leads = data;
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load leads');
       }
-    })
+    });
   }
 
-  deleteLead(idLead: string, event: MouseEvent){
+  onInfLead(idLead: string) {
+    this.router.navigate(['/lead-detail'], { queryParams: { id: idLead } });
+  }
+
+  submitAddLead() {
+    this.isLoading = true;
+    this.leadService.createLead(this.leadForm).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Lead created successfully');
+        this.leadForm = this.getEmptyForm();
+        this.closePopup();
+        this.loadLeads();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to create lead');
+      }
+    });
+  }
+
+  deleteLead(idLead: string, event: MouseEvent) {
     event.stopPropagation();
+    if (!confirm('Are you sure you want to delete this lead?')) return;
 
     this.leadService.DeleteLead(idLead).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert(res.data.deleteLead);
-
-        this.openMenu = null;
-        this.onListLead();
+      next: () => {
+        this.toastService.success('Lead deleted successfully');
+        this.loadLeads();
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to delete lead');
       }
-    })
+    });
   }
 
-  SearchLead(){
-    this.searchService.SearchLead(this.searchInput.keyword).subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leads = res.data?.searchLeads ?? [];
-      },
-      error: (err) => {
-        console.log("Lỗi: ", err);
-      }
-    })
-  }
-
-  uploadExcel(){
+  uploadExcel() {
     if (!this.selectedFile) {
-      alert("Hãy chọn file để tải lên!");
+      this.toastService.error('Please select a file to upload');
       return;
     }
 
+    this.isLoading = true;
     this.leadService.UploadExcelLead(this.selectedFile).subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert("Tải lên danh sách khách hàng tiềm năng thành công!");
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Leads imported successfully');
         this.closeUploadPopup();
-        this.onListLead();
+        this.loadLeads();
       },
       error: (err) => {
-        console.log("Lỗi: ", err);
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to import leads');
       }
-    })
+    });
   }
 
-  toggleMenu(item: any, event: MouseEvent) {
-    event.stopPropagation();
-    this.openMenu = this.openMenu === item ? null : item;
-  }
-
-  openAddPopup(){
+  openAddPopup() {
+    this.leadForm = this.getEmptyForm();
     this.showAddPopup = true;
   }
 
-  closePopup(){
+  closePopup() {
     this.showAddPopup = false;
   }
 
@@ -165,9 +117,17 @@ export class LeadListComponent {
 
   closeUploadPopup() {
     this.showUploadPopup = false;
+    this.selectedFile = undefined;
   }
 
-  onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  private getEmptyForm(): LeadRequest {
+    return { fullname: '', email: '', phone: '', location: '', resource: '' };
   }
 }

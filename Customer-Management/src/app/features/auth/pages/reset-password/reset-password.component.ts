@@ -4,6 +4,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -17,42 +18,43 @@ export class ResetPasswordComponent {
   confirmOTPForgotPasswordData: confirmOTPForgotPassword = {} as confirmOTPForgotPassword;
   isLoading: boolean = false;
 
-  constructor(private authenService: AuthService,
-              private router: Router){}
+  constructor(
+    private authenService: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
-  ngOnInit(): void{
-    const email = localStorage.getItem('email')
-    const otp = localStorage.getItem('forgot_password_otp')
+  ngOnInit(): void {
+    const email = localStorage.getItem('email');
+    const otp = localStorage.getItem('forgot_password_otp');
     if (email && otp) {
       this.confirmOTPForgotPasswordData.email = email;
       this.confirmOTPForgotPasswordData.otp = otp;
-    } else {
-      console.warn('Không tìm thấy email hoặc trong localStorage!');
     }
   }
 
   onResetPassword(form: NgForm){
     Object.values(form.controls).forEach(control => {
-      control.markAsTouched(); 
+      control.markAsTouched();
     });
     if (form.invalid) return;
 
     this.isLoading = true;
     this.authenService.confirmOTPForgotPassword(this.confirmOTPForgotPasswordData).subscribe({
       next: (res) => {
-      if (res.errors && res.errors.length > 0) {
-        alert(res.errors[0].message);
-        this.isLoading = false;
-        return;
-      }
+        if (res.errors && res.errors.length > 0) {
+          this.toastService.error(res.errors[0].message);
+          this.isLoading = false;
+          return;
+        }
 
-      console.log(res);
-      this.isLoading = false;
-      this.router.navigate(['/authen'])
+        this.isLoading = false;
+        this.router.navigate(['/authen']);
       },
-      error: (err) => {console.log("Lỗi đổi mật khẩu!", err);
+      error: (err) => {
+        this.toastService.error('Failed to reset password');
         this.isLoading = false;
       }
-    })
+    });
   }
 }

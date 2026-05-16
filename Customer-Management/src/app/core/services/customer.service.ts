@@ -1,7 +1,16 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { Observable, tap } from "rxjs";
-import { CustomerDeletionResponse, CustomerInfResponse, CustomerRequest, CustomerResponse, CustomerUpdateResponse, UploadCustomerFileResponse } from "../models/customer.model";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import {
+  CustomerRequest,
+  CustomerResponse,
+  CustomerByIdResponse,
+  CustomerMutationResponse,
+  CustomerDeleteResponse,
+  UploadCustomerFileResponse,
+  CustomerItem
+} from "../models/customer.model";
 import { HttpHeaders } from "@angular/common/http";
 
 @Injectable({
@@ -10,111 +19,137 @@ import { HttpHeaders } from "@angular/common/http";
 export class CustomerService {
     constructor(private api: ApiService) {}
 
-    GetListCustomer(): Observable<CustomerResponse>{
+    GetListCustomer(): Observable<CustomerItem[]> {
         const query = `
             query {
                 customers {
-                    idCustomer
+                    id
                     createdAt
-                    personResponse{
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
-        return this.api.graphql<CustomerResponse>(query);
+        return this.api.graphql<CustomerResponse>(query).pipe(
+            map(res => (res as any)?.customers ?? [])
+        );
     }
 
-    GetInfCustomer(idCustomer: string): Observable<CustomerInfResponse>{
+    GetInfCustomer(idCustomer: string): Observable<CustomerItem | null> {
         const query = `
-            query($idCustomer: String!) {
-                customerById(idCustomer: $idCustomer) {
-                    idCustomer
+            query($id: UUID!) {
+                customerById(idCustomer: $id) {
+                    id
                     createdAt
-                    personResponse{
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
-        return this.api.graphql<CustomerInfResponse>(query, { idCustomer });
+        return this.api.graphql<CustomerByIdResponse>(query, { id: idCustomer }).pipe(
+            map(res => (res as any)?.customerById?.[0] ?? null)
+        );
     }
 
-    createCustomer(customerRequest: CustomerRequest): Observable<CustomerResponse>{
+    createCustomer(customerRequest: CustomerRequest): Observable<CustomerItem> {
         const query = `
-            mutation CreateCustomer($input: CustomerCreationRequest!) {
-                createCustomer(customerCreationRequest: $input) {
-                    idCustomer
+            mutation CreateCustomer($input: CustomerCreationRequestInput!) {
+                createCustomer(request: $input) {
+                    id
                     createdAt
-                    personResponse {
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
         const input = {
-            person: {
-                fullname: customerRequest.fullname,
-                email: customerRequest.email,
-                phone: customerRequest.phone,
-                salary: customerRequest.salary,
-                location: customerRequest.location
-            }
+            fullname: customerRequest.fullname,
+            email: customerRequest.email,
+            phone: customerRequest.phone,
+            location: customerRequest.location
         };
 
-        return this.api.graphql<CustomerResponse>(query, { input });
+        return this.api.graphql<CustomerMutationResponse>(query, { input }).pipe(
+            map((res: any) => res.createCustomer)
+        );
     }
 
-    DeleteCustomer(idCustomer: string): Observable<CustomerDeletionResponse>{
+    UpdateCustomer(customerRequest: CustomerRequest, idCustomer: string): Observable<CustomerItem> {
         const query = `
-            mutation DeleteCustomer($idCustomer: String!) {
-                deleteCustomer(idCustomer: $idCustomer)
-            }`;
-
-        return this.api.graphql<CustomerDeletionResponse>(query, { idCustomer });
-    }
-
-    UpdateCustomer(customerRequest: CustomerRequest, idCustomer: string): Observable<CustomerUpdateResponse>{
-        const query = `
-            mutation UpdateCustomer($idCustomer: String!, $input: CustomerUpdateRequest!) {
-                updateCustomer(idCustomer: $idCustomer, customerUpdateRequest: $input) {
-                    idCustomer
-                    personResponse {
+            mutation UpdateCustomer($id: UUID!, $input: CustomerUpdateRequestInput!) {
+                updateCustomer(request: $input, idCustomer: $id) {
+                    id
+                    createdAt
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
         const input = {
-            person: {
-                fullname: customerRequest.fullname,
-                email: customerRequest.email,
-                phone: customerRequest.phone,
-                salary: customerRequest.salary,
-                location: customerRequest.location
-            }
+            fullname: customerRequest.fullname,
+            email: customerRequest.email,
+            phone: customerRequest.phone,
+            location: customerRequest.location
         };
 
-        return this.api.graphql<CustomerUpdateResponse>(query, { idCustomer, input });
+        return this.api.graphql<CustomerMutationResponse>(query, { id: idCustomer, input }).pipe(
+            map((res: any) => res.updateCustomer)
+        );
     }
 
-    UploadExcelCustomer(file: File): Observable<UploadCustomerFileResponse>{
+    DeleteCustomer(idCustomer: string): Observable<string> {
+        const query = `
+            mutation DeleteCustomer($id: UUID!) {
+                deleteCustomer(idCustomer: $id)
+            }`;
+
+        return this.api.graphql<CustomerDeleteResponse>(query, { id: idCustomer }).pipe(
+            map((res: any) => res.deleteCustomer)
+        );
+    }
+
+    RestoreCustomer(idCustomer: string): Observable<CustomerItem> {
+        const query = `
+            mutation RestoreCustomer($id: UUID!) {
+                restoreCustomer(idCustomer: $id) {
+                    id
+                    createdAt
+                    person {
+                        id
+                        fullname
+                        email
+                        phone
+                        location
+                    }
+                }
+            }`;
+
+        return this.api.graphql<CustomerMutationResponse>(query, { id: idCustomer }).pipe(
+            map((res: any) => res.restoreCustomer)
+        );
+    }
+
+    UploadExcelCustomer(file: File): Observable<string> {
         const formData = new FormData();
         const query = `
             mutation ImportCustomer($file: Upload!) {
@@ -135,6 +170,8 @@ export class CustomerService {
         const headers = new HttpHeaders({
             "GraphQL-Preflight": "1"
         });
-        return this.api.Post<UploadCustomerFileResponse>('graphql', formData, { headers });
+        return this.api.Post<{ data: { importCustomerExcel: string } }>('graphql', formData, { headers }).pipe(
+            map(res => res.data.importCustomerExcel)
+        );
     }
 }

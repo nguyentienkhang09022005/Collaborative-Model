@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LeadService } from '../../../../core/services/lead.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-lead-detail',
@@ -12,86 +13,90 @@ import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
   templateUrl: './lead-detail.html',
   styleUrls: ['./lead-detail.css'],
 })
-export class LeadDetailComponet {
-
-  leadForm: LeadRequest = {} as LeadRequest;
-  leadData: LeadItem[] = [];
+export class LeadDetailComponet implements OnInit {
+  leadForm: LeadRequest = this.getEmptyForm();
+  leadData: LeadItem | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
-  isSaveEdit: boolean = true;
   idLead: string = "";
 
-  constructor(private leadService: LeadService, private route: ActivatedRoute) {}
+  constructor(
+    private leadService: LeadService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
-  ngOnInit(){
+  ngOnInit() {
     this.route.queryParams.subscribe(param => {
-      this.idLead = param['id']
-      if (this.idLead){
-        this.onInfLead(this.idLead)
+      this.idLead = param['id'];
+      if (this.idLead) {
+        this.loadLead(this.idLead);
       }
-    })
+    });
   }
 
-  onInfLead(idLead: string){
+  loadLead(idLead: string) {
+    this.isLoading = true;
     this.leadService.GetInfLead(idLead).subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
+        if (data) {
+          this.leadData = data;
+          this.leadForm = {
+            fullname: data.person.fullname,
+            email: data.person.email,
+            phone: data.person.phone || '',
+            location: data.person.location || '',
+            resource: data.resource || ''
+          };
         }
-
-        this.leadData = res.data?.leadById ?? [];
-
-        const item = this.leadData[0];
-        if (!item) return;
-
-        this.leadForm = {
-          idLead: item.idLead,
-          resource: item.resource,
-          fullname: item.personResponse.fullname,
-          email: item.personResponse.email,
-          phone: +item.personResponse.phone,
-          salary: item.personResponse.salary,
-          location: item.personResponse.location,
-          createdAt: item.createdAt
-        }
-
-        console.log(res);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load lead');
       }
-    })
+    });
   }
 
-  onUpdateLead(){
+  onUpdateLead() {
+    this.isLoading = true;
     this.leadService.UpdateLead(this.leadForm, this.idLead).subscribe({
-      next: (res) => {
+      next: () => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leadData = res.data?.updateLead ?? [];
-        console.log(res);
-        this.onInfLead(this.leadForm.idLead);
-        alert("Cập nhật thông tin thành công!");
-
+        this.toastService.success('Lead updated successfully');
         this.isEditing = false;
-        this.isSaveEdit = true;
+        this.loadLead(this.idLead);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to update lead');
       }
-    })
+    });
   }
 
   onEdit() {
     this.isEditing = true;
-    this.isSaveEdit = false;
+  }
+
+  onCancel() {
+    this.isEditing = false;
+    if (this.leadData) {
+      this.leadForm = {
+        fullname: this.leadData.person.fullname,
+        email: this.leadData.person.email,
+        phone: this.leadData.person.phone || '',
+        location: this.leadData.person.location || '',
+        resource: this.leadData.resource || ''
+      };
+    }
+  }
+
+  onBack() {
+    this.router.navigate(['/leads']);
+  }
+
+  private getEmptyForm(): LeadRequest {
+    return { fullname: '', email: '', phone: '', location: '', resource: '' };
   }
 }

@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { CustomerItem, CustomerRequest } from '../../../../core/models/customer.model';
 import { CustomerService } from '../../../../core/services/customer.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-customer-detail',
@@ -12,85 +13,88 @@ import { CustomerService } from '../../../../core/services/customer.service';
   templateUrl: './customer-detail.html',
   styleUrls: ['./customer-detail.css'],
 })
-export class CustomerDetailComponet {
-
-  customerForm: CustomerRequest = {} as CustomerRequest;
-  customerData: CustomerItem[] = [];
+export class CustomerDetailComponet implements OnInit {
+  customerForm: CustomerRequest = this.getEmptyForm();
+  customerData: CustomerItem | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
-  isSaveEdit: boolean = true;
   idCustomer: string = "";
 
-  constructor(private customerService: CustomerService, private route: ActivatedRoute) {}
+  constructor(
+    private customerService: CustomerService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
-  ngOnInit(){
+  ngOnInit() {
     this.route.queryParams.subscribe(param => {
-      this.idCustomer = param['id']
-      if (this.idCustomer){
-        this.onInfCustomer(this.idCustomer)
+      this.idCustomer = param['id'];
+      if (this.idCustomer) {
+        this.loadCustomer(this.idCustomer);
       }
-    })
+    });
   }
 
-  onInfCustomer(idCustomer: string){
+  loadCustomer(idCustomer: string) {
+    this.isLoading = true;
     this.customerService.GetInfCustomer(idCustomer).subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
+        if (data) {
+          this.customerData = data;
+          this.customerForm = {
+            fullname: data.person.fullname,
+            email: data.person.email,
+            phone: data.person.phone || '',
+            location: data.person.location || ''
+          };
         }
-
-        this.customerData = res.data?.customerById ?? [];
-
-        const item = this.customerData[0];
-        if (!item) return;
-
-        this.customerForm = {
-          idCustomer: item.idCustomer,
-          fullname: item.personResponse.fullname,
-          email: item.personResponse.email,
-          phone: +item.personResponse.phone,
-          salary: item.personResponse.salary,
-          location: item.personResponse.location,
-          createdAt: item.createdAt
-        }
-
-        console.log(res);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load customer');
       }
-    })
+    });
   }
 
-  onUpdateCustomer(){
+  onUpdateCustomer() {
+    this.isLoading = true;
     this.customerService.UpdateCustomer(this.customerForm, this.idCustomer).subscribe({
-      next: (res) => {
+      next: () => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.customerData = res.data?.updateCustomer ?? [];
-        console.log(res);
-        this.onInfCustomer(this.customerForm.idCustomer);
-        alert("Cập nhật thông tin thành công!");
-
+        this.toastService.success('Customer updated successfully');
         this.isEditing = false;
-        this.isSaveEdit = true;
+        this.loadCustomer(this.idCustomer);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to update customer');
       }
-    })
+    });
   }
 
   onEdit() {
     this.isEditing = true;
-    this.isSaveEdit = false;
+  }
+
+  onCancel() {
+    this.isEditing = false;
+    if (this.customerData) {
+      this.customerForm = {
+        fullname: this.customerData.person.fullname,
+        email: this.customerData.person.email,
+        phone: this.customerData.person.phone || '',
+        location: this.customerData.person.location || ''
+      };
+    }
+  }
+
+  onBack() {
+    this.router.navigate(['/customers']);
+  }
+
+  private getEmptyForm(): CustomerRequest {
+    return { fullname: '', email: '', phone: '', location: '' };
   }
 }

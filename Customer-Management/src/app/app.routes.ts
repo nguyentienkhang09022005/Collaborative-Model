@@ -17,6 +17,13 @@ import { CustomerDetailComponet } from './features/customers/pages/customer-deta
 import { ContactDetailComponent } from './features/contacts/pages/contact-detail/contact-detail.component';
 import { DealDetailComponent } from './features/deals/pages/deal-detail/deal-detail.component';
 import { LeadMarkComponent } from './features/leads/components/lead-mark/lead-mark.component';
+import { TaskListComponent } from './features/tasks/pages/task-list/task-list.component';
+import { TaskDetailComponent } from './features/tasks/pages/task-detail/task-detail.component';
+import { NotificationListComponent } from './features/notifications/pages/notification-list/notification-list.component';
+import { CalendarListComponent } from './features/calendar/pages/calendar-list/calendar-list.component';
+import { AuditLogListComponent } from './features/audit-log/pages/audit-log-list/audit-log-list.component';
+import { ReportListComponent } from './features/reports/pages/report-list/report-list.component';
+import { StaffListComponent } from './features/staff/pages/staff-list/staff-list.component';
 
 export const routes: Routes = [
     // Authen
@@ -48,6 +55,15 @@ export const routes: Routes = [
             { path: 'contact-detail', component: ContactDetailComponent },
             { path: 'deals', component: DealListComponent },
             { path: 'deal-detail', component: DealDetailComponent },
+            { path: 'staff', component: StaffListComponent },
+
+            // New routes
+            { path: 'tasks', component: TaskListComponent },
+            { path: 'tasks/:id', component: TaskDetailComponent },
+            { path: 'notifications', component: NotificationListComponent },
+            { path: 'calendar', component: CalendarListComponent },
+            { path: 'audit-log', component: AuditLogListComponent },
+            { path: 'reports', component: ReportListComponent },
         ]
     },
 

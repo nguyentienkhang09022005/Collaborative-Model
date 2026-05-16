@@ -10,6 +10,7 @@ import { LeadService } from '../../../../core/services/lead.service';
 import { LeadItem } from '../../../../core/models/lead.models';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ContactItem } from '../../../../core/models/contact.model';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-dash-board',
@@ -18,16 +19,15 @@ import { ContactItem } from '../../../../core/models/contact.model';
   styleUrls: ['./dash-board.css'],
 })
 export class DashboardComponent {
-
-  statisticsItems: StatisticsItem = {} as StatisticsItem;
-  chartDealItems: ChartDealItem = {} as ChartDealItem;
+  today = new Date();
+  statisticsItems: StatisticsItem | null = null;
+  chartDealItems: ChartDealItem | null = null;
   leads: LeadItem[] = [];
   contacts: ContactItem[] = [];
   showModal: boolean = false;
   popupType = '';
   popupTitle = '';
 
-  // Bar Chart
   public barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: []
@@ -40,28 +40,22 @@ export class DashboardComponent {
       title: {
         display: true,
         text: 'Monthly Lead Count Chart',
-        font: {
-          size: 15
-        }
+        font: { size: 15 }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
         title: { display: true, text: 'Leads' },
-        ticks: {
-          stepSize: 1,
-          precision: 0
-        }
+        ticks: { stepSize: 1, precision: 0 }
       }
     }
   };
 
-  // Line Chart
   public lineChartData: ChartConfiguration<'line'>['data'] = {
     labels: [],
     datasets: []
-  };  
+  };
 
   public lineChartLabels: string[] = [];
   public lineChartOptions: ChartOptions<'line'> = {
@@ -72,19 +66,12 @@ export class DashboardComponent {
       title: {
         display: true,
         text: 'Real Estate Revenue Chart',
-        font: {
-          size: 15
-        }
+        font: { size: 15 }
       }
     },
     scales: {
-      y: { 
-        beginAtZero: true,
-        title: { display: true, text: 'Price ($)' } 
-      },
-      x: { 
-        beginAtZero: true,
-      },
+      y: { beginAtZero: true, title: { display: true, text: 'Price ($)' } },
+      x: { beginAtZero: true },
     },
   };
 
@@ -92,18 +79,10 @@ export class DashboardComponent {
   public pieChartData: number[] = [];
   public pieChart = {
     labels: this.pieChartLabels,
-    datasets: [
-      {
-        data: this.pieChartData,
-        backgroundColor: [
-          '#3b82f6',
-          '#22c55e',
-          '#f59e0b',
-          '#ef4444',
-          '#8b5cf6',
-        ]
-      }
-    ]
+    datasets: [{
+      data: this.pieChartData,
+      backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6']
+    }]
   };
 
   public pieChartOptions: ChartOptions<'pie'> = {
@@ -114,60 +93,49 @@ export class DashboardComponent {
       title: {
         display: true,
         text: 'Contact Classification Chart',
-        font: {
-          size: 20
-        }
+        font: { size: 20 }
       }
     }
   };
-  
-  constructor(private dashboardService: DashboardService, 
-              private leadService: LeadService, 
-              private contactService: ContactService){}
 
-  ngOnInit(){
+  constructor(
+    private dashboardService: DashboardService,
+    private leadService: LeadService,
+    private contactService: ContactService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
     this.onQuantityStatistics();
     this.onChartDeal();
     this.onChartLead();
     this.onChartContact();
   }
 
-  onQuantityStatistics(){
+  onQuantityStatistics() {
     this.dashboardService.GetStatistics().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.statisticsItems = res.data?.statistics;
-
-        console.log(res);
+      next: (data) => {
+        this.statisticsItems = data;
       },
       error: (err) => {
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load statistics');
       }
-    })
+    });
   }
 
   onChartDeal() {
     this.dashboardService.GetChartDeal().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
+      next: (data) => {
+        this.chartDealItems = data;
 
-        this.chartDealItems = res.data?.chartDeal;
-
-        const successDeals = this.chartDealItems.listSuccessfullDeal || [];
-        const failedDeals = this.chartDealItems.listFailedDeal || [];
+        const successDeals = data.listSuccessfullDeal || [];
+        const failedDeals = data.listFailedDeal || [];
 
         const currentYear = new Date().getFullYear();
         const defaultLabels = Array.from({ length: 12 }, (_, i) => `${i + 1}-${currentYear}`);
 
-        const groupByMonth = (items: any[]) => {
-          const result: any = {};
+        const groupByMonth = (items: ListDealItem[]) => {
+          const result: Record<string, number> = {};
           items.forEach(item => {
             const date = new Date(item.createdAt);
             const label = `${date.getMonth() + 1}-${date.getFullYear()}`;
@@ -181,7 +149,7 @@ export class DashboardComponent {
         const failedByMonth = groupByMonth(failedDeals);
 
         const successData = defaultLabels.map(lb => successByMonth[lb] || 0);
-        const failedData  = defaultLabels.map(lb => failedByMonth[lb] || 0);
+        const failedData = defaultLabels.map(lb => failedByMonth[lb] || 0);
 
         this.lineChartData = {
           labels: defaultLabels,
@@ -205,29 +173,22 @@ export class DashboardComponent {
           ]
         };
       },
-      error: (err) => console.log("Lỗi: ", err)
+      error: (err) => this.toastService.error('Failed to load deal chart')
     });
   }
 
-  onChartLead(){
+  onChartLead() {
     this.leadService.GetListLead().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leads = res.data?.leads ?? [];
+      next: (data) => {
+        this.leads = data;
 
         const currentYear = new Date().getFullYear();
-
         const labels = Array.from({ length: 12 }, (_, i) => `${i + 1}-${currentYear}`);
 
-        const leadCount: any = {};
+        const leadCount: Record<string, number> = {};
         this.leads.forEach(lead => {
           const d = new Date(lead.createdAt);
           const label = `${d.getMonth() + 1}-${d.getFullYear()}`;
-
           if (!leadCount[label]) leadCount[label] = 0;
           leadCount[label] += 1;
         });
@@ -236,33 +197,24 @@ export class DashboardComponent {
 
         this.barChartData = {
           labels: labels,
-          datasets: [
-            {
-              data: dataByMonth,
-              label: "Leads Per Month",
-              backgroundColor: "#3b82f6",
-              borderColor: "#1d4ed8"
-            }
-          ]
+          datasets: [{
+            data: dataByMonth,
+            label: "Leads Per Month",
+            backgroundColor: "#3b82f6",
+            borderColor: "#1d4ed8"
+          }]
         };
       },
-      error: (err) => {
-        console.log("Lỗi: ", err);
-      }
-    })
+      error: (err) => this.toastService.error('Failed to load leads')
+    });
   }
 
-  onChartContact(){
+  onChartContact() {
     this.contactService.GetListContact().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.contacts = res.data?.contacts ?? [];
+      next: (data) => {
+        this.contacts = data;
 
-        const typeCount: { [key: string]: number } = {};
+        const typeCount: Record<string, number> = {};
         this.contacts.forEach(contact => {
           const type = contact.type || 'Unknown';
           if (!typeCount[type]) typeCount[type] = 0;
@@ -274,33 +226,30 @@ export class DashboardComponent {
 
         this.pieChart = {
           labels: this.pieChartLabels,
-          datasets: [
-            { data: this.pieChartData, backgroundColor: [
-              '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'
-            ] }
-          ]
-        };  
+          datasets: [{
+            data: this.pieChartData,
+            backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6']
+          }]
+        };
       },
-      error: (err) => console.log("Lỗi: ", err)
+      error: (err) => this.toastService.error('Failed to load contacts')
     });
   }
 
   openDetail(type: string) {
-  this.popupType = type;
-
-  switch (type) {
-      case 'deal':
-        this.popupTitle = 'Detail of Deals';
-        break;
-
-      case 'contact':
-        this.popupTitle = 'Detail of Contacts';
-        break;
-    }
+    this.popupType = type;
+    this.popupTitle = type === 'deal' ? 'Detail of Deals' : 'Detail of Contacts';
     this.showModal = true;
   }
 
   closeDetail() {
     this.showModal = false;
   }
+}
+
+interface ListDealItem {
+  idDeal: string;
+  price: number;
+  status: string;
+  createdAt: string;
 }

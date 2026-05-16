@@ -17,11 +17,16 @@ export class AuthService {
                 login(authenticationRequest: { username: $username, password: $password }) {
                     token
                     infStaff {
-                        idStaff
-                        email
+                        id
+                        username
                         role
                         createdAt
-                        fullname
+                        person {
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
@@ -31,9 +36,11 @@ export class AuthService {
             password: login.password
         }).pipe(
             map(res => {
-                const loginData = res.data.login;
-                localStorage.setItem('access_token', loginData.token);
-                localStorage.setItem("staff_info", JSON.stringify(loginData.infStaff));
+                const loginData = (res as any)?.login;
+                if (loginData) {
+                    localStorage.setItem('access_token', loginData.token);
+                    localStorage.setItem("staff_info", JSON.stringify(loginData.infStaff));
+                }
                 return res;
             })
         );

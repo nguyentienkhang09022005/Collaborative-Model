@@ -1,7 +1,15 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { ContactDeletionResponse, ContactInfResponse, ContactRequest, ContactResponse, ContactUpdateResponse } from "../models/contact.model";
-import { Observable, tap } from "rxjs";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import {
+  ContactRequest,
+  ContactResponse,
+  ContactByIdResponse,
+  ContactMutationResponse,
+  ContactDeleteResponse,
+  ContactItem
+} from "../models/contact.model";
 
 @Injectable({
     providedIn: 'root'
@@ -9,132 +17,203 @@ import { Observable, tap } from "rxjs";
 export class ContactService {
     constructor(private api: ApiService) {}
 
-    GetListContact(): Observable<ContactResponse>{
+    GetListContact(): Observable<ContactItem[]> {
         const query = `
             query {
                 contacts {
                     idContact
                     title
                     type
+                    content
                     status
                     createdAt
+                    updatedAt
+                    lead {
+                        id
+                        resource
+                        createdAt
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
+                    staff {
+                        id
+                        username
+                        role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
                 }
             }`;
 
-        return this.api.graphql<ContactResponse>(query);
+        return this.api.graphql<ContactResponse>(query).pipe(
+            map(res => (res as any)?.contacts ?? [])
+        );
     }
 
-    GetInfContact(idContact: string): Observable<ContactInfResponse>{
+    GetInfContact(idContact: string): Observable<ContactItem | null> {
         const query = `
-            query($idContact: String!) {
-                contactById(idContact: $idContact) {
+            query($id: UUID!) {
+                contactById(idContact: $id) {
+                    idContact
                     title
                     type
                     content
                     status
                     createdAt
-                    infLeadResponse {
-                        idLead
+                    updatedAt
+                    lead {
+                        id
                         resource
-                        personResponse {
+                        createdAt
+                        person {
+                            id
                             fullname
                             email
                             phone
-                            salary
                             location
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
-        return this.api.graphql<ContactInfResponse>(query, { idContact });
+        return this.api.graphql<ContactByIdResponse>(query, { id: idContact }).pipe(
+            map(res => (res as any)?.contactById?.[0] ?? null)
+        );
     }
 
-    DeleteContact(idContact: string): Observable<ContactDeletionResponse>{
+    createContact(contactRequest: ContactRequest, idStaff: string, idLead: string): Observable<ContactItem> {
         const query = `
-            mutation DeleteContact($idContact: String!) {
-                deleteContact(idContact: $idContact)
-            }`;
-
-        return this.api.graphql<ContactDeletionResponse>(query, { idContact });
-    }
-
-    createContact(contactRequest: ContactRequest, idStaff: string, idLead: string): Observable<ContactResponse>{
-        const query = `
-            mutation CreateContact($input: ContactCreationRequest!) {
+            mutation CreateContact($input: ContactCreationRequestInput!) {
                 createContact(contactCreationRequest: $input) {
                     idContact
-                    type
                     title
+                    type
                     content
                     status
                     createdAt
-                    infLeadResponse {
-                        idLead
+                    lead {
+                        id
                         resource
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
                             phone
-                            salary
                             location
                         }
                     }
-                    infStaffResponse {
-                        idStaff
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
                         createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
         const input = {
-            type: contactRequest.type,
             title: contactRequest.title,
+            type: contactRequest.type,
             content: contactRequest.content,
-            idStaff,
-            idLead
+            idStaff: idStaff,
+            idLead: idLead
         };
 
-        return this.api.graphql<ContactResponse>(query, { input });
+        return this.api.graphql<ContactMutationResponse>(query, { input }).pipe(
+            map((res: any) => res.createContact)
+        );
     }
 
-    UpdateContact(status: string, idContact: string): Observable<ContactUpdateResponse>{
+    UpdateContact(status: string, idContact: string): Observable<ContactItem> {
         const query = `
-            mutation UpdateContact($idContact: String!, $status: String!) {
-                updateContact(contactUpdateRequest: { status: $status }, idContact: $idContact) {
+            mutation UpdateContact($id: UUID!, $input: ContactUpdateRequestInput!) {
+                updateContact(contactUpdateRequest: $input, idContact: $id) {
                     idContact
-                    type
                     title
+                    type
                     content
                     status
                     createdAt
-                    infLeadResponse {
-                        idLead
+                    updatedAt
+                    lead {
+                        id
                         resource
                         createdAt
-                        personResponse {
+                        person {
+                            id
                             fullname
                             email
+                            phone
+                            location
                         }
                     }
-                    infStaffResponse {
-                        fullname
-                        email
+                    staff {
+                        id
+                        username
                         role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
                     }
                 }
             }`;
 
-        return this.api.graphql<ContactUpdateResponse>(query, { idContact, status });
+        const input = { status: status };
+
+        return this.api.graphql<ContactMutationResponse>(query, { id: idContact, input }).pipe(
+            map((res: any) => res.updateContact)
+        );
+    }
+
+    DeleteContact(idContact: string): Observable<string> {
+        const query = `
+            mutation DeleteContact($id: UUID!) {
+                deleteContact(idContact: $id)
+            }`;
+
+        return this.api.graphql<ContactDeleteResponse>(query, { id: idContact }).pipe(
+            map((res: any) => res.deleteContact)
+        );
     }
 }

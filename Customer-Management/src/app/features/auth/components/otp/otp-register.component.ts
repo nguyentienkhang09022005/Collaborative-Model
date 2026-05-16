@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { ConfirmOTPRegister } from '../../../../core/models/otp.model';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-otp',
@@ -13,26 +14,25 @@ import { ConfirmOTPRegister } from '../../../../core/models/otp.model';
   styleUrls: ['./otp-register.css'],
 })
 export class OtpRegisterComponent {
-
-  // Input confirmOTP
   confirmOTPData: ConfirmOTPRegister = {} as ConfirmOTPRegister;
   isLoading: boolean = false;
 
-  constructor(private authenService: AuthService,
-              private router: Router){}
-              
-  ngOnInit(): void{
-    const email = localStorage.getItem('email')
+  constructor(
+    private authenService: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit(): void {
+    const email = localStorage.getItem('email');
     if (email) {
       this.confirmOTPData.email = email;
-    } else {
-      console.warn('Không tìm thấy email trong localStorage!');
     }
   }
 
-  onConfirmRegisterOTP(form: NgForm){
+  onConfirmRegisterOTP(form: NgForm) {
     Object.values(form.controls).forEach(control => {
-      control.markAsTouched(); 
+      control.markAsTouched();
     });
     if (form.invalid) return;
 
@@ -40,18 +40,18 @@ export class OtpRegisterComponent {
     this.authenService.confirmOTPRegister(this.confirmOTPData).subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
+          this.toastService.error(res.errors[0].message);
           this.isLoading = false;
           return;
-        } 
+        }
 
-        console.log("Xác thực thành công!", res);
         this.isLoading = false;
-        this.router.navigate(['/authen'])
+        this.router.navigate(['/authen']);
       },
-      error: (err) => {console.log("Lỗi xác thực OTP!", err);
-      this.isLoading = false;
+      error: (err) => {
+        this.toastService.error('OTP verification failed');
+        this.isLoading = false;
       }
-    })
+    });
   }
 }

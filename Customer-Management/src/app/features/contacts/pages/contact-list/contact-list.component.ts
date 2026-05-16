@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ContactService } from '../../../../core/services/contact.service';
 import { ContactItem, ContactRequest } from '../../../../core/models/contact.model';
@@ -9,6 +9,12 @@ import { StaffItem } from '../../../../core/models/staff.model';
 import { StaffService } from '../../../../core/services/staff.service';
 import { LeadService } from '../../../../core/services/lead.service';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../../core/services/toast.service';
+import {
+  CONTACT_STATUS,
+  CONTACT_STATUS_LABELS,
+  CONTACT_STATUS_COLORS
+} from '../../../../core/constants/enums';
 
 @Component({
   selector: 'app-contact-page',
@@ -16,10 +22,9 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './contact-list.html',
   styleUrls: ['./contact-list.css'],
 })
-export class ContactListComponent {
-
+export class ContactListComponent implements OnInit {
   contacts: ContactItem[] = [];
-  contactForm: ContactRequest = {} as ContactRequest;
+  contactForm: ContactRequest = this.getEmptyForm();
   isLoading: boolean = false;
   showAddPopup: boolean = false;
   selectedStaff: string = '';
@@ -27,134 +32,122 @@ export class ContactListComponent {
   leads: LeadItem[] = [];
   staffs: StaffItem[] = [];
 
-  constructor(private contactService: ContactService, 
-              private staffService: StaffService, 
-              private leadService: LeadService ,
-              private router: Router){}
+  // Expose constants to template
+  contactStatusList = Object.values(CONTACT_STATUS);
 
-  ngOnInit(){
-    this.onListContact();
+  constructor(
+    private contactService: ContactService,
+    private staffService: StaffService,
+    private leadService: LeadService,
+    private toastService: ToastService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadContacts();
   }
 
-  onListContact(){
-    this.contactService.GetListContact().subscribe({
-      next: (res) => {
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.contacts = res.data?.contacts ?? [];
-
-        console.log(res);
-      },
-      error: (err) => {
-        console.log("Lỗi: ", err);
-      }
-    })
-  } 
-
-  onInfContact(idContact: string){
-    this.router.navigate(['/contact-detail'], { queryParams: { id: idContact } })
-  }
-
-  submitAddContact(){
+  loadContacts() {
     this.isLoading = true;
-      
-    this.contactService.createContact(this.contactForm, this.selectedStaff, this.selectedLead).subscribe({
-      next: (res) => {
+    this.contactService.GetListContact().subscribe({
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-          
-        this.contacts = res.data?.contacts ?? [];
-        console.log(res);
-  
-        this.contactForm = {} as ContactRequest;
-  
-        this.isLoading = false;
-        this.closePopup();
-        this.onListContact();
+        this.contacts = data;
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load contacts');
       }
-    })
+    });
   }
 
-  deleteContact(idContact: string, event: MouseEvent){
+  onInfContact(idContact: string) {
+    this.router.navigate(['/contact-detail'], { queryParams: { id: idContact } });
+  }
+
+  submitAddContact() {
+    if (!this.selectedStaff || !this.selectedLead) {
+      this.toastService.error('Please select staff and lead');
+      return;
+    }
+
+    this.isLoading = true;
+    this.contactService.createContact(this.contactForm, this.selectedStaff, this.selectedLead).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.toastService.success('Contact created successfully');
+        this.contactForm = this.getEmptyForm();
+        this.closePopup();
+        this.loadContacts();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.toastService.error(err.message || 'Failed to create contact');
+      }
+    });
+  }
+
+  deleteContact(idContact: string, event: MouseEvent) {
     event.stopPropagation();
+    if (!confirm('Are you sure you want to delete this contact?')) return;
 
     this.contactService.DeleteContact(idContact).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        alert(res.data.deleteContact);
-
-        this.onListContact();
+      next: () => {
+        this.toastService.success('Contact deleted successfully');
+        this.loadContacts();
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to delete contact');
       }
-    })
+    });
   }
 
-  onListLead(){
+  loadLeads() {
     this.leadService.GetListLead().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.leads = res.data?.leads ?? [];
-
-        console.log(res);
+      next: (data) => {
+        this.leads = data;
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load leads');
       }
-    })
+    });
   }
 
-  onListStaff(){
+  loadStaffs() {
     this.staffService.GetListStaff().subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.staffs = res.data?.staffs ?? [];
-
-        console.log(res);
+      next: (data) => {
+        this.staffs = data;
       },
       error: (err) => {
-        this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load staff');
       }
-    })
+    });
   }
 
-  openAddPopup(){
+  openAddPopup() {
+    this.contactForm = this.getEmptyForm();
+    this.selectedStaff = '';
+    this.selectedLead = '';
     this.showAddPopup = true;
-    this.onListLead();
-    this.onListStaff();
+    this.loadLeads();
+    this.loadStaffs();
   }
 
-  closePopup(){
+  closePopup() {
     this.showAddPopup = false;
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'bg-slate-500';
+    return CONTACT_STATUS_COLORS[status] || 'bg-slate-500';
+  }
+
+  getStatusLabel(status: string | undefined): string {
+    if (!status) return 'Unknown';
+    return CONTACT_STATUS_LABELS[status] || status;
+  }
+
+  private getEmptyForm(): ContactRequest {
+    return { title: '', type: 'Call', content: '', idStaff: '', idLead: '' };
   }
 }

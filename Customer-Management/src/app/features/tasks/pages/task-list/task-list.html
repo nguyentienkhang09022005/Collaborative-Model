@@ -1,0 +1,285 @@
+<div class="bg-slate-100 min-h-screen p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Tasks</h1>
+      <p class="text-sm text-slate-500 mt-1">Manage and track your work</p>
+    </div>
+    <button *ngIf="isAdmin" (click)="openCreateModal()"
+      class="px-5 py-2.5 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create Task
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-white rounded-xl shadow-md border border-slate-200 p-4 mb-6">
+    <div class="flex items-center gap-4">
+      <div class="flex-1">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search tasks..."
+          class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-1 focus:ring-slate-900/20 text-sm">
+      </div>
+      <select [(ngModel)]="filterStatus" class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+        <option [value]="-1">All Status</option>
+        <option [value]="0">Pending</option>
+        <option [value]="1">In Progress</option>
+        <option [value]="2">Completed</option>
+        <option [value]="3">Cancelled</option>
+      </select>
+      <select [(ngModel)]="filterPriority" class="px-4 py-2 border border-slate-200 rounded-lg text-sm">
+        <option [value]="-1">All Priority</option>
+        <option [value]="0">Low</option>
+        <option [value]="1">Medium</option>
+        <option [value]="2">High</option>
+        <option [value]="3">Urgent</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-16">
+    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+  </div>
+
+  <!-- Tasks Table -->
+  <div *ngIf="!isLoading" class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+    <table class="w-full">
+      <thead>
+        <tr class="bg-slate-50 border-b border-slate-200">
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Task</th>
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Priority</th>
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Status</th>
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Assigned To</th>
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Due Date</th>
+          <th class="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr *ngFor="let task of getFilteredTasks()"
+          class="hover:bg-slate-50 cursor-pointer"
+          (click)="viewTaskDetail(task)">
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-slate-900">{{ task.title }}</p>
+                <p *ngIf="task.description" class="text-sm text-slate-500 truncate max-w-xs">{{ task.description }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-4">
+            <span class="px-3 py-1 rounded-lg text-xs font-semibold" [ngClass]="getPriorityClass(task.priority)">
+              {{ priorityLabels[task.priority] }}
+            </span>
+          </td>
+          <td class="px-5 py-4">
+            <select [value]="task.status" (click)="$event.stopPropagation()"
+              (change)="updateTaskStatus(task.idTask, $any($event.target).value)"
+              [disabled]="!canEditTask(task)"
+              class="px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold bg-white"
+              [ngClass]="getStatusClass(task.status)">
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELED">Cancelled</option>
+            </select>
+          </td>
+          <td class="px-5 py-4">
+            <span class="text-sm text-slate-700">{{ getStaffName(task.idStaffAssigned) }}</span>
+          </td>
+          <td class="px-5 py-4">
+            <span class="text-sm text-slate-500">{{ formatDate(task.dueDate) }}</span>
+          </td>
+          <td class="px-5 py-4">
+            <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+              <button *ngIf="canEditTask(task)" (click)="openEditModal(task)"
+                class="p-2 hover:bg-slate-100 rounded-lg text-slate-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button *ngIf="isAdmin" (click)="deleteTask(task.idTask)"
+                class="p-2 hover:bg-red-50 rounded-lg text-red-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="getFilteredTasks().length === 0">
+          <td colspan="6" class="px-5 py-12 text-center">
+            <div class="flex flex-col items-center">
+              <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+              </div>
+              <p class="text-slate-500 font-medium">No tasks found</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && tasks.length === 0" class="bg-white rounded-xl shadow-md border border-slate-200 p-16 text-center">
+    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+      </svg>
+    </div>
+    <p class="text-slate-500 font-medium text-lg mb-2">No tasks yet</p>
+    <p class="text-slate-400 mb-4">Create your first task to get started</p>
+    <button *ngIf="isAdmin" (click)="openCreateModal()"
+      class="px-5 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 text-sm font-medium">
+      Create Task
+    </button>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showCreateModal || showEditModal"
+  class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl">
+    <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">{{ isEditing ? 'Edit Task' : 'Create Task' }}</h2>
+        <button (click)="closeModals()" class="p-2 hover:bg-slate-100 rounded-lg">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Title *</label>
+        <input type="text" [(ngModel)]="taskForm.title"
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm"
+          placeholder="Enter task title">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Description</label>
+        <textarea [(ngModel)]="taskForm.description" rows="3"
+          class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm"
+          placeholder="Enter task description"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Priority</label>
+          <select [(ngModel)]="taskForm.priority"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="URGENT">Urgent</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+          <select [(ngModel)]="taskForm.status"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELED">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Due Date</label>
+          <input type="date" [(ngModel)]="taskForm.dueDate"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Assign To</label>
+          <select [(ngModel)]="taskForm.idStaffAssigned"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+            <option value="">Unassigned</option>
+            <option *ngFor="let staff of staffList" [value]="staff.id">
+              {{ staff.person?.fullname }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">Linked Entity</label>
+          <select [(ngModel)]="taskForm.linkedEntityType"
+            class="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm bg-white">
+            <option value="">None</option>
+            <option value="Lead">Lead</option>
+            <option value="Customer">Customer</option>
+            <option value="Deal">Deal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-200 flex gap-3 justify-end">
+      <button (click)="closeModals()"
+        class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium">
+        Cancel
+      </button>
+      <button *ngIf="!isEditing" (click)="createTask()"
+        class="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium">
+        Create
+      </button>
+      <button *ngIf="isEditing" (click)="updateTask()"
+        class="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg text-sm font-medium">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Status Change Modal -->
+<div *ngIf="showConfirmStatusModal"
+  class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+    <div class="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-amber-50 to-white">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">Confirm Status Change</h2>
+        <button (click)="closeConfirmStatusModal()" class="p-2 hover:bg-slate-100 rounded-lg">
+          <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-slate-700">Are you sure you want to change task status to:</p>
+          <p class="font-semibold text-amber-600 mt-1">{{ getStatusLabel(pendingStatusValue) }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-4 border-t border-slate-200 flex gap-3 justify-end bg-slate-50">
+      <button (click)="closeConfirmStatusModal()"
+        class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg text-sm font-medium">
+        Cancel
+      </button>
+      <button (click)="confirmStatusChange()"
+        class="px-4 py-2 bg-amber-500 text-white hover:bg-amber-600 rounded-lg text-sm font-medium flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>

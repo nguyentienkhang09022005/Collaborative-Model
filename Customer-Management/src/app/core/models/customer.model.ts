@@ -1,75 +1,51 @@
-export interface CustomerRequest
-{
-    idCustomer: string,
-    fullname: string;
-    email: string;
-    phone: number;
-    salary: number;
-    location: string;
-    createdAt: Date
-}
+import { PersonInfo } from './staff.model';
 
-//----------Response Models----------
-export interface CustomerResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        customers: CustomerItem[];
-    }
+export interface CustomerRequest {
+  fullname: string;
+  email: string;
+  phone?: string;
+  location?: string;
 }
 
 export interface CustomerItem {
-    idCustomer: string
-    createdAt: Date
-    personResponse: PersonInfo;
+  id: string;
+  createdAt: string;
+  person: PersonInfo;
 }
 
-export interface PersonInfo {
-    fullname: string;   
-    email: string;
-    phone: string;
-    salary: number;
-    location: string;
+export interface CustomerResponse {
+  errors?: { message: string }[];
+  data: {
+    customers: CustomerItem[];
+  };
 }
 
-export interface CustomerDeletionResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        deleteCustomer: string;
-    }
+export interface CustomerByIdResponse {
+  errors?: { message: string }[];
+  data: {
+    customerById: CustomerItem[];
+  };
 }
 
-export interface CustomerInfResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        customerById: CustomerItem[];
-    }
+export interface CustomerMutationResponse {
+  errors?: { message: string }[];
+  data: {
+    createCustomer: CustomerItem;
+    updateCustomer: CustomerItem;
+    restoreCustomer: CustomerItem;
+  };
 }
 
-export interface CustomerUpdateResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        updateCustomer: CustomerItem[];
-    }
+export interface CustomerDeleteResponse {
+  errors?: { message: string }[];
+  data: {
+    deleteCustomer: string;
+  };
 }
 
-export interface UploadCustomerFileResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        importCustomerExcel: string;
-    }
+export interface UploadCustomerFileResponse {
+  errors?: { message: string }[];
+  data: {
+    importCustomerExcel: string;
+  };
 }

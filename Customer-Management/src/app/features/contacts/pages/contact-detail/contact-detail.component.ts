@@ -1,10 +1,16 @@
 import { Component } from '@angular/core';
-import { ContactItem, ContactRequest } from '../../../../core/models/contact.model';
+import { ContactItem } from '../../../../core/models/contact.model';
 import { ContactService } from '../../../../core/services/contact.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../../core/services/toast.service';
+import {
+  CONTACT_STATUS,
+  CONTACT_STATUS_LABELS,
+  CONTACT_STATUS_COLORS
+} from '../../../../core/constants/enums';
 
 @Component({
   selector: 'app-contact-detail',
@@ -13,15 +19,20 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./contact-detail.css'],
 })
 export class ContactDetailComponent {
-
-  contactForm: ContactItem = {} as ContactItem;
-  contactData: ContactItem[] = [];
+  contactForm: ContactItem | null = null;
   isLoading: boolean = false;
   isEditing: boolean = false;
-  isSaveEdit: boolean = true;
   idContact: string = "";
 
-  constructor(private contactService: ContactService, private route: ActivatedRoute) {}
+  // Expose constants to template
+  contactStatusList = Object.values(CONTACT_STATUS);
+
+  constructor(
+    private contactService: ContactService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(){
     this.route.queryParams.subscribe(param => {
@@ -33,56 +44,52 @@ export class ContactDetailComponent {
   }
 
   onInfContact(idContact: string){
+    this.isLoading = true;
     this.contactService.GetInfContact(idContact).subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
+        if (data) {
+          this.contactForm = data;
         }
-
-        this.contactData = res.data?.contactById ?? [];
-
-        const item = this.contactData[0];
-        if (!item) return;
-
-        this.contactForm = item;
-
-        console.log(res);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load contact');
       }
     })
   }
 
   onUpdateContact(status: string){
+    this.isLoading = true;
     this.contactService.UpdateContact(status, this.idContact).subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.contactData = res.data?.updateContact ?? [];
-        console.log(res);
-        this.onInfContact(this.contactForm.idContact);
-        alert("Cập nhật thông tin thành công!");
-
+        this.toastService.success('Contact updated successfully');
         this.isEditing = false;
-        this.isSaveEdit = true;
+        this.onInfContact(this.idContact);
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error(err.message || 'Failed to update contact');
       }
     })
   }
 
   onEdit() {
     this.isEditing = true;
-    this.isSaveEdit = false;
+  }
+
+  onBack() {
+    this.router.navigate(['/contacts']);
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return 'bg-slate-500';
+    return CONTACT_STATUS_COLORS[status] || 'bg-slate-500';
+  }
+
+  getStatusLabel(status: string | undefined): string {
+    if (!status) return 'Unknown';
+    return CONTACT_STATUS_LABELS[status] || status;
   }
 }

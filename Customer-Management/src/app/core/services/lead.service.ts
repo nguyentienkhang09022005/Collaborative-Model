@@ -1,7 +1,16 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { LeadDeletionResponse, LeadInfResponse, LeadRequest, LeadResponse, LeadUpdateResponse, UploadLeadFileResponse } from "../models/lead.models";
-import { Observable, tap } from "rxjs";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import {
+  LeadRequest,
+  LeadResponse,
+  LeadByIdResponse,
+  LeadMutationResponse,
+  LeadDeleteResponse,
+  UploadLeadFileResponse,
+  LeadItem
+} from "../models/lead.models";
 import { HttpHeaders } from "@angular/common/http";
 
 @Injectable({
@@ -10,117 +19,144 @@ import { HttpHeaders } from "@angular/common/http";
 export class LeadService {
     constructor(private api: ApiService) {}
 
-    GetListLead(): Observable<LeadResponse>{
+    GetListLead(): Observable<LeadItem[]> {
         const query = `
             query {
                 leads {
-                    resource
-                    idLead
+                    id
                     createdAt
-                    personResponse{
+                    resource
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
-        return this.api.graphql<LeadResponse>(query);
+        return this.api.graphql<LeadResponse>(query).pipe(
+            map(res => (res as any)?.leads ?? [])
+        );
     }
 
-    GetInfLead(idLead: string): Observable<LeadInfResponse>{
+    GetInfLead(idLead: string): Observable<LeadItem | null> {
         const query = `
-            query($idLead: String!) {
-                leadById(idLead: $idLead) {
-                    idLead
-                    resource
+            query($id: UUID!) {
+                leadById(idLead: $id) {
+                    id
                     createdAt
-                    personResponse{
+                    resource
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
-        return this.api.graphql<LeadInfResponse>(query, { idLead });
+        return this.api.graphql<LeadByIdResponse>(query, { id: idLead }).pipe(
+            map(res => (res as any)?.leadById?.[0] ?? null)
+        );
     }
 
-    createLead(leadRequest: LeadRequest): Observable<LeadResponse>{
+    createLead(leadRequest: LeadRequest): Observable<LeadItem> {
         const query = `
-            mutation CreateLead($input: LeadCreationRequest!) {
+            mutation CreateLead($input: LeadCreationRequestInput!) {
                 createLead(leadCreationRequest: $input) {
-                    idLead
-                    resource
+                    id
                     createdAt
-                    personResponse {
-                        fullname
-                        email
-                        phone
-                        salary
-                        location
-                    }
-                }
-            }`;
-
-        const input = {
-            resource: leadRequest.resource,
-            person: {
-                fullname: leadRequest.fullname,
-                email: leadRequest.email,
-                phone: leadRequest.phone,
-                salary: leadRequest.salary,
-                location: leadRequest.location
-            }
-        };
-
-        return this.api.graphql<LeadResponse>(query, { input });
-    }
-
-    DeleteLead(idLead: string): Observable<LeadDeletionResponse>{
-        const query = `
-            mutation DeleteLead($idLead: String!) {
-                deleteLead(idLead: $idLead)
-            }`;
-
-        return this.api.graphql<LeadDeletionResponse>(query, { idLead });
-    }
-
-    UpdateLead(leadRequest: LeadRequest, idLead: string): Observable<LeadUpdateResponse>{
-        const query = `
-            mutation UpdateLead($idLead: String!, $input: LeadUpdateRequest!) {
-                updateLead(idLead: $idLead, leadUpdateRequest: $input) {
-                    idLead
                     resource
-                    personResponse {
+                    person {
+                        id
                         fullname
                         email
                         phone
-                        salary
                         location
                     }
                 }
             }`;
 
         const input = {
-            resource: leadRequest.resource,
-            person: {
-                fullname: leadRequest.fullname,
-                email: leadRequest.email,
-                phone: leadRequest.phone,
-                salary: leadRequest.salary,
-                location: leadRequest.location
-            }
+            fullname: leadRequest.fullname,
+            email: leadRequest.email,
+            phone: leadRequest.phone,
+            location: leadRequest.location,
+            resource: leadRequest.resource
         };
 
-        return this.api.graphql<LeadUpdateResponse>(query, { idLead, input });
+        return this.api.graphql<LeadMutationResponse>(query, { input }).pipe(
+            map((res: any) => res.createLead)
+        );
     }
 
-    UploadExcelLead(file: File): Observable<UploadLeadFileResponse>{
+    UpdateLead(leadRequest: LeadRequest, idLead: string): Observable<LeadItem> {
+        const query = `
+            mutation UpdateLead($id: UUID!, $input: LeadUpdateRequestInput!) {
+                updateLead(leadUpdateRequest: $input, idLead: $id) {
+                    id
+                    createdAt
+                    resource
+                    person {
+                        id
+                        fullname
+                        email
+                        phone
+                        location
+                    }
+                }
+            }`;
+
+        const input = {
+            fullname: leadRequest.fullname,
+            email: leadRequest.email,
+            phone: leadRequest.phone,
+            location: leadRequest.location,
+            resource: leadRequest.resource
+        };
+
+        return this.api.graphql<LeadMutationResponse>(query, { id: idLead, input }).pipe(
+            map((res: any) => res.updateLead)
+        );
+    }
+
+    DeleteLead(idLead: string): Observable<string> {
+        const query = `
+            mutation DeleteLead($id: UUID!) {
+                deleteLead(idLead: $id)
+            }`;
+
+        return this.api.graphql<LeadDeleteResponse>(query, { id: idLead }).pipe(
+            map((res: any) => res.deleteLead)
+        );
+    }
+
+    RestoreLead(idLead: string): Observable<LeadItem> {
+        const query = `
+            mutation RestoreLead($id: UUID!) {
+                restoreLead(idLead: $id) {
+                    id
+                    createdAt
+                    resource
+                    person {
+                        id
+                        fullname
+                        email
+                        phone
+                        location
+                    }
+                }
+            }`;
+
+        return this.api.graphql<LeadMutationResponse>(query, { id: idLead }).pipe(
+            map((res: any) => res.restoreLead)
+        );
+    }
+
+    UploadExcelLead(file: File): Observable<string> {
         const formData = new FormData();
         const query = `
             mutation ImportLead($file: Upload!) {
@@ -141,6 +177,8 @@ export class LeadService {
         const headers = new HttpHeaders({
             "GraphQL-Preflight": "1"
         });
-        return this.api.Post<UploadLeadFileResponse>('graphql', formData, { headers });
+        return this.api.Post<{ data: { importLeadExcel: string } }>('graphql', formData, { headers }).pipe(
+            map(res => res.data.importLeadExcel)
+        );
     }
 }

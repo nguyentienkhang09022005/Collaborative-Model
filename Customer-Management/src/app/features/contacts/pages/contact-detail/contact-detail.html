@@ -1,117 +1,159 @@
-<div class=" bg-slate-100 p-10">
-  <div class="max-w-5xl mx-auto bg-white rounded-3xl shadow-lg overflow-hidden">
+<div class="bg-slate-100 min-h-screen p-6">
+  <!-- Back Button -->
+  <button (click)="onBack()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 text-sm font-medium transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+    </svg>
+    Back to Contacts
+  </button>
 
-    <div class="bg-slate-900 text-white p-6 rounded-t-3xl">
-      <h1 class="text-2xl font-bold mb-2">{{ contactForm.title }}</h1>
-      <div class="grid grid-cols-4 gap-4 text-sm opacity-90">
-        <div>
-            <span class="font-medium ">Type:</span> 
-            <span class="font-medium ml-1">{{ contactForm.type }}</span>
-        </div>
-        <div>
-            <span class="font-medium">Status:</span> 
-            <span 
-            class="px-2 py-1 rounded-lg text-white text-xs shadow-sm ml-1"
-            *ngIf="!isEditing"
-            [ngClass]="{
-                'bg-yellow-500': contactForm.status === 'Pending',
-                'bg-blue-500': contactForm.status === 'In Progress',
-                'bg-green-500': contactForm.status === 'Done',
-                'bg-red-500': contactForm.status === 'Canceled',
-                'bg-purple-500': contactForm.status === 'Failed'
-            }">{{ contactForm.status }}</span>
-              <select
-                *ngIf="isEditing"
-                [(ngModel)]="contactForm.status"
-                class="font-medium w-1/2 ml-1 px-2 py-1 border rounded-lg shadow-sm 
-                focus:outline-none text-sm bg-slate-800 text-white"  >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Done">Done</option>
-                  <option value="Canceled">Canceled</option>
-                  <option value="Failed">Failed</option>
-              </select>
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-16">
+    <div class="animate-spin rounded-full h-10 w-10 border-3 border-slate-200 border-t-slate-800"></div>
+  </div>
+
+  <!-- Form Card -->
+  <div *ngIf="!isLoading && contactForm" class="space-y-6">
+
+    <!-- Main Info Card -->
+    <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-800 text-white rounded-xl flex items-center justify-center text-lg font-bold shadow-md">
+              {{ contactForm.title.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">{{ contactForm.title }}</h1>
+              <div class="flex items-center gap-3 mt-2">
+                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold">{{ contactForm.type }}</span>
+                <span class="px-3 py-1 rounded-lg text-xs font-semibold" [ngClass]="getStatusClass(contactForm.status)">
+                  {{ getStatusLabel(contactForm.status) }}
+                </span>
+              </div>
+            </div>
           </div>
-        <div>
-            <span class="font-medium">Created At:</span> 
-            <span class="font-medium ml-1">{{ contactForm.createdAt | customDate }}</span>
+          <div class="flex gap-2">
+            <button *ngIf="!isEditing" (click)="onEdit()"
+              class="px-4 py-2 bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:from-slate-900 hover:to-slate-800 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              Edit
+            </button>
+            <ng-container *ngIf="isEditing">
+              <button (click)="isEditing = false" class="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-medium transition-all">
+                Cancel
+              </button>
+              <button (click)="onUpdateContact(contactForm.status || '')"
+                class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save
+              </button>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Edit -->
+      <div *ngIf="isEditing" class="px-6 py-4 bg-amber-50 border-b border-amber-100">
+        <label class="block text-sm font-semibold text-amber-800 mb-2">Change Status</label>
+        <select [(ngModel)]="contactForm.status"
+          class="w-full px-3 py-2.5 border border-amber-200 rounded-lg focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20 text-sm transition-all bg-white">
+          <option value="NEW">New</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="SUCCESS">Success</option>
+          <option value="FAILED">Failed</option>
+          <option value="CLOSED">Closed</option>
+          <option value="CANCELED">Canceled</option>
+        </select>
+      </div>
+
+      <!-- Content -->
+      <div *ngIf="contactForm.content" class="px-6 py-5 bg-gradient-to-br from-slate-50 to-white">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+          </svg>
+          Description
+        </label>
+        <p class="text-slate-700 leading-relaxed bg-white p-4 rounded-lg border border-slate-100">{{ contactForm.content }}</p>
+      </div>
+    </div>
+
+    <!-- Related Info Cards -->
+    <div class="grid grid-cols-2 gap-6">
+      <!-- Lead Info -->
+      <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-amber-50 to-white">
+          <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+            Lead Information
+          </h3>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+              <span class="text-amber-700 font-bold">{{ (contactForm.lead?.person?.fullname || '-').charAt(0) }}</span>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">{{ contactForm.lead?.person?.fullname || '-' }}</p>
+              <p class="text-sm text-slate-500">Associated lead</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Info -->
+      <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-white">
+          <h3 class="font-semibold text-slate-800 flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            Staff Information
+          </h3>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <span class="text-emerald-700 font-bold">{{ (contactForm.staff?.person?.fullname || '-').charAt(0) }}</span>
+            </div>
+            <div>
+              <p class="font-semibold text-slate-900">{{ contactForm.staff?.person?.fullname || '-' }}</p>
+              <p class="text-sm text-slate-500">Assigned staff</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="p-6 grid grid-cols-2 gap-6 text-slate-700">
-      <div class="bg-slate-50 p-4 rounded-2xl shadow-sm">
-        <h2 class="text-lg font-semibold mb-3">Lead Information</h2>
-        <div class="space-y-4 text-sm">
-            <div>
-                <span class="font-medium">Full Name:</span> 
-                <span class="font-medium ml-1">{{ contactForm.infLeadResponse.personResponse.fullname }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Email:</span>
-                <span class="font-medium ml-1">{{ contactForm.infLeadResponse.personResponse.email }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Phone:</span>
-                <span class="font-medium ml-1">{{ contactForm.infLeadResponse.personResponse.phone }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Location:</span>
-                <span class="font-medium ml-1">{{ contactForm.infLeadResponse.personResponse.location }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Salary:</span>
-                <span class="font-medium ml-1">{{ contactForm.infLeadResponse.personResponse.salary }}</span>
-            </div>
-        </div>
-      </div>
-
-      <div class="bg-slate-50 p-4 rounded-2xl shadow-sm">
-        <h2 class="text-lg font-semibold mb-3">Staff Information</h2>
-        <div class="space-y-4 text-sm">
-            <div>
-                <span class="font-medium">Full Name:</span>
-                <span class="font-medium ml-1">{{ contactForm.infStaffResponse.fullname }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Email:</span>
-                <span class="font-medium ml-1">{{ contactForm.infStaffResponse.email }}</span>
-            </div>
-            <div>
-                <span class="font-medium">Role:</span>
-                <span class="font-medium ml-1">{{ contactForm.infStaffResponse.role }}</span>
-            </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="p-6 border-t text-slate-700">
-      <h2 class="text-lg font-semibold mb-2">Content</h2>
-      <p class="text-sm opacity-90">{{ contactForm.content }}</p>
-    </div>
-
-    <div class="w-full flex justify-center mt-6 gap-4">
-      <button        
-        *ngIf="isSaveEdit" 
-        class="flex items-center gap-2 px-5 py-2 bg-black text-white rounded-lg 
-              hover:bg-slate-800 shadow cursor-pointer text-sm min-w-[120px] justify-center"
-        (click)="onEdit()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> 
-          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /> 
+    <!-- Timestamp -->
+    <div class="bg-white rounded-xl shadow-md border border-slate-100 px-6 py-4">
+      <div class="flex items-center gap-2 text-sm text-slate-500">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <span>Edit</span>
-      </button>
+        Created on {{ contactForm.createdAt | customDate }}
+      </div>
+    </div>
 
-      <button        
-        *ngIf="isEditing" 
-        class="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg
-              hover:bg-green-700 shadow cursor-pointer text-sm min-w-[120px] justify-center"
-        (click)="onUpdateContact(contactForm.status)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"> 
-          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /> 
-        </svg>
-        <span>Save</span>
-      </button>
-    </div> 
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !contactForm" class="bg-white rounded-xl shadow-md border border-slate-100 p-16 text-center">
+    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+      </svg>
+    </div>
+    <p class="text-slate-500 font-medium text-lg mb-2">Contact not found</p>
+    <button (click)="onBack()" class="mt-4 px-5 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-lg hover:from-slate-900 hover:to-slate-800 text-sm font-medium shadow-md transition-all">
+      Back to Contacts
+    </button>
   </div>
 </div>

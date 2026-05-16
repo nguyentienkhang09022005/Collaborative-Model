@@ -4,6 +4,7 @@ import { Login } from '../../../../core/models/auth.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-authen',
@@ -13,19 +14,21 @@ import { Router } from '@angular/router';
   styleUrls: ['./authen.css'],
 })
 export class AuthenComponent {
-  
-  // Input Login
+
   loginData: Login = {} as Login;
   isLoading: boolean = false;
 
-  constructor(private authenService: AuthService, 
-              private router: Router){}
+  constructor(
+    private authenService: AuthService,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
-  ngOnInit(): void{}
+  ngOnInit(): void {}
 
   onLogin(form: NgForm){
     Object.values(form.controls).forEach(control => {
-      control.markAsTouched(); 
+      control.markAsTouched();
     });
     if (form.invalid) return;
 
@@ -33,18 +36,18 @@ export class AuthenComponent {
     this.authenService.authen(this.loginData).subscribe({
       next: (res) => {
         if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
+          this.toastService.error(res.errors[0].message);
           this.isLoading = false;
           return;
         }
-        
-        console.log(res);
+
         this.isLoading = false;
-        this.router.navigate(['/dashboard'])
+        this.router.navigate(['/dashboard']);
       },
-      error: (err) => {console.log("Lỗi đăng nhập!", err);
+      error: (err) => {
+        this.toastService.error('Login failed');
         this.isLoading = false;
       }
-    })
+    });
   }
 }

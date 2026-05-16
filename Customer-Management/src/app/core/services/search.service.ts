@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { Observable, tap } from "rxjs";
+import { Observable, map } from "rxjs";
 import { SearchCustomerResponse, SearchLeadResponse } from "../models/elasticsearch.model";
 
 @Injectable({
@@ -10,51 +10,41 @@ import { SearchCustomerResponse, SearchLeadResponse } from "../models/elasticsea
 export class SearchService {
     constructor(private api : ApiService){}
 
-    SearchLead(keyword: string): Observable<SearchLeadResponse>{
-        const query = {
-            query: `
-                query {
-                    searchLeads(keyword: "${keyword}") {
-                        resource
-                        createdAt
-                            personResponse{
-                            fullname
-                            email
-                            phone
-                            salary
-                            location
-                        }
+    SearchLead(keyword: string): Observable<any>{
+        const query = `
+            query SearchLeads($keyword: String!) {
+                searchLeads(keyword: $keyword) {
+                    resource
+                    createdAt
+                    person {
+                        fullname
+                        email
+                        phone
+                        location
                     }
-                }`
-            };
-        
-        return this.api.post<SearchLeadResponse>('graphql', query).pipe(
-            tap(res => {
-                return res;
-            })
+                }
+            }`;
+
+        return this.api.graphql<SearchLeadResponse>(query, { keyword }).pipe(
+            map(res => (res as any)?.searchLeads ?? [])
         );
     }
 
-    SearchCustomer(keyword: string): Observable<SearchCustomerResponse>{
-        const query = {
-            query: `
-                query {
-                    searchCustomers(keyword: "${keyword}") {
-                        personResponse{
-                            fullname
-                            email
-                            phone
-                            salary
-                            location
-                        }
+    SearchCustomer(keyword: string): Observable<any>{
+        const query = `
+            query SearchCustomers($keyword: String!) {
+                searchCustomers(keyword: $keyword) {
+                    person {
+                        fullname
+                        email
+                        phone
+                        location
                     }
-                }`
-            };
-        
-        return this.api.post<SearchCustomerResponse>('graphql', query).pipe(
-            tap(res => {
-                return res;
-            })
+                }
+            }`;
+
+        return this.api.graphql<SearchCustomerResponse>(query, { keyword }).pipe(
+            map(res => (res as any)?.searchCustomers ?? [])
         );
     }
 }

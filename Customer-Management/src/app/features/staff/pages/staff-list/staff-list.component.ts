@@ -1,45 +1,64 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { StaffService } from '../../../../core/services/staff.service';
-import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { StaffItem } from '../../../../core/models/staff.model';
+import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
+import { ToastService } from '../../../../core/services/toast.service';
+import {
+  STAFF_ROLE,
+  STAFF_ROLE_LABELS,
+  STAFF_ROLE_COLORS
+} from '../../../../core/constants/enums';
 
 @Component({
   selector: 'app-staff-list',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, CustomDatePipe],
   templateUrl: './staff-list.html',
   styleUrl: './staff-list.css',
 })
-export class StaffListComponent {
-
+export class StaffListComponent implements OnInit {
   staffs: StaffItem[] = [];
   isLoading: boolean = false;
-  
-  constructor(private staffService: StaffService, 
-              private router: Router){}
 
-  ngOnInit(){
-    this.onListStaff();
+  // Expose constants to template
+  staffRoleList = Object.values(STAFF_ROLE);
+
+  constructor(
+    private staffService: StaffService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadStaffs();
   }
 
-  onListStaff(){
+  loadStaffs() {
+    this.isLoading = true;
     this.staffService.GetListStaff().subscribe({
-      next: (res) => {
+      next: (data) => {
         this.isLoading = false;
-        if (res.errors && res.errors.length > 0) {
-          alert(res.errors[0].message);
-          return;
-        }
-        
-        this.staffs = res.data?.staffs ?? [];
-
-        console.log(res);
+        this.staffs = data;
       },
       error: (err) => {
         this.isLoading = false;
-        console.log("Lỗi: ", err);
+        this.toastService.error('Failed to load staff');
       }
-    })
+    });
+  }
+
+  getRoleBadgeClass(role: string | undefined): string {
+    if (!role) return 'bg-slate-100 text-slate-700';
+    return STAFF_ROLE_COLORS[role] || 'bg-slate-100 text-slate-700';
+  }
+
+  getRoleLabel(role: string | undefined): string {
+    if (!role) return 'Unknown';
+    return STAFF_ROLE_LABELS[role] || role;
+  }
+
+  countByRole(role: string): number {
+    return this.staffs.filter(s => s.role === role).length;
   }
 }

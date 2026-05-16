@@ -1,77 +1,54 @@
-export interface LeadRequest
-{
-    idLead: string,
-    resource: string;
-    fullname: string;
-    email: string;
-    phone: number;
-    salary: number;
-    location: string;
-    createdAt: Date
-}
+import { PersonInfo } from './staff.model';
 
-//----------Response Models----------
-export interface LeadResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        leads: LeadItem[];
-    }
+export interface LeadRequest {
+  id?: string;
+  fullname: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  resource?: string;
 }
 
 export interface LeadItem {
-    idLead: string
-    resource: string;
-    createdAt: Date
-    personResponse: PersonInfo;
+  id: string;
+  createdAt: string;
+  resource?: string;
+  person: PersonInfo;
 }
 
-export interface PersonInfo {
-    fullname: string;   
-    email: string;
-    phone: string;
-    salary: number;
-    location: string;
+export interface LeadResponse {
+  errors?: { message: string }[];
+  data: {
+    leads: LeadItem[];
+  };
 }
 
-export interface LeadDeletionResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        deleteLead: string;
-    }
+export interface LeadByIdResponse {
+  errors?: { message: string }[];
+  data: {
+    leadById: LeadItem[];
+  };
 }
 
-export interface LeadInfResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        leadById: LeadItem[];
-    }
+export interface LeadMutationResponse {
+  errors?: { message: string }[];
+  data: {
+    createLead: LeadItem;
+    updateLead: LeadItem;
+    restoreLead: LeadItem;
+  };
 }
 
-export interface LeadUpdateResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        updateLead: LeadItem[];
-    }
+export interface LeadDeleteResponse {
+  errors?: { message: string }[];
+  data: {
+    deleteLead: string;
+  };
 }
 
-export interface UploadLeadFileResponse
-{
-    errors?: {
-        message: string
-    }[];
-    data: {
-        importLeadExcel: string;
-    }
+export interface UploadLeadFileResponse {
+  errors?: { message: string }[];
+  data: {
+    importLeadExcel: string;
+  };
 }
