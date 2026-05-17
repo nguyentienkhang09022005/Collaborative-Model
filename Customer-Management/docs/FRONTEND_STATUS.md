@@ -1,4 +1,6 @@
-# Frontend Status - 2026-05-17 (Latest Update)
+# Frontend Status - 2026-05-17 Updated
+
+**Note**: Last updated with STAFF Kanban board, task priority indicators, and drag-drop status update.
 
 ## Project Info
 - **Path**: `D:\Project_Angular\Collaborative-Model\Customer-Management`
@@ -186,6 +188,7 @@ export interface ThemeConfig {
   contentBg: string;
   headerBg: string;
   cardBg: string;
+  taskCardBg: string;        // NEW - Task card background (lighter than column bg)
   textPrimary: string;
   textSecondary: string;
   borderColor: string;
@@ -398,6 +401,7 @@ For icon backgrounds:
 | IN_PROGRESS | In Progress |
 | COMPLETED | Completed |
 | CANCELED | Cancelled |
+| CANCELLED | Cancelled | (backend uses this)
 
 ### Calendar Event Type
 | Value | Label |
@@ -569,14 +573,19 @@ const routeMap: Record<string, { path: string; useQueryParam: boolean }> = {
 ## Build Status
 
 ```
-npm run build  # ✅ Success
+npm run build  # ✅ Success (2026-05-17)
 ```
 
-**Build Output**:
-- main-*.js: ~1.07 MB
-- Total: ~1.06 MB (including theme system + redesigned UI)
+**Token Settings (Backend)**:
+- Access Token Expiration: 5 minutes
+- Refresh Token Expiration: 7 days
+- Refresh token stored in HTTP-only cookie (Secure, SameSite=None)
 
-**Budget**: 1MB warning (expected with Settings + Themes + all features + Reports redesign)
+**Build Output**:
+- main-*.js: ~1.17 MB
+- Total: ~1.17 MB (including Kanban board + task priority indicators + theme enhancements)
+
+**Budget**: 1MB warning (expected with Settings + Themes + Kanban board features)
 
 **Warnings** (non-blocking):
 - NG8107 optional chain simplifications in contact-detail.html, task-detail.html, task-list.html
@@ -811,6 +820,113 @@ npm run build  # ✅ Success
     - Fix: CSS to hide scrollbar while keeping scroll functionality
     - File: main-layout.css - `::-webkit-scrollbar { display: none }`
 
+40. **Team Assignment Integration (NEW - 2026-05-17)**
+    - Issue: TeamService existed but was not integrated into any page
+    - Fix: Integrated into Deal Detail page (`deal-detail.component.ts/html`)
+    - Features added:
+      - View team members of a deal
+      - Add team member (select staff + role: Owner/Member/Viewer)
+      - Remove team member
+      - Dark mode support for role badges
+      - Filter out already-assigned staff from dropdown
+    - Files modified:
+      - `deal-detail.component.ts` - Added TeamService, StaffService, team management methods
+      - `deal-detail.html` - Added Team Members card section
+
+41. **Team Role Enum Fix (2026-05-17)**
+    - Issue: Backend returns string enum ("OWNER", "MEMBER", "VIEWER") but frontend checked number ("0", "1", "2")
+    - Fix: Changed all role comparisons from number to string
+    - Files modified:
+      - `deal-detail.component.ts` - All role checks now use string comparison
+      - `team.model.ts` - Changed `TeamMemberRequest.role` from `number` to `string`
+      - `deal-detail.html` - Role dropdown values changed to string enum
+
+42. **Team Role Permission System (2026-05-17)**
+    - Issue: Need full role-based permission system for Deal List and Deal Detail
+    - Permission Matrix:
+      | Action | OWNER | MEMBER (canEdit=true) | MEMBER (canEdit=false) | VIEWER |
+      |--------|-------|----------------------|------------------------|--------|
+      | View entity | ✅ | ✅ | ✅ | ✅ |
+      | Edit entity | ✅ | ✅ | ❌ | ❌ |
+      | Delete entity | ✅ | ❌ | ❌ | ❌ |
+      | Add member | ✅ | ❌ | ❌ | ❌ |
+      | Remove member | ✅ | ❌ | ❌ | ❌ |
+    - Deal List: Query team members for each deal, store in `dealPermissions` Map
+    - Deal Detail: Use `canEdit()` function and `member.canDelete` field
+    - Files modified:
+      - `deal-list.component.ts` - Added TeamService, AuthService, dealPermissions Map
+      - `deal-list.html` - Delete button uses `canDeleteDeal(d.idDeal)`
+      - `deal-detail.component.ts` - Role checks use string comparison, canEdit/canDelete functions
+      - `deal-detail.html` - Edit button uses `canEdit()`, Add Member uses `isOwner()`, Remove uses `canUpdateMemberPermissions()`
+
+43. **getDeals / getMyDeals API Split (2026-05-17)**
+    - Issue: Backend separated deals API for ADMIN vs STAFF
+    - Solution:
+      - ADMIN: `getDeals` → all system deals
+      - STAFF: `getMyDeals` → only own deals + team member deals
+    - Files modified:
+      - `deal.service.ts` - Added `GetMyDeals()` method for STAFF
+      - `deal-list.component.ts` - `loadDeals()` checks role and calls appropriate API
+
+44. **JWT Token Decoding (2026-05-17)**
+    - Issue: Backend JWT uses "sub" claim, localStorage staff_info may be out of sync
+    - Solution: Decode JWT directly to get user ID and role
+    - Methods added to `auth.service.ts`:
+      - `decodeJWT()` - Decode JWT payload to get claims (sub, role, email, name)
+      - `getCurrentUserId()` - Returns `sub` claim from JWT
+      - `getCurrentUserRole()` - Returns `role` claim (supports both custom and Microsoft format)
+    - Files modified:
+      - `auth.service.ts` - Added decodeJWT, getCurrentUserId, getCurrentUserRole methods
+      - `deal-list.component.ts` - Uses `authService.getCurrentUserRole()` for ADMIN check
+      - `deal-detail.component.ts` - Uses JWT claims instead of localStorage staff_info
+
+45. **Token Refresh System (2026-05-17)**
+    - Issue: Access token expires after 5 minutes, needs auto-refresh
+    - Solution: Error interceptor catches 401, calls refreshToken mutation, retries request
+    - Components:
+      - `auth.service.ts` - Added `refreshToken()`, `getTokenExpiration()`, `isTokenExpired()`
+      - `error.interceptor.ts` - 401 → refreshToken() → retry with new token
+      - Backend: `RefreshTokenAsync` has `[AllowAnonymous]` to bypass auth
+    - Debug logs added for troubleshooting:
+      - `[Auth] JWT decode result:`
+      - `[Auth] Raw exp value:`
+      - `[Auth] Token expired check:`
+      - `[ErrorInterceptor] 401 received, attempting token refresh...`
+      - `[Auth] refreshToken() called`
+      - `[Auth] Refresh SUCCESS` / `[Auth] Refresh failed`
+    - Note: Refresh token stored in HTTP-only cookie (set on login), 7-day expiration
+    - Note: Incognito mode may not receive cookies - use normal tab for testing
+
+46. **Deal Detail Load for Team Members (PENDING - Backend Fix Required)**
+    - Issue: STAFF who is team MEMBER cannot view deal detail (GetDealById only checks creator)
+    - Root cause: `GetDealById` in DealQuery.cs only checks `IdStaff == currentUserId`
+    - Backend needs fix:
+      - Check if user is creator OR team member
+      - Similar to GetMyDeals logic: query team_members for deal membership
+    - Current behavior: Only creator (IdStaff) can view deal detail
+
+47. **STAFF Task Kanban Board (2026-05-17)**
+    - Issue: STAFF task list was displayed as table, less intuitive than Kanban board
+    - Solution: STAFF sees 4-column Kanban board with drag-drop status change
+    - Features:
+      - 4 columns: Pending, In Progress, Completed, Cancelled
+      - Drag-drop to change task status (direct API update, no confirmation modal)
+      - Tasks sorted by due date (earliest first, no due date last)
+      - Priority color indicator on left border of each task card
+      - Priority badge with updated colors (LOW=green, MEDIUM=blue, HIGH=orange, URGENT=red)
+      - Task card shows: priority badge, task ID, title, description, assignee avatar + name, due date
+      - Overdue date highlighted in red
+      - Scrollable columns with max-height
+      - Dark mode task card background (bg-slate-700, brighter than column bg-slate-800)
+    - ADMIN keeps original table layout
+    - Files modified:
+      - `task-list.component.ts` - Added CDK DragDrop, grouped tasks by status, drop handler
+      - `task-list.html` - Kanban layout for STAFF, table for ADMIN
+      - `task.model.ts` - Added TASK_PRIORITY_BORDER_COLORS, updated priority colors
+      - `preference.service.ts` - Added taskCardBg theme property
+      - `enums.ts` - Added CANCELLED status
+      - `task.service.ts` - Added CANCELLED to statusMap
+
 ---
 
 ## Verification Checklist
@@ -835,6 +951,10 @@ npm run build  # ✅ Success
 - [x] Theme switching works correctly with 5 themes
 - [x] Theme persists across page refresh (localStorage)
 - [x] Settings page accessible via sidebar
+- [x] Team role permission system works correctly (OWNER/MEMBER/VIEWER)
+- [x] Deal List shows delete button only for OWNER
+- [x] Deal Detail edit button shows based on canEdit permission
+- [x] Deal Detail add/remove member buttons show based on OWNER permission
 - [x] Dashboard header styled with gradient icon and subtitle
 - [x] Notification list page fully supports dark mode
 - [x] Task list status displayed as badges (not dropdowns) in both themes
@@ -849,6 +969,13 @@ npm run build  # ✅ Success
 - [x] Topbar uses backdrop blur with gradient accents
 - [x] Sidebar scrollbar hidden (scroll still works)
 - [x] Settings nav visible to all users (not just ADMIN)
+- [x] Token refresh system implemented (401 → refresh → retry)
+- [x] STAFF Kanban board with drag-drop status change
+- [x] Task cards show priority border indicator (green/blue/orange/red)
+- [x] Task cards sorted by due date (earliest first)
+- [x] Overdue dates highlighted in red on task cards
+- [x] Task card background contrasts with column in dark mode
+- [x] CANCELLED status supported (backend uses CANCELLED, frontend supports both CANCELED/CANCELLED)
 
 ---
 

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { TaskService } from '../../../../core/services/task.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -12,6 +13,7 @@ import { StaffItem } from '../../../../core/models/staff.model';
 import {
   TASK_PRIORITY_LABELS,
   TASK_PRIORITY_COLORS,
+  TASK_PRIORITY_BORDER_COLORS,
   TASK_STATUS_LABELS,
   TASK_STATUS_COLORS,
   TASK_LINKED_ENTITY_LABELS
@@ -25,7 +27,7 @@ import {
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './task-list.html',
 })
 export class TaskListComponent implements OnInit {
@@ -69,9 +71,16 @@ export class TaskListComponent implements OnInit {
   linkedEntities = TASK_LINKED_ENTITY;
   priorityLabels = TASK_PRIORITY_LABELS;
   priorityColors = TASK_PRIORITY_COLORS;
+  priorityBorderColors = TASK_PRIORITY_BORDER_COLORS;
   statusLabels = TASK_STATUS_LABELS;
   statusColors = TASK_STATUS_COLORS;
   linkedEntityLabels = TASK_LINKED_ENTITY_LABELS;
+
+  // Kanban columns for STAFF
+  pendingTasks: TaskItem[] = [];
+  inProgressTasks: TaskItem[] = [];
+  completedTasks: TaskItem[] = [];
+  canceledTasks: TaskItem[] = [];
 
   constructor(
     private taskService: TaskService,
@@ -96,6 +105,7 @@ export class TaskListComponent implements OnInit {
       this.taskService.GetTasks().subscribe({
         next: (res) => {
           this.tasks = res;
+          this.groupTasksByStatus();
           this.isLoading = false;
         },
         error: (err) => {
@@ -107,11 +117,54 @@ export class TaskListComponent implements OnInit {
       this.taskService.GetTasksByStaff(this.currentStaffId).subscribe({
         next: (res) => {
           this.tasks = res;
+          this.groupTasksByStatus();
           this.isLoading = false;
         },
         error: (err) => {
           this.toastService.error('Failed to load tasks');
           this.isLoading = false;
+        }
+      });
+    }
+  }
+
+  groupTasksByStatus(): void {
+    const sortByDueDate = (tasks: TaskItem[]) =>
+      tasks.sort((a, b) => {
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
+
+    this.pendingTasks = sortByDueDate(this.tasks.filter(t => t.status === 'PENDING'));
+    this.inProgressTasks = sortByDueDate(this.tasks.filter(t => t.status === 'IN_PROGRESS'));
+    this.completedTasks = sortByDueDate(this.tasks.filter(t => t.status === 'COMPLETED'));
+    this.canceledTasks = sortByDueDate(this.tasks.filter(t => t.status === 'CANCELED' || t.status === 'CANCELLED'));
+  }
+
+  onTaskDrop(event: CdkDragDrop<TaskItem[]>, newStatus: string): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      const task = event.previousContainer.data[event.previousIndex];
+      transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+
+      // Direct API update without confirmation
+      this.taskService.updateTaskStatus(task.idTask, newStatus).subscribe({
+        next: (updatedTask) => {
+          this.toastService.success('Task status updated');
+          // Update only status field locally, keep all other task data intact
+          const index = this.tasks.findIndex(t => t.idTask === task.idTask);
+          if (index !== -1) {
+            this.tasks[index] = { ...this.tasks[index], status: updatedTask.status };
+            this.groupTasksByStatus();
+          }
+        },
+        error: (err) => {
+          this.toastService.error(err.message || 'Failed to update task status');
+          // Reload to revert UI on error
+          this.loadTasks();
         }
       });
     }
@@ -314,6 +367,20 @@ export class TaskListComponent implements OnInit {
     return this.priorityColors[priority] || 'bg-slate-100 text-slate-600';
   }
 
+  getPriorityBorderClass(priority: string): string {
+    return this.priorityBorderColors[priority] || 'border-l-slate-500';
+  }
+
+  getPriorityIcon(priority: string): string {
+    const icons: Record<string, string> = {
+      'LOW': 'M5 13l4 4L19 7',
+      'MEDIUM': 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      'HIGH': 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+      'URGENT': 'M17 8l4 4m0 0l-4 4m4-4H3m13 6a9 9 0 11-18 0 9 9 0 0118 0z'
+    };
+    return icons[priority] || icons['MEDIUM'];
+  }
+
   getStatusClass(status: string): string {
     if (this.themeConfig().id === 'dark') {
       const darkColors: Record<string, string> = {
@@ -339,11 +406,38 @@ export class TaskListComponent implements OnInit {
     return date.toLocaleDateString('vi-VN');
   }
 
+  getStaffInitials(idStaff?: string): string {
+    if (!idStaff) return '?';
+    const staff = this.staffList.find(s => s.id === idStaff);
+    const name = staff?.person?.fullname || '';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  isOverdue(dateStr: string): boolean {
+    if (!dateStr) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(dateStr);
+    return dueDate < today;
+  }
+
   isTaskCreator(task: TaskItem): boolean {
     return task.idStaffAssigned === this.currentStaffId;
   }
 
   canEditTask(task: TaskItem): boolean {
     return this.isAdmin || task.idStaffAssigned === this.currentStaffId;
+  }
+
+  getFilteredColumnTasks(tasks: TaskItem[]): TaskItem[] {
+    return tasks.filter(task => {
+      if (this.searchQuery && !task.title.toLowerCase().includes(this.searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (this.filterPriority !== -1 && task.priority !== Object.keys(TASK_PRIORITY)[this.filterPriority]) {
+        return false;
+      }
+      return true;
+    });
   }
 }

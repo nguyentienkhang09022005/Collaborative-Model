@@ -36,7 +36,7 @@
             </div>
           </div>
           <div class="flex gap-2">
-            <button *ngIf="!isEditing" (click)="onEdit()"
+            <button *ngIf="!isEditing && canEdit()" (click)="onEdit()"
               [class]="'px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all flex items-center gap-2 ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -60,7 +60,7 @@
       </div>
 
       <!-- Status Edit -->
-      <div *ngIf="isEditing" [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-amber-900/20' : 'bg-amber-50 border-amber-100')">
+      <div *ngIf="isEditing && canEdit()" [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-amber-900/20' : 'bg-amber-50 border-amber-100')">
         <label [class]="'block text-sm font-semibold mb-2 ' + (themeConfig().id === 'dark' ? 'text-amber-300' : 'text-amber-800')">Change Status</label>
         <select [(ngModel)]="dealForm.status"
           [class]="'w-full px-3 py-2.5 border rounded-lg text-sm transition-all ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'border-amber-200 bg-white')">
@@ -139,6 +139,109 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         Created on {{ dealForm.createdAt | customDate }}
+      </div>
+    </div>
+
+    <!-- Team Members Card -->
+    <div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
+      <div [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' flex items-center justify-between ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-indigo-50 to-white')">
+        <h3 [class]="'font-semibold flex items-center gap-2 ' + themeConfig().textPrimary">
+          <svg [class]="'w-4 h-4 ' + (themeConfig().id === 'dark' ? 'text-indigo-400' : 'text-indigo-600')" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          Team Members
+          <span [class]="'px-2 py-0.5 rounded-full text-xs font-semibold ' + (themeConfig().id === 'dark' ? 'bg-indigo-900 text-indigo-300' : 'bg-indigo-100 text-indigo-700')">
+            {{ teamMembers.length }}
+          </span>
+        </h3>
+        <div class="flex items-center gap-3">
+          <span *ngIf="getMyRole()" [class]="'px-2.5 py-1 rounded-lg text-xs font-semibold ' + getRoleClass(getMyRole())">
+            {{ getMyRoleLabel() }}
+          </span>
+          <button *ngIf="isAdmin() && !isShowAddMember" (click)="toggleAddMember()"
+            [class]="'px-3 py-1.5 rounded-lg text-xs font-medium shadow-md transition-all flex items-center gap-1.5 ' + (themeConfig().id === 'dark' ? 'bg-indigo-600 text-white hover:bg-indigo-500' : 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white hover:from-indigo-700 hover:to-indigo-800')">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Member
+          </button>
+          <button *ngIf="isShowAddMember" (click)="toggleAddMember()"
+            [class]="'px-3 py-1.5 border rounded-lg text-xs font-medium transition-all ' + (themeConfig().id === 'dark' ? 'border-slate-600 text-slate-300 hover:bg-slate-700' : 'border-slate-300 text-slate-700 hover:bg-slate-50')">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Member Form -->
+      <div *ngIf="isShowAddMember" [class]="'px-6 py-4 border-b ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-indigo-900/20 border-indigo-800' : 'bg-indigo-50 border-indigo-100')">
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <label [class]="'block text-xs font-semibold mb-1.5 ' + themeConfig().textSecondary">Select Staff</label>
+            <select [(ngModel)]="newMemberIdStaff"
+              [class]="'w-full px-3 py-2 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300')">
+              <option value="">-- Select Staff --</option>
+              <option *ngFor="let staff of getAvailableStaff()" [value]="staff.id">
+                {{ staff.person?.fullname || staff.username }}
+              </option>
+            </select>
+          </div>
+          <div class="w-40">
+            <label [class]="'block text-xs font-semibold mb-1.5 ' + themeConfig().textSecondary">Role</label>
+            <select [(ngModel)]="newMemberRole"
+              [class]="'w-full px-3 py-2 border rounded-lg text-sm ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300')">
+              <option value="OWNER">Owner</option>
+              <option value="MEMBER">Member</option>
+              <option value="VIEWER">Viewer</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button (click)="onAddTeamMember()"
+              [class]="'px-4 py-2 rounded-lg text-sm font-medium shadow-md transition-all ' + (themeConfig().id === 'dark' ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700')">
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoadingTeam" class="flex justify-center py-8">
+        <div [class]="'animate-spin rounded-full h-8 w-8 border-2 ' + (themeConfig().id === 'dark' ? 'border-slate-700 border-t-slate-300' : 'border-slate-200 border-t-slate-800')"></div>
+      </div>
+
+      <!-- Team Members List -->
+      <div *ngIf="!isLoadingTeam" class="divide-y" [class]="themeConfig().borderColor">
+        <div *ngFor="let member of teamMembers" class="px-6 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div [class]="'w-10 h-10 rounded-lg flex items-center justify-center ' + (themeConfig().id === 'dark' ? 'bg-indigo-900/50' : 'bg-indigo-100')">
+              <span [class]="'font-bold ' + (themeConfig().id === 'dark' ? 'text-indigo-300' : 'text-indigo-700')">
+                {{ getStaffName(member.staff).charAt(0) }}
+              </span>
+            </div>
+            <div>
+              <p [class]="'font-semibold ' + themeConfig().textPrimary">{{ getStaffName(member.staff) }}</p>
+              <p [class]="'text-xs ' + themeConfig().textSecondary">{{ member.staff?.person?.email || '-' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span [class]="'px-2.5 py-1 rounded-lg text-xs font-semibold ' + getRoleClass(member.role)">
+              {{ getRoleLabel(member.role) }}
+            </span>
+            <button *ngIf="canUpdateMemberPermissions()" (click)="onRemoveTeamMember(member.id)"
+              [class]="'p-1.5 rounded-lg transition-all ' + (themeConfig().id === 'dark' ? 'hover:bg-red-900/50 text-red-400' : 'hover:bg-red-50 text-red-500')">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="teamMembers.length === 0" [class]="'px-6 py-8 text-center ' + themeConfig().textSecondary">
+          <svg [class]="'w-10 h-10 mx-auto mb-2 opacity-50 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <p class="text-sm">No team members yet</p>
+        </div>
       </div>
     </div>
 

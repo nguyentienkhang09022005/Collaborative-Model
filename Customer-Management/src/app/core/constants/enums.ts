@@ -39,7 +39,8 @@ export const TASK_STATUS = {
   PENDING: 'PENDING',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
-  CANCELED: 'CANCELED'
+  CANCELED: 'CANCELED',
+  CANCELLED: 'CANCELLED'
 } as const;
 
 // Label mappings for UI display

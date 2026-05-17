@@ -8,6 +8,8 @@ import { StaffItem } from '../../../../core/models/staff.model';
 import { DealService } from '../../../../core/services/deal.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { CustomerService } from '../../../../core/services/customer.service';
+import { TeamService } from '../../../../core/services/team.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PreferenceService } from '../../../../core/services/preference.service';
@@ -32,6 +34,10 @@ export class DealListComponent implements OnInit {
   selectedCustomer: string = '';
   customers: CustomerItem[] = [];
   staffs: StaffItem[] = [];
+  currentStaff: any = null;
+
+  // Map deal ID -> permission info (canDelete, canEdit, role)
+  dealPermissions: Map<string, { canDelete: boolean; canEdit: boolean; role: string }> = new Map();
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -43,26 +49,96 @@ export class DealListComponent implements OnInit {
     private dealService: DealService,
     private staffService: StaffService,
     private customerService: CustomerService,
+    private teamService: TeamService,
+    private authService: AuthService,
     private toastService: ToastService,
     private router: Router
   ) {}
 
   ngOnInit() {
+    this.currentStaff = this.authService.getCurrentStaff();
     this.loadDeals();
   }
 
   loadDeals() {
     this.isLoading = true;
-    this.dealService.GetListDeal().subscribe({
+
+    // ADMIN dùng getDeals (toàn bộ system), STAFF dùng getMyDeals (chỉ deals của mình)
+    const isAdmin = this.authService.getCurrentUserRole() === 'ADMIN';
+    const dealObservable = isAdmin
+      ? this.dealService.GetListDeal()
+      : this.dealService.GetMyDeals();
+
+    dealObservable.subscribe({
       next: (data) => {
         this.isLoading = false;
         this.deals = data;
+        this.loadDealPermissions();
       },
       error: (err) => {
         this.isLoading = false;
         this.toastService.error('Failed to load deals');
       }
     });
+  }
+
+  loadDealPermissions() {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) return;
+
+    // Query team members for each deal to get current user's permissions
+    const dealIds = this.deals.map(d => d.idDeal);
+    let loadedCount = 0;
+
+    dealIds.forEach(dealId => {
+      this.teamService.GetTeamMembers('Deal', dealId).subscribe({
+        next: (members) => {
+          // Find current user's membership for this deal using JWT userId
+          const myMembership = members.find(m => m.idStaff === userId);
+
+          if (myMembership) {
+            this.dealPermissions.set(dealId, {
+              canDelete: myMembership.canDelete,
+              canEdit: myMembership.canEdit,
+              role: myMembership.role
+            });
+          } else if (this.deals.find(d => d.idDeal === dealId)?.staff?.id === userId) {
+            // User is the creator - has full permissions
+            this.dealPermissions.set(dealId, {
+              canDelete: true,
+              canEdit: true,
+              role: 'OWNER'
+            });
+          } else {
+            // User is not a member - no permissions
+            this.dealPermissions.set(dealId, {
+              canDelete: false,
+              canEdit: false,
+              role: ''
+            });
+          }
+
+          loadedCount++;
+          if (loadedCount === dealIds.length) {
+            // All loaded, trigger change detection by reassigning
+            this.dealPermissions = new Map(this.dealPermissions);
+          }
+        },
+        error: () => {
+          // On error, assume no permissions
+          this.dealPermissions.set(dealId, {
+            canDelete: false,
+            canEdit: false,
+            role: ''
+          });
+          loadedCount++;
+        }
+      });
+    });
+  }
+
+  canDeleteDeal(dealId: string): boolean {
+    return this.dealPermissions.get(dealId)?.canDelete ?? false;
   }
 
   onInfDeal(idDeal: string) {
@@ -128,13 +204,27 @@ export class DealListComponent implements OnInit {
     });
   }
 
+  // ADMIN check - use JWT role claim directly for accuracy
+  isAdmin(): boolean {
+    return this.authService.getCurrentUserRole() === 'ADMIN';
+  }
+
+  // Also expose currentStaff id for use in templates
+  get currentUserId(): string | null {
+    return this.authService.getCurrentUserId();
+  }
+
   openAddPopup() {
     this.dealForm = this.getEmptyForm();
-    this.selectedStaff = '';
+    // STAFF: staff is automatically set to themselves, no dropdown
+    this.selectedStaff = this.isAdmin() ? '' : this.currentStaff?.id || '';
     this.selectedCustomer = '';
     this.showAddPopup = true;
     this.loadCustomers();
-    this.loadStaffs();
+    // STAFF doesn't need staff list - it's auto-assigned
+    if (this.isAdmin()) {
+      this.loadStaffs();
+    }
   }
 
   closePopup() {

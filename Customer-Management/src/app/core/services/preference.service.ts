@@ -25,6 +25,7 @@ export interface ThemeConfig {
   chartGridColor: string;
   statCardBg: string;
   statCardBorder: string;
+  taskCardBg: string;
 }
 
 export const THEMES: Record<ThemeMode, ThemeConfig> = {
@@ -39,6 +40,7 @@ export const THEMES: Record<ThemeMode, ThemeConfig> = {
     contentBg: 'bg-slate-100',
     headerBg: 'bg-white border-slate-200',
     cardBg: 'bg-white',
+    taskCardBg: 'bg-white',
     textPrimary: 'text-slate-800',
     textSecondary: 'text-slate-500',
     borderColor: 'border-slate-200',
@@ -63,6 +65,7 @@ export const THEMES: Record<ThemeMode, ThemeConfig> = {
     contentBg: 'bg-slate-900',
     headerBg: 'bg-slate-900 border-slate-700',
     cardBg: 'bg-slate-800',
+    taskCardBg: 'bg-slate-700',
     textPrimary: 'text-slate-100',
     textSecondary: 'text-slate-400',
     borderColor: 'border-slate-700',

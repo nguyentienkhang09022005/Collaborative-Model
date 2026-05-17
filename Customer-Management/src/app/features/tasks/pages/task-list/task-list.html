@@ -45,8 +45,227 @@
     <div [class]="'animate-spin rounded-full h-10 w-10 border-3 ' + (themeConfig().id === 'dark' ? 'border-slate-700 border-t-slate-300' : 'border-slate-200 border-t-slate-800')"></div>
   </div>
 
-  <!-- Tasks Table -->
-  <div *ngIf="!isLoading" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
+  <!-- STAFF: Kanban Board (4 columns) -->
+  <div *ngIf="!isLoading && !isAdmin" class="grid grid-cols-4 gap-4">
+    <!-- Pending Column -->
+    <div [class]="'rounded-xl border ' + themeConfig().borderColor + ' ' + themeConfig().cardBg">
+      <div class="px-4 py-3 border-b flex items-center justify-between" [class]="themeConfig().borderColor">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-slate-400"></div>
+          <span class="font-semibold" [class]="themeConfig().textPrimary">Pending</span>
+        </div>
+        <span [class]="'text-xs px-2 py-0.5 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+          {{ getFilteredColumnTasks(pendingTasks).length }}
+        </span>
+      </div>
+      <div class="p-3 space-y-3 min-h-96 max-h-[calc(100vh-280px)] overflow-y-auto"
+        cdkDropList
+        id="PENDING"
+        [cdkDropListData]="getFilteredColumnTasks(pendingTasks)"
+        [cdkDropListConnectedTo]="['IN_PROGRESS', 'COMPLETED', 'CANCELED']"
+        (cdkDropListDropped)="onTaskDrop($event, 'PENDING')">
+        <div *ngFor="let task of getFilteredColumnTasks(pendingTasks)"
+          cdkDrag
+          [cdkDragData]="task"
+          [class]="'rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg border-l-4 ' + getPriorityBorderClass(task.priority) + ' ' + themeConfig().taskCardBg + ' border ' + themeConfig().borderColor"
+          (click)="viewTaskDetail(task)">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold" [ngClass]="getPriorityClass(task.priority)">
+                {{ priorityLabels[task.priority] }}
+              </span>
+            </div>
+            <span class="text-xs" [class]="themeConfig().textSecondary">#{{ task.idTask.slice(-6) }}</span>
+          </div>
+          <p class="font-semibold text-sm mb-2 line-clamp-2" [class]="themeConfig().textPrimary">{{ task.title }}</p>
+          <p *ngIf="task.description" class="text-xs mb-3 line-clamp-2" [class]="themeConfig().textSecondary">{{ task.description }}</p>
+          <div class="flex items-center justify-between pt-2 border-t" [class]="themeConfig().borderColor">
+            <div class="flex items-center gap-2">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+                {{ getStaffInitials(task.idStaffAssigned) }}
+              </div>
+              <span class="text-xs truncate max-w-20" [class]="themeConfig().textSecondary">{{ getStaffName(task.idStaffAssigned) }}</span>
+            </div>
+            <div *ngIf="task.dueDate" class="flex items-center gap-1 text-xs" [class]="isOverdue(task.dueDate) ? 'text-red-500' : themeConfig().textSecondary">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              {{ formatDate(task.dueDate) }}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="getFilteredColumnTasks(pendingTasks).length === 0"
+          [class]="'text-center py-8 text-sm ' + themeConfig().textSecondary">
+          No pending tasks
+        </div>
+      </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div [class]="'rounded-xl border ' + themeConfig().borderColor + ' ' + themeConfig().cardBg">
+      <div class="px-4 py-3 border-b flex items-center justify-between" [class]="themeConfig().borderColor">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span class="font-semibold" [class]="themeConfig().textPrimary">In Progress</span>
+        </div>
+        <span [class]="'text-xs px-2 py-0.5 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-600')">
+          {{ getFilteredColumnTasks(inProgressTasks).length }}
+        </span>
+      </div>
+      <div class="p-3 space-y-3 min-h-96 max-h-[calc(100vh-280px)] overflow-y-auto"
+        cdkDropList
+        id="IN_PROGRESS"
+        [cdkDropListData]="getFilteredColumnTasks(inProgressTasks)"
+        [cdkDropListConnectedTo]="['PENDING', 'COMPLETED', 'CANCELED']"
+        (cdkDropListDropped)="onTaskDrop($event, 'IN_PROGRESS')">
+        <div *ngFor="let task of getFilteredColumnTasks(inProgressTasks)"
+          cdkDrag
+          [cdkDragData]="task"
+          [class]="'rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg border-l-4 ' + getPriorityBorderClass(task.priority) + ' ' + themeConfig().taskCardBg + ' border ' + themeConfig().borderColor"
+          (click)="viewTaskDetail(task)">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold" [ngClass]="getPriorityClass(task.priority)">
+                {{ priorityLabels[task.priority] }}
+              </span>
+            </div>
+            <span class="text-xs" [class]="themeConfig().textSecondary">#{{ task.idTask.slice(-6) }}</span>
+          </div>
+          <p class="font-semibold text-sm mb-2 line-clamp-2" [class]="themeConfig().textPrimary">{{ task.title }}</p>
+          <p *ngIf="task.description" class="text-xs mb-3 line-clamp-2" [class]="themeConfig().textSecondary">{{ task.description }}</p>
+          <div class="flex items-center justify-between pt-2 border-t" [class]="themeConfig().borderColor">
+            <div class="flex items-center gap-2">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+                {{ getStaffInitials(task.idStaffAssigned) }}
+              </div>
+              <span class="text-xs truncate max-w-20" [class]="themeConfig().textSecondary">{{ getStaffName(task.idStaffAssigned) }}</span>
+            </div>
+            <div *ngIf="task.dueDate" class="flex items-center gap-1 text-xs" [class]="isOverdue(task.dueDate) ? 'text-red-500' : themeConfig().textSecondary">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              {{ formatDate(task.dueDate) }}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="getFilteredColumnTasks(inProgressTasks).length === 0"
+          [class]="'text-center py-8 text-sm ' + themeConfig().textSecondary">
+          No tasks in progress
+        </div>
+      </div>
+    </div>
+
+    <!-- Completed Column -->
+    <div [class]="'rounded-xl border ' + themeConfig().borderColor + ' ' + themeConfig().cardBg">
+      <div class="px-4 py-3 border-b flex items-center justify-between" [class]="themeConfig().borderColor">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-green-500"></div>
+          <span class="font-semibold" [class]="themeConfig().textPrimary">Completed</span>
+        </div>
+        <span [class]="'text-xs px-2 py-0.5 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-600')">
+          {{ getFilteredColumnTasks(completedTasks).length }}
+        </span>
+      </div>
+      <div class="p-3 space-y-3 min-h-96 max-h-[calc(100vh-280px)] overflow-y-auto"
+        cdkDropList
+        id="COMPLETED"
+        [cdkDropListData]="getFilteredColumnTasks(completedTasks)"
+        [cdkDropListConnectedTo]="['PENDING', 'IN_PROGRESS', 'CANCELED']"
+        (cdkDropListDropped)="onTaskDrop($event, 'COMPLETED')">
+        <div *ngFor="let task of getFilteredColumnTasks(completedTasks)"
+          cdkDrag
+          [cdkDragData]="task"
+          [class]="'rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg border-l-4 ' + getPriorityBorderClass(task.priority) + ' ' + themeConfig().taskCardBg + ' border ' + themeConfig().borderColor"
+          (click)="viewTaskDetail(task)">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold" [ngClass]="getPriorityClass(task.priority)">
+                {{ priorityLabels[task.priority] }}
+              </span>
+            </div>
+            <span class="text-xs" [class]="themeConfig().textSecondary">#{{ task.idTask.slice(-6) }}</span>
+          </div>
+          <p class="font-semibold text-sm mb-2 line-clamp-2" [class]="themeConfig().textPrimary">{{ task.title }}</p>
+          <p *ngIf="task.description" class="text-xs mb-3 line-clamp-2" [class]="themeConfig().textSecondary">{{ task.description }}</p>
+          <div class="flex items-center justify-between pt-2 border-t" [class]="themeConfig().borderColor">
+            <div class="flex items-center gap-2">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+                {{ getStaffInitials(task.idStaffAssigned) }}
+              </div>
+              <span class="text-xs truncate max-w-20" [class]="themeConfig().textSecondary">{{ getStaffName(task.idStaffAssigned) }}</span>
+            </div>
+            <div *ngIf="task.dueDate" class="flex items-center gap-1 text-xs" [class]="themeConfig().textSecondary">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              {{ formatDate(task.dueDate) }}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="getFilteredColumnTasks(completedTasks).length === 0"
+          [class]="'text-center py-8 text-sm ' + themeConfig().textSecondary">
+          No completed tasks
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancelled Column -->
+    <div [class]="'rounded-xl border ' + themeConfig().borderColor + ' ' + themeConfig().cardBg">
+      <div class="px-4 py-3 border-b flex items-center justify-between" [class]="themeConfig().borderColor">
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <span class="font-semibold" [class]="themeConfig().textPrimary">Cancelled</span>
+        </div>
+        <span [class]="'text-xs px-2 py-0.5 rounded-full ' + (themeConfig().id === 'dark' ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-600')">
+          {{ getFilteredColumnTasks(canceledTasks).length }}
+        </span>
+      </div>
+      <div class="p-3 space-y-3 min-h-96 max-h-[calc(100vh-280px)] overflow-y-auto"
+        cdkDropList
+        id="CANCELED"
+        [cdkDropListData]="getFilteredColumnTasks(canceledTasks)"
+        [cdkDropListConnectedTo]="['PENDING', 'IN_PROGRESS', 'COMPLETED']"
+        (cdkDropListDropped)="onTaskDrop($event, 'CANCELED')">
+        <div *ngFor="let task of getFilteredColumnTasks(canceledTasks)"
+          cdkDrag
+          [cdkDragData]="task"
+          [class]="'rounded-xl p-4 cursor-pointer transition-all hover:shadow-lg border-l-4 ' + getPriorityBorderClass(task.priority) + ' ' + themeConfig().taskCardBg + ' border ' + themeConfig().borderColor"
+          (click)="viewTaskDetail(task)">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold" [ngClass]="getPriorityClass(task.priority)">
+                {{ priorityLabels[task.priority] }}
+              </span>
+            </div>
+            <span class="text-xs" [class]="themeConfig().textSecondary">#{{ task.idTask.slice(-6) }}</span>
+          </div>
+          <p class="font-semibold text-sm mb-2 line-clamp-2" [class]="themeConfig().textPrimary">{{ task.title }}</p>
+          <p *ngIf="task.description" class="text-xs mb-3 line-clamp-2" [class]="themeConfig().textSecondary">{{ task.description }}</p>
+          <div class="flex items-center justify-between pt-2 border-t" [class]="themeConfig().borderColor">
+            <div class="flex items-center gap-2">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+                {{ getStaffInitials(task.idStaffAssigned) }}
+              </div>
+              <span class="text-xs truncate max-w-20" [class]="themeConfig().textSecondary">{{ getStaffName(task.idStaffAssigned) }}</span>
+            </div>
+            <div *ngIf="task.dueDate" class="flex items-center gap-1 text-xs" [class]="themeConfig().textSecondary">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              {{ formatDate(task.dueDate) }}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="getFilteredColumnTasks(canceledTasks).length === 0"
+          [class]="'text-center py-8 text-sm ' + themeConfig().textSecondary">
+          No cancelled tasks
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN: Tasks Table (original layout) -->
+  <div *ngIf="!isLoading && isAdmin" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' overflow-hidden'">
     <table class="w-full">
       <thead>
         <tr [class]="'border-b ' + themeConfig().borderColor" [style.background]="themeConfig().id === 'dark' ? 'rgba(30,41,59,0.5)' : ''">
@@ -124,19 +343,15 @@
     </table>
   </div>
 
-  <!-- Empty State -->
-  <div *ngIf="!isLoading && tasks.length === 0" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-16 text-center'">
+  <!-- Empty State for STAFF -->
+  <div *ngIf="!isLoading && !isAdmin && tasks.length === 0" [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' p-16 text-center'">
     <div [class]="'w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : '')">
       <svg [class]="'w-10 h-10 ' + themeConfig().textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
       </svg>
     </div>
     <p [class]="'font-medium text-lg mb-2 ' + themeConfig().textPrimary">No tasks yet</p>
-    <p [class]="'mb-4 ' + themeConfig().textSecondary">Create your first task to get started</p>
-    <button *ngIf="isAdmin" (click)="openCreateModal()"
-      [class]="'px-5 py-2.5 rounded-lg text-sm font-medium ' + (themeConfig().id === 'dark' ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-700 hover:to-sky-800')">
-      Create Task
-    </button>
+    <p [class]="'mb-4 ' + themeConfig().textSecondary">You don't have any tasks assigned</p>
   </div>
 </div>
 

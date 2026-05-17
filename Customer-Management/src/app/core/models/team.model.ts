@@ -4,7 +4,7 @@ export interface TeamMemberRequest {
   entityType: string;
   entityId: string;
   idStaff: string;
-  role: number;
+  role: string;
   canEdit: boolean;
   canDelete: boolean;
 }

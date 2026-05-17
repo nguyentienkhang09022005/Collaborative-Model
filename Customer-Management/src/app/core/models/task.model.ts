@@ -66,24 +66,33 @@ export const TASK_PRIORITY_LABELS: Record<string, string> = {
 };
 
 export const TASK_PRIORITY_COLORS: Record<string, string> = {
-  'LOW': 'bg-slate-100 text-slate-600',
-  'MEDIUM': 'bg-blue-100 text-blue-700',
-  'HIGH': 'bg-amber-100 text-amber-700',
-  'URGENT': 'bg-red-100 text-red-700'
+  'LOW': 'bg-green-100 text-green-700 border border-green-300',
+  'MEDIUM': 'bg-blue-100 text-blue-700 border border-blue-300',
+  'HIGH': 'bg-orange-100 text-orange-700 border border-orange-300',
+  'URGENT': 'bg-red-100 text-red-700 border border-red-300'
+};
+
+export const TASK_PRIORITY_BORDER_COLORS: Record<string, string> = {
+  'LOW': 'border-l-green-500',
+  'MEDIUM': 'border-l-blue-500',
+  'HIGH': 'border-l-orange-500',
+  'URGENT': 'border-l-red-500'
 };
 
 export const TASK_STATUS_LABELS: Record<string, string> = {
   'PENDING': 'Pending',
   'IN_PROGRESS': 'In Progress',
   'COMPLETED': 'Completed',
-  'CANCELED': 'Cancelled'
+  'CANCELED': 'Cancelled',
+  'CANCELLED': 'Cancelled'
 };
 
 export const TASK_STATUS_COLORS: Record<string, string> = {
   'PENDING': 'bg-slate-100 text-slate-600',
   'IN_PROGRESS': 'bg-blue-100 text-blue-700',
   'COMPLETED': 'bg-green-100 text-green-700',
-  'CANCELED': 'bg-red-100 text-red-700'
+  'CANCELED': 'bg-red-100 text-red-700',
+  'CANCELLED': 'bg-red-100 text-red-700'
 };
 
 export const TASK_LINKED_ENTITY_LABELS: Record<string, string> = {

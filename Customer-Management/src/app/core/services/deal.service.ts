@@ -61,6 +61,51 @@ export class DealService {
         );
     }
 
+    // STAFF dùng - lấy deals của mình (OWNER và MEMBER)
+    GetMyDeals(): Observable<DealItem[]> {
+        const query = `
+            query {
+                myDeals {
+                    idDeal
+                    title
+                    content
+                    price
+                    status
+                    createdAt
+                    updatedAt
+                    customer {
+                        id
+                        createdAt
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
+                    staff {
+                        id
+                        username
+                        role
+                        createdAt
+                        salary
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
+                }
+            }`;
+
+        return this.api.graphql<DealResponse>(query).pipe(
+            map(res => (res as any)?.myDeals ?? [])
+        );
+    }
+
     GetInfDeal(idDeal: string): Observable<DealItem | null> {
         const query = `
             query($id: UUID!) {
