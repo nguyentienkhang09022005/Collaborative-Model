@@ -1,17 +1,17 @@
 import { Injectable } from "@angular/core";
 import { ApiService } from "./api.service";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
+import { Observable, throwError } from "rxjs";
+import { map, catchError } from "rxjs/operators";
 import {
   CustomerRequest,
   CustomerResponse,
   CustomerByIdResponse,
   CustomerMutationResponse,
   CustomerDeleteResponse,
-  UploadCustomerFileResponse,
+  ImportExcelResponse,
   CustomerItem
 } from "../models/customer.model";
-import { HttpHeaders } from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Injectable({
     providedIn: 'root'
@@ -151,27 +151,14 @@ export class CustomerService {
 
     UploadExcelCustomer(file: File): Observable<string> {
         const formData = new FormData();
-        const query = `
-            mutation ImportCustomer($file: Upload!) {
-                importCustomerExcel(file: $file)
-            }`;
+        formData.append("file", file);
 
-        formData.append(
-            "operations",
-            JSON.stringify({
-                query,
-                variables: { file: null }
+        return this.api.Post<ImportExcelResponse>('api/FileUpload/customer', formData).pipe(
+            map(res => res.message),
+            catchError((err: HttpErrorResponse) => {
+                const message = err.error?.message || err.message || 'Failed to import customers';
+                return throwError(() => new Error(message));
             })
-        );
-
-        formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
-        formData.append("0", file);
-
-        const headers = new HttpHeaders({
-            "GraphQL-Preflight": "1"
-        });
-        return this.api.Post<{ data: { importCustomerExcel: string } }>('graphql', formData, { headers }).pipe(
-            map(res => res.data.importCustomerExcel)
         );
     }
 }

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { map, Observable, tap, of, catchError } from "rxjs";
+import { map, Observable, tap, of, catchError, Subject, take, finalize } from "rxjs";
 import { Login, InfStaff, LoginResponse, LogoutResponse } from "../models/auth.models";
 import { ApiService } from "./api.service";
 import { OTPRegisterResponse, ConfirmOTPRegister, OTPForgotPasswordResponse, confirmOTPForgotPassword, confirmOTPForgotPasswordResponse, sendOTPForgotPassword } from "../models/otp.model";
@@ -8,7 +8,23 @@ import { OTPRegisterResponse, ConfirmOTPRegister, OTPForgotPasswordResponse, con
     providedIn: 'root'
 })
 export class AuthService {
-    constructor(private api: ApiService) {}
+    private refreshInFlight = false;
+    private refreshResult$ = new Subject<boolean>();
+    private refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+    constructor(private api: ApiService) {
+        this.initializeFromStoredToken();
+    }
+
+    private initializeFromStoredToken(): void {
+        const token = this.getAccessToken();
+        if (!token) return;
+        if (this.isTokenExpired()) {
+            this.refreshToken().subscribe({ error: () => { /* swallowed */ } });
+        } else {
+            this.scheduleRefresh();
+        }
+    }
 
     authen(login: Login): Observable<LoginResponse>{
         const query = `
@@ -39,6 +55,7 @@ export class AuthService {
                 if (loginData) {
                     localStorage.setItem('access_token', loginData.token);
                     localStorage.setItem("staff_info", JSON.stringify(loginData.infStaff));
+                    this.scheduleRefresh();
                 }
                 return res;
             })
@@ -55,9 +72,16 @@ export class AuthService {
             tap((res) => {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('staff_info');
+                this.cancelScheduledRefresh();
                 return res;
             })
         );
+    }
+
+    clearLocalState(): void {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('staff_info');
+        this.cancelScheduledRefresh();
     }
 
     
@@ -183,7 +207,8 @@ export class AuthService {
         return isExpired;
     }
 
-    // Refresh token - returns true if successful
+    // Refresh token - returns true if successful.
+    // Concurrent calls share one in-flight refresh request.
     refreshToken(): Observable<boolean> {
         console.log('[Auth] refreshToken() called');
         const query = `
@@ -205,6 +230,11 @@ export class AuthService {
                 }
             }`;
 
+        if (this.refreshInFlight) {
+            return this.refreshResult$.pipe(take(1));
+        }
+
+        this.refreshInFlight = true;
         return this.api.graphql(query).pipe(
             map(res => {
                 console.log('[Auth] refreshToken response:', res);
@@ -213,15 +243,47 @@ export class AuthService {
                     console.log('[Auth] Refresh SUCCESS, new token:', data.token.substring(0, 20) + '...');
                     localStorage.setItem('access_token', data.token);
                     localStorage.setItem('staff_info', JSON.stringify(data.infStaff));
+                    this.scheduleRefresh();
+                    this.refreshResult$.next(true);
                     return true;
                 }
                 console.log('[Auth] Refresh failed - no token in response');
+                this.refreshResult$.next(false);
                 return false;
             }),
             catchError((err) => {
                 console.error('[Auth] Refresh token error:', err);
+                this.refreshResult$.next(false);
                 return of(false);
+            }),
+            finalize(() => {
+                this.refreshInFlight = false;
             })
         );
+    }
+
+    private scheduleRefresh(): void {
+        this.cancelScheduledRefresh();
+        const exp = this.getTokenExpiration();
+        if (!exp) return;
+
+        const expiryMs = exp * 1000;
+        const refreshInMs = expiryMs - Date.now() - 30000;
+
+        if (refreshInMs <= 0) {
+            this.refreshToken().subscribe({ error: () => { /* swallowed */ } });
+            return;
+        }
+
+        this.refreshTimer = setTimeout(() => {
+            this.refreshToken().subscribe({ error: () => { /* swallowed */ } });
+        }, refreshInMs);
+    }
+
+    private cancelScheduledRefresh(): void {
+        if (this.refreshTimer) {
+            clearTimeout(this.refreshTimer);
+            this.refreshTimer = null;
+        }
     }
 }

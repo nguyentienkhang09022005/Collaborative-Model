@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { AuthGuard } from './guards/auth/auth.guard';
+import { RoleGuard } from './guards/auth/role.guard';
 
 export const routes: Routes = [
     // Authen
@@ -94,6 +95,8 @@ export const routes: Routes = [
             },
             {
                 path: 'staff',
+                canActivate: [RoleGuard],
+                data: { roles: ['ADMIN'] },
                 loadComponent: () =>
                     import('./features/staff/pages/staff-list/staff-list.component').then(m => m.StaffListComponent),
             },
@@ -119,11 +122,15 @@ export const routes: Routes = [
             },
             {
                 path: 'audit-log',
+                canActivate: [RoleGuard],
+                data: { roles: ['ADMIN'] },
                 loadComponent: () =>
                     import('./features/audit-log/pages/audit-log-list/audit-log-list.component').then(m => m.AuditLogListComponent),
             },
             {
                 path: 'reports',
+                canActivate: [RoleGuard],
+                data: { roles: ['ADMIN'] },
                 loadComponent: () =>
                     import('./features/reports/pages/report-list/report-list.component').then(m => m.ReportListComponent),
             },

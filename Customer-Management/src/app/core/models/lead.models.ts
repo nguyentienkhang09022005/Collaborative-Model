@@ -46,9 +46,6 @@ export interface LeadDeleteResponse {
   };
 }
 
-export interface UploadLeadFileResponse {
-  errors?: { message: string }[];
-  data: {
-    importLeadExcel: string;
-  };
+export interface ImportExcelResponse {
+  message: string;
 }

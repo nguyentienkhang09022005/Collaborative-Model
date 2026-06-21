@@ -1,10 +1,12 @@
 import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -29,9 +31,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               });
               return next(retryReq);
             } else {
-              // Refresh failed - logout
-              console.log('[ErrorInterceptor] Refresh failed, logging out');
-              authService.logout();
+              // Refresh failed - clear local state and send user to login.
+              // We don't call authService.logout() here because that BE call would
+              // itself return 401 (expired token) and re-trigger this interceptor.
+              // The server-side refresh cookie will expire on its own.
+              console.log('[ErrorInterceptor] Refresh failed, clearing state and redirecting to login');
+              authService.clearLocalState();
+              router.navigate(['/authen']);
               return throwError(() => new Error('Token expired and refresh failed'));
             }
           })

@@ -11,7 +11,13 @@
       "Read(//d/ProjectASP.NET/Customer-Managerment/**)",
       "Bash(powershell *)",
       "Bash(npx ng *)",
-      "Bash(dotnet --version)"
+      "Bash(dotnet --version)",
+      "Bash(where psql *)",
+      "Bash(psql --version)",
+      "Bash(PGPASSWORD='npg_2cBhAdzna7yq' psql *)",
+      "Bash(node_modules/.bin/ngc.cmd --noEmit)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(node_modules/.bin/ng.cmd build *)"
     ]
   }
 }

@@ -43,9 +43,6 @@ export interface CustomerDeleteResponse {
   };
 }
 
-export interface UploadCustomerFileResponse {
-  errors?: { message: string }[];
-  data: {
-    importCustomerExcel: string;
-  };
+export interface ImportExcelResponse {
+  message: string;
 }
