@@ -17,11 +17,7 @@
     <!-- Logo/Brand -->
     <div class="px-6 pt-8 pb-6">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center shadow-lg shadow-sky-500/20">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </div>
+        <app-logo [size]="40"></app-logo>
         <div>
           <h1 class="text-lg font-bold tracking-wide text-white">SIDEBOARD</h1>
           <p class="text-[10px] text-slate-500 uppercase tracking-widest">CRM Platform</p>
@@ -33,7 +29,7 @@
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-2 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent hover:scrollbar-thumb-slate-600">
       <a
-        routerLink="/dashboard"
+        routerLink="/app/dashboard"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         [routerLinkActiveOptions]="{ exact: true }"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
@@ -44,7 +40,7 @@
       </a>
 
       <a
-        routerLink="/leads"
+        routerLink="/app/leads"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +50,7 @@
       </a>
 
       <a
-        routerLink="/customers"
+        routerLink="/app/customers"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,7 +60,7 @@
       </a>
 
       <a
-        routerLink="/contacts"
+        routerLink="/app/contacts"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +70,7 @@
       </a>
 
       <a
-        routerLink="/deals"
+        routerLink="/app/deals"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,7 +81,7 @@
 
       <!-- Staff - Only visible to ADMIN -->
       <a *ngIf="isAdmin()"
-        routerLink="/staff"
+        routerLink="/app/staff"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +91,7 @@
       </a>
 
       <a
-        routerLink="/tasks"
+        routerLink="/app/tasks"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,7 +101,7 @@
       </a>
 
       <a
-        routerLink="/calendar"
+        routerLink="/app/calendar"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +115,7 @@
 
       <!-- Audit Log - Only visible to ADMIN -->
       <a *ngIf="isAdmin()"
-        routerLink="/audit-log"
+        routerLink="/app/audit-log"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +126,7 @@
 
       <!-- Reports - Only visible to ADMIN -->
       <a *ngIf="isAdmin()"
-        routerLink="/reports"
+        routerLink="/app/reports"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +137,7 @@
 
       <!-- Settings - Visible to all -->
       <a
-        routerLink="/settings"
+        routerLink="/app/settings"
         routerLinkActive="bg-gradient-to-r from-sky-500/20 to-sky-500/10 text-sky-400 border-l-2 border-sky-400"
         class="flex items-center gap-3 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 rounded-lg ml-1">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,7 +253,7 @@
 
             <!-- Footer -->
             <div [class]="'px-5 py-3 border-t flex items-center justify-center ' + themeConfig().borderColor + ' ' + (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-gradient-to-r from-slate-50 to-white')">
-              <a routerLink="/notifications"
+              <a routerLink="/app/notifications"
                 (click)="showNotificationDropdown = false"
                 [class]="'block text-center text-sm font-semibold ' + (themeConfig().id === 'dark' ? 'text-sky-400 hover:text-sky-300' : 'text-sky-500 hover:text-sky-600')">
                 Xem tất cả thông báo
@@ -296,7 +292,7 @@
 
   <!-- AI Chat Panel -->
   <div *ngIf="isChatOpen"
-    [class]="'fixed bottom-24 right-6 z-50 w-[28rem] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] rounded-2xl shadow-2xl border flex flex-col overflow-hidden transition-colors duration-300 ' +
+    [class]="'fixed bottom-24 right-6 z-50 w-[34rem] max-w-[calc(100vw-3rem)] h-[640px] max-h-[calc(100vh-7rem)] rounded-2xl shadow-2xl border flex flex-col overflow-hidden transition-colors duration-300 ' +
              themeConfig().cardBg + ' ' + themeConfig().borderColor">
 
     <!-- Chat Header -->
@@ -354,12 +350,100 @@
         </div>
 
         <!-- Message Bubble -->
-        <div [class]="'max-w-[75%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words shadow-sm ' +
-                       (msg.role === 'user'
-                         ? (themeConfig().id === 'dark' ? 'bg-sky-600 text-white' : 'bg-gradient-to-br from-sky-500 to-emerald-500 text-white')
-                         : (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-100' : 'bg-white text-slate-800 border border-slate-200'))">
-          {{ msg.message }}
-        </div>
+        <ng-container *ngIf="msg.role === 'user'; else aiBubble">
+          <div [class]="'max-w-[75%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words shadow-sm ' +
+                         (themeConfig().id === 'dark' ? 'bg-sky-600 text-white' : 'bg-gradient-to-br from-sky-500 to-emerald-500 text-white')">
+            {{ msg.message }}
+          </div>
+        </ng-container>
+        <ng-template #aiBubble>
+          <div class="max-w-[90%] flex flex-col gap-2">
+            <ng-container *ngFor="let block of parseAiContent(msg.message)">
+              <ng-container [ngSwitch]="block.type">
+
+                <!-- SECTION: structured card -->
+                <div *ngSwitchCase="'section'"
+                  [class]="'rounded-xl border shadow-sm ' +
+                           (themeConfig().id === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200')">
+                  <!-- Header -->
+                  <div *ngIf="block.title"
+                    [class]="'flex items-center gap-2 px-3.5 pt-2.5 pb-2 border-b ' +
+                             (themeConfig().id === 'dark' ? 'border-slate-700' : 'border-slate-100')">
+                    <span [class]="'inline-flex items-center justify-center w-6 h-6 rounded-md shrink-0 ' + getBlockIconBgClass(block.iconKind || 'info')">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getBlockIconPath(block.iconKind || 'info')"/>
+                      </svg>
+                    </span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider leading-tight"
+                      [class]="themeConfig().id === 'dark' ? 'text-violet-300' : 'text-violet-700'">
+                      {{ block.title }}
+                    </span>
+                    <span *ngIf="block.items && block.items.length > 0"
+                      [class]="'ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md ' +
+                               (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')">
+                      {{ block.items?.length }}
+                    </span>
+                  </div>
+
+                  <!-- Items -->
+                  <div class="px-1.5 py-1.5">
+                    <ng-container *ngIf="block.items && block.items.length > 0; else noItems">
+                      <div *ngFor="let item of block.items; let last = last"
+                        [class]="'flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ' +
+                                 (themeConfig().id === 'dark' ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50') +
+                                 (last ? '' : ' mb-0.5')">
+                        <span [class]="'w-1.5 h-1.5 rounded-full shrink-0 ' +
+                                       (item.isEmpty
+                                         ? (themeConfig().id === 'dark' ? 'bg-slate-600' : 'bg-slate-300')
+                                         : (themeConfig().id === 'dark' ? 'bg-violet-400' : 'bg-violet-500'))"></span>
+                        <span *ngIf="!item.isEmpty"
+                          [class]="'flex-1 min-w-0 truncate ' +
+                                   (themeConfig().id === 'dark' ? 'text-slate-100' : 'text-slate-800')"
+                          [title]="item.label">
+                          {{ item.label }}
+                        </span>
+                        <span *ngIf="item.isEmpty"
+                          [class]="'flex-1 italic ' +
+                                   (themeConfig().id === 'dark' ? 'text-slate-500' : 'text-slate-400')">
+                          {{ item.label }}
+                        </span>
+                        <span *ngIf="item.count !== undefined"
+                          [class]="'px-1.5 py-0.5 rounded-md text-[11px] font-semibold shrink-0 ' +
+                                   (themeConfig().id === 'dark' ? 'bg-violet-900/50 text-violet-200' : 'bg-violet-100 text-violet-700')">
+                          {{ item.count }} {{ item.countLabel }}
+                        </span>
+                        <span *ngIf="item.badge"
+                          [class]="'px-1.5 py-0.5 rounded-md text-[10px] font-semibold shrink-0 ' + getBadgeClass(item.badge)">
+                          {{ item.badge }}
+                        </span>
+                      </div>
+                    </ng-container>
+                    <ng-template #noItems>
+                      <div class="px-2 py-1.5 italic text-xs"
+                        [class]="themeConfig().id === 'dark' ? 'text-slate-500' : 'text-slate-400'">
+                        Không có dữ liệu
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+
+                <!-- EMPTY -->
+                <div *ngSwitchCase="'empty'"
+                  [class]="'px-3.5 py-2.5 rounded-xl text-sm italic border ' +
+                           (themeConfig().id === 'dark' ? 'bg-slate-800/60 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500')">
+                  {{ block.text }}
+                </div>
+
+                <!-- PARAGRAPH -->
+                <div *ngSwitchCase="'paragraph'"
+                  [class]="'px-3.5 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words shadow-sm border ' +
+                           (themeConfig().id === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-800')">
+                  {{ block.text }}
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </ng-template>
 
         <!-- User Avatar (right) -->
         <div *ngIf="msg.role === 'user'" class="flex-shrink-0">

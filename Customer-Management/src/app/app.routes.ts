@@ -4,7 +4,14 @@ import { AuthGuard } from './guards/auth/auth.guard';
 import { RoleGuard } from './guards/auth/role.guard';
 
 export const routes: Routes = [
-    // Authen
+    // Root entry point — public landing page
+    {
+        path: '',
+        loadComponent: () =>
+            import('./features/landing/pages/landing-page/landing-page.component').then(m => m.LandingPageComponent),
+    },
+
+    // Auth (legacy path, still works for direct links)
     {
         path: 'authen',
         loadComponent: () =>
@@ -31,16 +38,16 @@ export const routes: Routes = [
             import('./features/auth/pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
     },
 
-    // Mark
+    // Public lead capture
     {
         path: 'lead-mark',
         loadComponent: () =>
             import('./features/leads/components/lead-mark/lead-mark.component').then(m => m.LeadMarkComponent),
     },
 
-    // Main
+    // Main authenticated app under /app/*
     {
-        path: '',
+        path: 'app',
         loadComponent: () =>
             import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
         canActivate: [AuthGuard],
@@ -133,6 +140,7 @@ export const routes: Routes = [
                 data: { roles: ['ADMIN'] },
                 loadComponent: () =>
                     import('./features/reports/pages/report-list/report-list.component').then(m => m.ReportListComponent),
+                providers: [provideCharts(withDefaultRegisterables())],
             },
             {
                 path: 'settings',
@@ -143,5 +151,5 @@ export const routes: Routes = [
     },
 
     // Fallback
-    { path: '**', redirectTo: 'dashboard' }
+    { path: '**', redirectTo: '' }
 ];

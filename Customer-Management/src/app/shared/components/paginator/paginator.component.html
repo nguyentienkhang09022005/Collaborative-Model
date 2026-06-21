@@ -1,0 +1,52 @@
+<div [class]="themeConfig().cardBg + ' rounded-xl shadow-md border ' + themeConfig().borderColor + ' px-5 py-4 mt-4 flex flex-col sm:flex-row items-center justify-between gap-4'">
+  <!-- Info -->
+  <div [class]="'text-sm flex items-center gap-2 ' + themeConfig().textSecondary">
+    <span>Showing</span>
+    <span [class]="'px-2 py-0.5 rounded-md font-semibold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-900')">
+      {{ startItem() }}–{{ endItem() }}
+    </span>
+    <span>of</span>
+    <span [class]="'px-2 py-0.5 rounded-md font-semibold ' + (themeConfig().id === 'dark' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-900')">
+      {{ totalCount() }}
+    </span>
+    <span>records</span>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <!-- Page size selector -->
+    <div class="flex items-center gap-2">
+      <label [class]="'text-sm ' + themeConfig().textSecondary">Rows</label>
+      <select [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)"
+        [class]="'px-3 py-1.5 border rounded-lg text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 ' + (themeConfig().id === 'dark' ? 'bg-slate-700 border-slate-600 text-white focus:border-sky-500 focus:ring-sky-500/20' : 'border-slate-200 bg-white text-slate-700 focus:border-sky-500 focus:ring-sky-500/20')">
+        <option *ngFor="let opt of pageSizeOptions()" [value]="opt">{{ opt }}</option>
+      </select>
+    </div>
+
+    <!-- Page nav -->
+    <div class="flex items-center gap-1 ml-2">
+      <!-- Prev -->
+      <button (click)="prev()" [disabled]="!canPrev()"
+        [class]="(canPrev() ? (themeConfig().id === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-700 hover:bg-slate-100') : (themeConfig().id === 'dark' ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 cursor-not-allowed')) + ' p-2 rounded-lg transition-all'">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+
+      <!-- Page numbers -->
+      <ng-container *ngFor="let p of pageNumbers()">
+        <button (click)="goToPage(p)"
+          [class]="(p === pageIndex() ? (themeConfig().id === 'dark' ? 'bg-sky-600 text-white shadow-md' : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white shadow-md') : (themeConfig().id === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-700 hover:bg-slate-100')) + ' min-w-[36px] h-9 px-2 rounded-lg text-sm font-semibold transition-all'">
+          {{ p + 1 }}
+        </button>
+      </ng-container>
+
+      <!-- Next -->
+      <button (click)="next()" [disabled]="!canNext()"
+        [class]="(canNext() ? (themeConfig().id === 'dark' ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-700 hover:bg-slate-100') : (themeConfig().id === 'dark' ? 'text-slate-600 cursor-not-allowed' : 'text-slate-300 cursor-not-allowed')) + ' p-2 rounded-lg transition-all'">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

@@ -4,13 +4,14 @@ import { LeadService } from '../../../../core/services/lead.service';
 import { LeadItem, LeadRequest } from '../../../../core/models/lead.models';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CustomDatePipe } from '../../../../shared/pipes/date-pipe';
 import { PreferenceService } from '../../../../core/services/preference.service';
 
 @Component({
   selector: 'app-lead-page',
-  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe, PaginatorComponent],
   templateUrl: './lead-list.html',
   styleUrls: ['./lead-list.css'],
 })
@@ -21,6 +22,10 @@ export class LeadListComponent implements OnInit {
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
   selectedFile?: File;
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -37,10 +42,11 @@ export class LeadListComponent implements OnInit {
 
   loadLeads() {
     this.isLoading = true;
-    this.leadService.GetListLead().subscribe({
-      next: (data) => {
+    this.leadService.GetListLeadPaged(this.pageIndex + 1, this.pageSize).subscribe({
+      next: (res) => {
         this.isLoading = false;
-        this.leads = data;
+        this.leads = res.items;
+        this.totalCount = res.totalCount;
       },
       error: (err) => {
         this.isLoading = false;
@@ -49,8 +55,14 @@ export class LeadListComponent implements OnInit {
     });
   }
 
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadLeads();
+  }
+
   onInfLead(idLead: string) {
-    this.router.navigate(['/lead-detail'], { queryParams: { id: idLead } });
+    this.router.navigate(['/app/lead-detail'], { queryParams: { id: idLead } });
   }
 
   submitAddLead() {

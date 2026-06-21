@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { DealItem, DealRequest } from '../../../../core/models/deal.model';
 import { CustomerItem } from '../../../../core/models/customer.model';
 import { StaffItem } from '../../../../core/models/staff.model';
@@ -21,7 +22,7 @@ import {
 
 @Component({
   selector: 'app-deal-page',
-  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe, PaginatorComponent],
   templateUrl: './deal-list.html',
   styleUrls: ['./deal-list.css'],
 })
@@ -35,6 +36,10 @@ export class DealListComponent implements OnInit {
   customers: CustomerItem[] = [];
   staffs: StaffItem[] = [];
   currentStaff: any = null;
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   // Map deal ID -> permission info (canDelete, canEdit, role)
   dealPermissions: Map<string, { canDelete: boolean; canEdit: boolean; role: string }> = new Map();
@@ -63,16 +68,14 @@ export class DealListComponent implements OnInit {
   loadDeals() {
     this.isLoading = true;
 
-    // ADMIN dùng getDeals (toàn bộ system), STAFF dùng getMyDeals (chỉ deals của mình)
-    const isAdmin = this.authService.getCurrentUserRole() === 'ADMIN';
-    const dealObservable = isAdmin
-      ? this.dealService.GetListDeal()
-      : this.dealService.GetMyDeals();
+    // ADMIN dùng dealsPaged (toàn bộ system), STAFF dùng dealsPaged (chỉ deals của mình + team)
+    const dealObservable = this.dealService.GetListDealPaged(this.pageIndex + 1, this.pageSize);
 
     dealObservable.subscribe({
-      next: (data) => {
+      next: (res) => {
         this.isLoading = false;
-        this.deals = data;
+        this.deals = res.items;
+        this.totalCount = res.totalCount;
         this.loadDealPermissions();
       },
       error: (err) => {
@@ -80,6 +83,12 @@ export class DealListComponent implements OnInit {
         this.toastService.error('Failed to load deals');
       }
     });
+  }
+
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadDeals();
   }
 
   loadDealPermissions() {
@@ -142,7 +151,7 @@ export class DealListComponent implements OnInit {
   }
 
   onInfDeal(idDeal: string) {
-    this.router.navigate(['/deal-detail'], { queryParams: { id: idDeal } });
+    this.router.navigate(['/app/deal-detail'], { queryParams: { id: idDeal } });
   }
 
   submitAddDeal() {

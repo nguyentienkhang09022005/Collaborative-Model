@@ -140,7 +140,7 @@ export class DealDetailComponent {
   }
 
   onBack() {
-    this.router.navigate(['/deals']);
+    this.router.navigate(['/app/deals']);
   }
 
   getStatusClass(status: string | undefined): string {

@@ -95,7 +95,7 @@ export class CustomerDetailComponet implements OnInit {
   }
 
   onBack() {
-    this.router.navigate(['/customers']);
+    this.router.navigate(['/app/customers']);
   }
 
   private getEmptyForm(): CustomerRequest {

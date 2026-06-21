@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { sendOTPForgotPassword } from '../../../../core/models/otp.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
+import { LogoComponent } from '../../../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, LogoComponent],
   templateUrl: './forgot-password.html',
   styleUrls: ['./forgot-password.css'],
 })

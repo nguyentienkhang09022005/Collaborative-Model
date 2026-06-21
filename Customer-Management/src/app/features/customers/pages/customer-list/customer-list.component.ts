@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { CustomerItem, CustomerRequest } from '../../../../core/models/customer.model';
 import { CustomerService } from '../../../../core/services/customer.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -10,7 +11,7 @@ import { PreferenceService } from '../../../../core/services/preference.service'
 
 @Component({
   selector: 'app-customer-page',
-  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe],
+  imports: [CommonModule, RouterModule, FormsModule, CustomDatePipe, PaginatorComponent],
   templateUrl: './customer-list.html',
   styleUrls: ['./customer-list.css'],
 })
@@ -21,6 +22,10 @@ export class CustomerListComponent implements OnInit {
   showAddPopup: boolean = false;
   showUploadPopup: boolean = false;
   selectedFile?: File;
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -37,10 +42,11 @@ export class CustomerListComponent implements OnInit {
 
   loadCustomers() {
     this.isLoading = true;
-    this.customerService.GetListCustomer().subscribe({
-      next: (data) => {
+    this.customerService.GetListCustomerPaged(this.pageIndex + 1, this.pageSize).subscribe({
+      next: (res) => {
         this.isLoading = false;
-        this.customers = data;
+        this.customers = res.items;
+        this.totalCount = res.totalCount;
       },
       error: (err) => {
         this.isLoading = false;
@@ -49,8 +55,14 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadCustomers();
+  }
+
   onInfCustomer(idCustomer: string) {
-    this.router.navigate(['/customer-detail'], { queryParams: { id: idCustomer } });
+    this.router.navigate(['/app/customer-detail'], { queryParams: { id: idCustomer } });
   }
 
   submitAddCustomer() {

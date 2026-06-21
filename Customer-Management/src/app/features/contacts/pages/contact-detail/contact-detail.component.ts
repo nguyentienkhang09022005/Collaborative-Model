@@ -84,7 +84,7 @@ export class ContactDetailComponent {
   }
 
   onBack() {
-    this.router.navigate(['/contacts']);
+    this.router.navigate(['/app/contacts']);
   }
 
   getStatusClass(status: string | undefined): string {

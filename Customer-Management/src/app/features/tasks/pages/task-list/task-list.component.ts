@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { TaskService } from '../../../../core/services/task.service';
 import { StaffService } from '../../../../core/services/staff.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -27,13 +28,17 @@ import {
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, PaginatorComponent],
   templateUrl: './task-list.html',
 })
 export class TaskListComponent implements OnInit {
   tasks: TaskItem[] = [];
   staffList: StaffItem[] = [];
   isLoading = true;
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -102,9 +107,10 @@ export class TaskListComponent implements OnInit {
   loadTasks(): void {
     this.isLoading = true;
     if (this.isAdmin) {
-      this.taskService.GetTasks().subscribe({
+      this.taskService.GetTasksPaged(this.pageIndex + 1, this.pageSize).subscribe({
         next: (res) => {
-          this.tasks = res;
+          this.tasks = res.items;
+          this.totalCount = res.totalCount;
           this.groupTasksByStatus();
           this.isLoading = false;
         },
@@ -126,6 +132,12 @@ export class TaskListComponent implements OnInit {
         }
       });
     }
+  }
+
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadTasks();
   }
 
   groupTasksByStatus(): void {
@@ -345,7 +357,7 @@ export class TaskListComponent implements OnInit {
   }
 
   viewTaskDetail(task: TaskItem): void {
-    this.router.navigate(['/tasks', task.idTask]);
+    this.router.navigate(['/app/tasks', task.idTask]);
   }
 
   getFilteredTasks(): TaskItem[] {

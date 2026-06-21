@@ -12,6 +12,18 @@ import {
 } from '../../../../core/models/audit-log.model';
 import { AUDIT_ACTION, AUDIT_ENTITY_TYPE } from '../../../../core/constants/enums';
 
+interface ChangeLine {
+  key: string;
+  oldVal?: string;
+  newVal?: string;
+  state: 'changed' | 'added' | 'removed';
+}
+
+const NOISE_KEYS = new Set([
+  'id', 'idStaff', 'idDeal', 'idLead', 'idCustomer', 'idContact', 'idTask', 'idNote',
+  'createdAt', 'updatedAt', 'createdBy', 'updatedBy',
+]);
+
 @Component({
   selector: 'app-audit-log-list',
   standalone: true,
@@ -119,26 +131,61 @@ export class AuditLogListComponent implements OnInit {
     });
   }
 
-  formatOldNewValues(oldValues?: string, newValues?: string): string {
-    if (!oldValues && !newValues) return '';
-    // Parse JSON and format for display
-    try {
-      const oldObj = oldValues ? JSON.parse(oldValues) : null;
-      const newObj = newValues ? JSON.parse(newValues) : null;
-
-      if (oldObj && newObj) {
-        // Find changed fields
-        const changes: string[] = [];
-        for (const key of Object.keys(newObj)) {
-          if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
-            changes.push(`${key}: "${oldObj[key]}" → "${newObj[key]}"`);
-          }
-        }
-        return changes.join(', ');
+  formatChanges(oldValues?: string, newValues?: string): ChangeLine[] {
+    const safeParse = (raw?: string): Record<string, unknown> | null => {
+      if (!raw || raw.trim() === '') return null;
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+      } catch {
+        return null;
       }
-    } catch (e) {
-      // Not JSON, return as is
+    };
+
+    const oldObj = safeParse(oldValues);
+    const newObj = safeParse(newValues);
+
+    const formatVal = (v: unknown): string => {
+      if (v === null || v === undefined) return '∅';
+      if (typeof v === 'object') return JSON.stringify(v);
+      return String(v);
+    };
+
+    const lines: ChangeLine[] = [];
+    const seen = new Set<string>();
+
+    if (oldObj && newObj) {
+      // Diff: walk new keys, then old-only keys
+      for (const key of Object.keys(newObj)) {
+        if (NOISE_KEYS.has(key)) continue;
+        seen.add(key);
+        const o = oldObj[key];
+        const n = newObj[key];
+        if (JSON.stringify(o) !== JSON.stringify(n)) {
+          lines.push({ key, oldVal: formatVal(o), newVal: formatVal(n), state: 'changed' });
+        }
+      }
+      for (const key of Object.keys(oldObj)) {
+        if (NOISE_KEYS.has(key) || seen.has(key)) continue;
+        lines.push({ key, oldVal: formatVal(oldObj[key]), state: 'removed' });
+      }
+    } else if (newObj) {
+      // Create: every field is "added"
+      for (const key of Object.keys(newObj)) {
+        if (NOISE_KEYS.has(key)) continue;
+        lines.push({ key, newVal: formatVal(newObj[key]), state: 'added' });
+      }
+    } else if (oldObj) {
+      // Delete: every field is "removed"
+      for (const key of Object.keys(oldObj)) {
+        if (NOISE_KEYS.has(key)) continue;
+        lines.push({ key, oldVal: formatVal(oldObj[key]), state: 'removed' });
+      }
+    } else if (oldValues || newValues) {
+      // Unparseable raw string — show as-is
+      lines.push({ key: (oldValues || newValues || '').slice(0, 80), state: 'changed' });
     }
-    return oldValues || newValues || '';
+
+    return lines;
   }
 }

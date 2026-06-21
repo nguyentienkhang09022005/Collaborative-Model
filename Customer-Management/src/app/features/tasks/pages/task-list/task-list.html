@@ -341,6 +341,13 @@
         </tr>
       </tbody>
     </table>
+    <app-paginator
+      *ngIf="isAdmin"
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [totalCount]="totalCount"
+      (pageChange)="onPageChange($event)">
+    </app-paginator>
   </div>
 
   <!-- Empty State for STAFF -->

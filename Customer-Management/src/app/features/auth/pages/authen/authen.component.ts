@@ -6,11 +6,13 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
+import { LogoComponent } from '../../../../shared/components/logo/logo.component';
+
 
 @Component({
   selector: 'app-authen',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, LogoComponent],
   templateUrl: './authen.html',
   styleUrls: ['./authen.css'],
 })
@@ -25,8 +27,6 @@ export class AuthenComponent {
     private router: Router,
     private toastService: ToastService
   ) {}
-
-  ngOnInit(): void {}
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -48,7 +48,7 @@ export class AuthenComponent {
         }
 
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/app/dashboard']);
       },
       error: (err) => {
         this.toastService.error(err.message || 'Login failed');

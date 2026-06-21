@@ -62,6 +62,54 @@ export class ContactService {
         );
     }
 
+    GetListContactPaged(page: number, pageSize: number): Observable<{ items: ContactItem[]; totalCount: number }> {
+        const query = `
+            query GetContactsPaged($page: Int!, $pageSize: Int!) {
+                contactsPaged(page: $page, pageSize: $pageSize) {
+                    items {
+                        idContact
+                        title
+                        type
+                        content
+                        status
+                        createdAt
+                        updatedAt
+                        lead {
+                            id
+                            resource
+                            createdAt
+                            person {
+                                id
+                                fullname
+                                email
+                                phone
+                                location
+                            }
+                        }
+                        staff {
+                            id
+                            username
+                            role
+                            createdAt
+                            salary
+                            person {
+                                id
+                                fullname
+                                email
+                                phone
+                                location
+                            }
+                        }
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ contactsPaged: { items: ContactItem[]; totalCount: number } }>(query, { page, pageSize }).pipe(
+            map(res => res?.contactsPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     GetInfContact(idContact: string): Observable<ContactItem | null> {
         const query = `
             query($id: UUID!) {

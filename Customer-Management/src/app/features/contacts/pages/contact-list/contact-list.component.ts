@@ -9,6 +9,7 @@ import { StaffItem } from '../../../../core/models/staff.model';
 import { StaffService } from '../../../../core/services/staff.service';
 import { LeadService } from '../../../../core/services/lead.service';
 import { FormsModule } from '@angular/forms';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { PreferenceService } from '../../../../core/services/preference.service';
 import {
@@ -19,7 +20,7 @@ import {
 
 @Component({
   selector: 'app-contact-page',
-  imports: [CommonModule, RouterModule, CustomDatePipe, FormsModule],
+  imports: [CommonModule, RouterModule, CustomDatePipe, FormsModule, PaginatorComponent],
   templateUrl: './contact-list.html',
   styleUrls: ['./contact-list.css'],
 })
@@ -32,6 +33,10 @@ export class ContactListComponent implements OnInit {
   selectedLead: string = '';
   leads: LeadItem[] = [];
   staffs: StaffItem[] = [];
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -53,10 +58,11 @@ export class ContactListComponent implements OnInit {
 
   loadContacts() {
     this.isLoading = true;
-    this.contactService.GetListContact().subscribe({
-      next: (data) => {
+    this.contactService.GetListContactPaged(this.pageIndex + 1, this.pageSize).subscribe({
+      next: (res) => {
         this.isLoading = false;
-        this.contacts = data;
+        this.contacts = res.items;
+        this.totalCount = res.totalCount;
       },
       error: (err) => {
         this.isLoading = false;
@@ -65,8 +71,14 @@ export class ContactListComponent implements OnInit {
     });
   }
 
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadContacts();
+  }
+
   onInfContact(idContact: string) {
-    this.router.navigate(['/contact-detail'], { queryParams: { id: idContact } });
+    this.router.navigate(['/app/contact-detail'], { queryParams: { id: idContact } });
   }
 
   submitAddContact() {

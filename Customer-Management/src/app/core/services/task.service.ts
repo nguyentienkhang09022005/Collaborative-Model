@@ -50,6 +50,43 @@ export class TaskService {
         );
     }
 
+    GetTasksPaged(page: number, pageSize: number): Observable<{ items: TaskItem[]; totalCount: number }> {
+        const query = `
+            query GetTasksPaged($page: Int!, $pageSize: Int!) {
+                tasksPaged(page: $page, pageSize: $pageSize) {
+                    items {
+                        idTask
+                        title
+                        description
+                        dueDate
+                        priority
+                        status
+                        createdAt
+                        updatedAt
+                        isDeleted
+                        idStaffAssigned
+                        staffAssigned {
+                            id
+                            person {
+                                id
+                                fullname
+                                email
+                                phone
+                                location
+                            }
+                        }
+                        linkedEntityType
+                        linkedEntityId
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ tasksPaged: { items: TaskItem[]; totalCount: number } }>(query, { page, pageSize }).pipe(
+            map(res => res?.tasksPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     GetTasksByStaff(idStaff: string): Observable<TaskItem[]> {
         const query = `
             query($idStaff: UUID!) {

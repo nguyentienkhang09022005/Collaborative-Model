@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { ConfirmOTPRegister } from '../../../../core/models/otp.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ToastComponent } from '../../../../shared/components/toast/toast.component';
+import { LogoComponent } from '../../../../shared/components/logo/logo.component';
 
 @Component({
   selector: 'app-otp',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastComponent],
+  imports: [CommonModule, FormsModule, ToastComponent, LogoComponent],
   templateUrl: './otp-register.html',
   styleUrls: ['./otp-register.css'],
 })

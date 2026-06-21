@@ -44,6 +44,31 @@ export class NotificationService {
         );
     }
 
+    GetNotificationsPaged(idStaff: string, page: number, pageSize: number): Observable<{ items: NotificationItem[]; totalCount: number }> {
+        const query = `
+            query GetNotificationsPaged($idStaff: UUID!, $page: Int!, $pageSize: Int!) {
+                notificationsPaged(idStaff: $idStaff, page: $page, pageSize: $pageSize) {
+                    items {
+                        idNotification
+                        title
+                        message
+                        type
+                        isRead
+                        isPinned
+                        createdAt
+                        idStaff
+                        relatedEntityType
+                        relatedEntityId
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ notificationsPaged: { items: NotificationItem[]; totalCount: number } }>(query, { idStaff, page, pageSize }).pipe(
+            map(res => res?.notificationsPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     GetUnreadNotifications(idStaff: string): Observable<NotificationItem[]> {
         const query = `
             query($idStaff: UUID!) {

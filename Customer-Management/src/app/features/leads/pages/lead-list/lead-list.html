@@ -113,6 +113,12 @@
         </tbody>
       </table>
     </div>
+    <app-paginator
+      [pageIndex]="pageIndex"
+      [pageSize]="pageSize"
+      [totalCount]="totalCount"
+      (pageChange)="onPageChange($event)">
+    </app-paginator>
   </div>
 
   <!-- Add Modal -->

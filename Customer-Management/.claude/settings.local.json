@@ -17,7 +17,12 @@
       "Bash(PGPASSWORD='npg_2cBhAdzna7yq' psql *)",
       "Bash(node_modules/.bin/ngc.cmd --noEmit)",
       "Bash(echo \"EXIT_CODE=$?\")",
-      "Bash(node_modules/.bin/ng.cmd build *)"
+      "Bash(node_modules/.bin/ng.cmd build *)",
+      "Bash(npx tsc *)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(PGPASSWORD=\"npg_2cBhAdzna7yq\" psql *)",
+      "Bash(npm install *)"
     ]
   }
 }

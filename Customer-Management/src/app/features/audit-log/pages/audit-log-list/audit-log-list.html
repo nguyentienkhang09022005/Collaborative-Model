@@ -87,11 +87,14 @@
             </span>
           </td>
           <td class="px-5 py-4">
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium" [class]="themeConfig().textPrimary">{{ getEntityLabel(log.entityType) }}</span>
-              <button *ngIf="log.entityId" (click)="viewEntityHistory(log.entityType, log.entityId)"
-                class="text-xs text-blue-500 hover:text-blue-700 underline">
-                {{ log.entityId.substring(0, 8) }}...
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold" [class]="themeConfig().textPrimary">{{ getEntityLabel(log.entityType) }}</span>
+              <button *ngIf="log.entityId"
+                (click)="viewEntityHistory(log.entityType, log.entityId)"
+                [title]="log.entityId"
+                class="mt-0.5 text-[10px] font-mono text-left w-fit transition-colors"
+                [class]="themeConfig().id === 'dark' ? 'text-slate-500 hover:text-violet-400' : 'text-slate-400 hover:text-violet-600'">
+                #{{ log.entityId.substring(0, 8) }}
               </button>
             </div>
           </td>
@@ -99,10 +102,32 @@
             <span class="text-sm" [class]="themeConfig().textSecondary">{{ log.description }}</span>
           </td>
           <td class="px-5 py-4">
-            <span class="text-sm" [class]="themeConfig().textPrimary">{{ log.staffName || 'System' }}</span>
+            <span class="text-sm font-medium" [class]="themeConfig().textPrimary">{{ log.staffName || 'System' }}</span>
           </td>
           <td class="px-5 py-4">
-            <span class="text-xs" [class]="themeConfig().textSecondary">{{ formatOldNewValues(log.oldValues, log.newValues) }}</span>
+            <ng-container *ngIf="formatChanges(log.oldValues, log.newValues) as changes">
+              <div *ngIf="changes.length > 0" class="flex flex-col gap-1 max-w-md">
+                <div *ngFor="let c of changes" class="flex items-baseline gap-1.5 text-xs leading-relaxed">
+                  <span class="font-mono font-semibold shrink-0" [class]="themeConfig().textPrimary">{{ c.key }}:</span>
+                  <ng-container *ngIf="c.state === 'changed'">
+                    <span class="font-mono px-1.5 py-0.5 rounded line-through"
+                      [class]="themeConfig().id === 'dark' ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-700'">{{ c.oldVal }}</span>
+                    <span [class]="themeConfig().id === 'dark' ? 'text-slate-500' : 'text-slate-400'">→</span>
+                    <span class="font-mono px-1.5 py-0.5 rounded"
+                      [class]="themeConfig().id === 'dark' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-700'">{{ c.newVal }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="c.state === 'added'">
+                    <span class="font-mono px-1.5 py-0.5 rounded"
+                      [class]="themeConfig().id === 'dark' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-700'">{{ c.newVal }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="c.state === 'removed'">
+                    <span class="font-mono px-1.5 py-0.5 rounded line-through"
+                      [class]="themeConfig().id === 'dark' ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-700'">{{ c.oldVal }}</span>
+                  </ng-container>
+                </div>
+              </div>
+              <span *ngIf="changes.length === 0" class="text-xs italic" [class]="themeConfig().textSecondary">—</span>
+            </ng-container>
           </td>
         </tr>
         <tr *ngIf="auditLogs.length === 0">

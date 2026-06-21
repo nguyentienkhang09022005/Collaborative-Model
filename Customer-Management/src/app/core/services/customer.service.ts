@@ -40,6 +40,30 @@ export class CustomerService {
         );
     }
 
+    GetListCustomerPaged(page: number, pageSize: number): Observable<{ items: CustomerItem[]; totalCount: number }> {
+        const query = `
+            query GetCustomersPaged($page: Int!, $pageSize: Int!) {
+                customersPaged(page: $page, pageSize: $pageSize) {
+                    items {
+                        id
+                        createdAt
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ customersPaged: { items: CustomerItem[]; totalCount: number } }>(query, { page, pageSize }).pipe(
+            map(res => res?.customersPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     GetInfCustomer(idCustomer: string): Observable<CustomerItem | null> {
         const query = `
             query($id: UUID!) {

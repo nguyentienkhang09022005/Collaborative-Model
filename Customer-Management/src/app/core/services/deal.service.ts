@@ -61,6 +61,53 @@ export class DealService {
         );
     }
 
+    GetListDealPaged(page: number, pageSize: number): Observable<{ items: DealItem[]; totalCount: number }> {
+        const query = `
+            query GetDealsPaged($page: Int!, $pageSize: Int!) {
+                dealsPaged(page: $page, pageSize: $pageSize) {
+                    items {
+                        idDeal
+                        title
+                        content
+                        price
+                        status
+                        createdAt
+                        updatedAt
+                        customer {
+                            id
+                            createdAt
+                            person {
+                                id
+                                fullname
+                                email
+                                phone
+                                location
+                            }
+                        }
+                        staff {
+                            id
+                            username
+                            role
+                            createdAt
+                            salary
+                            person {
+                                id
+                                fullname
+                                email
+                                phone
+                                location
+                            }
+                        }
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ dealsPaged: { items: DealItem[]; totalCount: number } }>(query, { page, pageSize }).pipe(
+            map(res => res?.dealsPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     // STAFF dùng - lấy deals của mình (OWNER và MEMBER)
     GetMyDeals(): Observable<DealItem[]> {
         const query = `

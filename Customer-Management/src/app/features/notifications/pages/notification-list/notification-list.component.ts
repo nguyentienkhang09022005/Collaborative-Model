@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { PaginatorComponent, PaginatorChange } from '../../../../shared/components/paginator/paginator.component';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -14,13 +15,17 @@ import {
 @Component({
   selector: 'app-notification-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PaginatorComponent],
   templateUrl: './notification-list.html',
 })
 export class NotificationListComponent implements OnInit, OnDestroy {
   notifications: NotificationItem[] = [];
   isLoading = true;
   currentStaffId = '';
+
+  pageIndex = 0;
+  pageSize = 10;
+  totalCount = 0;
 
   private preferenceService = inject(PreferenceService);
   readonly themeConfig = this.preferenceService.themeConfig;
@@ -57,9 +62,10 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
   loadNotifications(): void {
     this.isLoading = true;
-    this.notificationService.GetNotifications(this.currentStaffId).subscribe({
+    this.notificationService.GetNotificationsPaged(this.currentStaffId, this.pageIndex + 1, this.pageSize).subscribe({
       next: (res) => {
-        this.notifications = res;
+        this.notifications = res.items;
+        this.totalCount = res.totalCount;
         this.isLoading = false;
       },
       error: (err) => {
@@ -67,6 +73,12 @@ export class NotificationListComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
+  }
+
+  onPageChange(e: PaginatorChange): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.loadNotifications();
   }
 
   markAsRead(idNotification: string): void {
@@ -128,11 +140,11 @@ export class NotificationListComponent implements OnInit, OnDestroy {
 
     if (notification.relatedEntityType && notification.relatedEntityId) {
       const routeMap: Record<string, { path: string; useQueryParam: boolean }> = {
-        'Task': { path: '/tasks', useQueryParam: false },
-        'Lead': { path: '/lead-detail', useQueryParam: true },
-        'Customer': { path: '/customer-detail', useQueryParam: true },
-        'Contact': { path: '/contact-detail', useQueryParam: true },
-        'Deal': { path: '/deal-detail', useQueryParam: true }
+        'Task': { path: '/app/tasks', useQueryParam: false },
+        'Lead': { path: '/app/lead-detail', useQueryParam: true },
+        'Customer': { path: '/app/customer-detail', useQueryParam: true },
+        'Contact': { path: '/app/contact-detail', useQueryParam: true },
+        'Deal': { path: '/app/deal-detail', useQueryParam: true }
       };
       const route = routeMap[notification.relatedEntityType];
       if (route) {

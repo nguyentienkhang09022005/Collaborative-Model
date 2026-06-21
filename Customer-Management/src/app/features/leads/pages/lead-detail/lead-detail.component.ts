@@ -97,7 +97,7 @@ export class LeadDetailComponet implements OnInit {
   }
 
   onBack() {
-    this.router.navigate(['/leads']);
+    this.router.navigate(['/app/leads']);
   }
 
   private getEmptyForm(): LeadRequest {

@@ -12,11 +12,30 @@ import { NotificationItem } from '../../core/models/notification.model';
 import { PreferenceService } from '../../core/services/preference.service';
 import { AiService } from '../../core/services/ai.service';
 import { HistoryMessageItem } from '../../core/models/ai.model';
+import { LogoComponent } from '../../shared/components/logo/logo.component';
+
+export type AiBlockType = 'section' | 'empty' | 'paragraph';
+
+export interface AiItem {
+  label: string;
+  count?: number;
+  countLabel?: string;
+  badge?: string;
+  isEmpty?: boolean;
+}
+
+export interface AiBlock {
+  type: AiBlockType;
+  title?: string;
+  iconKind?: string;
+  items?: AiItem[];
+  text?: string;
+}
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, RouterModule, FormsModule, ToastComponent, ConfirmDialogComponent],
+  imports: [RouterOutlet, CommonModule, RouterModule, FormsModule, ToastComponent, ConfirmDialogComponent, LogoComponent],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css',
 })
@@ -132,11 +151,11 @@ export class MainLayoutComponent implements OnDestroy {
         // Navigate based on related entity
         if (relatedEntityType && relatedEntityId) {
           const routeMap: Record<string, { path: string; useQueryParam: boolean }> = {
-            'Task': { path: '/tasks', useQueryParam: false },
-            'Lead': { path: '/lead-detail', useQueryParam: true },
-            'Customer': { path: '/customer-detail', useQueryParam: true },
-            'Contact': { path: '/contact-detail', useQueryParam: true },
-            'Deal': { path: '/deal-detail', useQueryParam: true }
+            'Task': { path: '/app/tasks', useQueryParam: false },
+            'Lead': { path: '/app/lead-detail', useQueryParam: true },
+            'Customer': { path: '/app/customer-detail', useQueryParam: true },
+            'Contact': { path: '/app/contact-detail', useQueryParam: true },
+            'Deal': { path: '/app/deal-detail', useQueryParam: true }
           };
           const route = routeMap[relatedEntityType];
           if (route) {
@@ -146,10 +165,10 @@ export class MainLayoutComponent implements OnDestroy {
               this.router.navigate([route.path, relatedEntityId]);
             }
           } else {
-            this.router.navigate(['/notifications']);
+            this.router.navigate(['/app/notifications']);
           }
         } else {
-          this.router.navigate(['/notifications']);
+          this.router.navigate(['/app/notifications']);
         }
       },
       error: (err) => {
@@ -342,5 +361,247 @@ export class MainLayoutComponent implements OnDestroy {
   toggleChat() {
     this.isChatOpen = !this.isChatOpen;
     this.isChatBoxOpen = !this.isChatOpen;
+  }
+
+  // ── AI board rendering ─────────────────────────────────────────────────
+
+  parseAiContent(text: string): AiBlock[] {
+    if (!text || !text.trim()) {
+      return [{ type: 'paragraph', text: '' }];
+    }
+
+    const rawLines = text.split('\n');
+    const lines = rawLines
+      .map(l => l.trim())
+      .filter(l => l !== '');
+
+    const sections: AiBlock[] = [];
+    let current: AiBlock | null = null;
+
+    const flush = () => {
+      if (!current) return;
+      const hasTitle = !!current.title;
+      const hasItems = (current.items?.length ?? 0) > 0;
+      if (hasTitle || hasItems) sections.push(current);
+      current = null;
+    };
+
+    const isEmptyMarker = (s: string) =>
+      /^\(\s*[Kk]hông có[^)]*\)\s*$/.test(s) ||
+      /^\(\s*[Nn]o data[^)]*\)\s*$/.test(s) ||
+      /^\(\s*[Ee]mpty[^)]*\)\s*$/.test(s) ||
+      /^N\/?A$/i.test(s) ||
+      /^-$/.test(s);
+
+    let hasAnyHeader = false;
+    let hasAnyBullet = false;
+    for (const l of lines) {
+      if (/^\*\*.+?:\*\*\s*$/.test(l)) hasAnyHeader = true;
+      if (/^[-•]\s+/.test(l)) hasAnyBullet = true;
+    }
+
+    for (const line of lines) {
+      // Section header: **Title:**
+      const headingMatch = line.match(/^\*\*(.+?):\*\*\s*$/);
+      if (headingMatch) {
+        flush();
+        const title = headingMatch[1].trim();
+        current = {
+          type: 'section',
+          title,
+          iconKind: this.detectIconKind(title),
+          items: []
+        };
+        continue;
+      }
+
+      // Empty marker line
+      if (isEmptyMarker(line)) {
+        if (current && current.type === 'section') {
+          current.items = current.items ?? [];
+          current.items.push({ label: line.replace(/[()]/g, '').trim() || '(Không có dữ liệu)', isEmpty: true });
+        } else {
+          sections.push({ type: 'empty', text: line });
+        }
+        continue;
+      }
+
+      // Bullet item: - Item text
+      const bulletMatch = line.match(/^[-•]\s+(.+)$/);
+      if (bulletMatch) {
+        if (!current) {
+          current = {
+            type: 'section',
+            title: hasAnyHeader ? '' : 'Kết quả',
+            iconKind: hasAnyHeader ? 'info' : 'stats',
+            items: []
+          };
+        }
+        const item = this.parseAiItem(bulletMatch[1]);
+        current.items = current.items ?? [];
+        current.items.push(item);
+        continue;
+      }
+
+      // Plain text — close any section, push as paragraph
+      flush();
+      sections.push({ type: 'paragraph', text: line });
+    }
+
+    flush();
+
+    // Fallback: if no headers but has bullets, give it a default title
+    if (!hasAnyHeader && hasAnyBullet && sections.length === 1) {
+      const only = sections[0];
+      if (only.type === 'section' && !only.title) {
+        only.title = 'Kết quả';
+        only.iconKind = 'stats';
+      }
+    }
+
+    return sections;
+  }
+
+  private parseAiItem(raw: string): AiItem {
+    let s = raw.trim();
+
+    // Extract count badge: (3 lead), (5 contact)
+    const countMatch = s.match(/^(.+?)\s*\((\d+)\s+([^)]+)\)\s*(.*)$/);
+    if (countMatch) {
+      const label = countMatch[1].trim();
+      const rest = countMatch[4]?.trim() ?? '';
+      const item: AiItem = {
+        label,
+        count: parseInt(countMatch[2], 10),
+        countLabel: countMatch[3].trim(),
+      };
+      if (rest) {
+        const cleaned = rest.replace(/^[\s,;:.–-]+/, '').trim();
+        if (cleaned) item.badge = cleaned;
+      }
+      return item;
+    }
+
+    // Extract status badge: trailing words like "Updated", "Mới", "Cập nhật"
+    // Match with optional trailing punctuation
+    const statusWords = [
+      'Updated', 'New', 'Pending', 'Done', 'Closed', 'Won', 'Lost',
+      'Mới', 'Cập nhật', 'Đang chờ', 'Hoàn thành', 'Đã đóng', 'Thắng', 'Thua',
+      'Hot', 'Warm', 'Cold', 'Nóng', 'Ấm', 'Lạnh'
+    ];
+    for (const w of statusWords) {
+      const idx = s.lastIndexOf(w);
+      if (idx === -1) continue;
+      const after = idx + w.length;
+      // Character after word must be non-alphanumeric or end of string
+      if (after < s.length && /[\w]/.test(s.charAt(after))) continue;
+      // Character before word must be start of string or non-alphanumeric (word boundary)
+      if (idx > 0 && /[\w]/.test(s.charAt(idx - 1))) continue;
+      // Found a status word at a word boundary
+      const label = s.substring(0, idx).trim().replace(/[\s,;:.–-]+$/, '').trim();
+      if (label) {
+        return { label, badge: w };
+      }
+    }
+
+    return { label: s };
+  }
+
+  private detectIconKind(title: string): string {
+    const t = title.toLowerCase();
+    if (/(lead)/.test(t)) return 'lead';
+    if (/(customer|khách hàng)/.test(t)) return 'customer';
+    if (/(contact|liên hệ)/.test(t)) return 'contact';
+    if (/(deal|cơ hội|giao dịch)/.test(t)) return 'deal';
+    if (/(task|công việc|nhiệm vụ)/.test(t)) return 'task';
+    if (/(doanh thu|revenue|tổng)/.test(t)) return 'revenue';
+    if (/(cảnh báo|warning|rủi ro)/.test(t)) return 'warning';
+    if (/(đề xuất|gợi ý|khuyến nghị|suggest|gợi ý|hành động)/.test(t)) return 'suggestion';
+    if (/(phân tích|analysis|chi tiết)/.test(t)) return 'analysis';
+    if (/(thống kê|summary|tổng quan|tóm tắt)/.test(t)) return 'stats';
+    if (/(ngày|date|thời gian|hôm nay|tuần|tháng)/.test(t)) return 'calendar';
+    if (/(xu hướng|trend|tiến độ)/.test(t)) return 'trend';
+    return 'info';
+  }
+
+  getBlockIconPath(kind: string): string {
+    const map: Record<string, string> = {
+      lead: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+      customer: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+      contact: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+      deal: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+      task: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+      revenue: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+      warning: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+      suggestion: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+      analysis: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+      stats: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+      calendar: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+      trend: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',
+      info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+    };
+    return map[kind] || map['info'];
+  }
+
+  getBlockIconBgClass(kind: string): string {
+    const isDark = this.themeConfig().id === 'dark';
+    const lightMap: Record<string, string> = {
+      lead: 'bg-blue-100 text-blue-600',
+      customer: 'bg-emerald-100 text-emerald-600',
+      contact: 'bg-cyan-100 text-cyan-600',
+      deal: 'bg-violet-100 text-violet-600',
+      task: 'bg-amber-100 text-amber-600',
+      revenue: 'bg-emerald-100 text-emerald-600',
+      warning: 'bg-rose-100 text-rose-600',
+      suggestion: 'bg-amber-100 text-amber-600',
+      analysis: 'bg-sky-100 text-sky-600',
+      stats: 'bg-indigo-100 text-indigo-600',
+      calendar: 'bg-orange-100 text-orange-600',
+      trend: 'bg-teal-100 text-teal-600',
+      info: 'bg-slate-100 text-slate-600'
+    };
+    const darkMap: Record<string, string> = {
+      lead: 'bg-blue-900/50 text-blue-300',
+      customer: 'bg-emerald-900/50 text-emerald-300',
+      contact: 'bg-cyan-900/50 text-cyan-300',
+      deal: 'bg-violet-900/50 text-violet-300',
+      task: 'bg-amber-900/50 text-amber-300',
+      revenue: 'bg-emerald-900/50 text-emerald-300',
+      warning: 'bg-rose-900/50 text-rose-300',
+      suggestion: 'bg-amber-900/50 text-amber-300',
+      analysis: 'bg-sky-900/50 text-sky-300',
+      stats: 'bg-indigo-900/50 text-indigo-300',
+      calendar: 'bg-orange-900/50 text-orange-300',
+      trend: 'bg-teal-900/50 text-teal-300',
+      info: 'bg-slate-700 text-slate-300'
+    };
+    const m = isDark ? darkMap : lightMap;
+    return m[kind] || m['info'];
+  }
+
+  getBadgeClass(badge: string): string {
+    const b = badge.toLowerCase();
+    const isDark = this.themeConfig().id === 'dark';
+    let tone = 'slate';
+    if (/(updated|cập nhật|hoàn thành|done|won|thắng|closed|đã đóng|new|mới)/.test(b)) tone = 'emerald';
+    else if (/(pending|đang chờ|hot|nóng|warning|cảnh báo)/.test(b)) tone = 'amber';
+    else if (/(cold|lạnh|lost|thua)/.test(b)) tone = 'sky';
+    else if (/(warm|ấm)/.test(b)) tone = 'orange';
+
+    const lightMap: Record<string, string> = {
+      emerald: 'bg-emerald-100 text-emerald-700',
+      amber: 'bg-amber-100 text-amber-700',
+      sky: 'bg-sky-100 text-sky-700',
+      orange: 'bg-orange-100 text-orange-700',
+      slate: 'bg-slate-100 text-slate-600'
+    };
+    const darkMap: Record<string, string> = {
+      emerald: 'bg-emerald-900/40 text-emerald-300',
+      amber: 'bg-amber-900/40 text-amber-300',
+      sky: 'bg-sky-900/40 text-sky-300',
+      orange: 'bg-orange-900/40 text-orange-300',
+      slate: 'bg-slate-700 text-slate-300'
+    };
+    return (isDark ? darkMap : lightMap)[tone];
   }
 }

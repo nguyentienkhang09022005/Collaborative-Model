@@ -41,6 +41,31 @@ export class LeadService {
         );
     }
 
+    GetListLeadPaged(page: number, pageSize: number): Observable<{ items: LeadItem[]; totalCount: number }> {
+        const query = `
+            query GetLeadsPaged($page: Int!, $pageSize: Int!) {
+                leadsPaged(page: $page, pageSize: $pageSize) {
+                    items {
+                        id
+                        createdAt
+                        resource
+                        person {
+                            id
+                            fullname
+                            email
+                            phone
+                            location
+                        }
+                    }
+                    totalCount
+                }
+            }`;
+
+        return this.api.graphql<{ leadsPaged: { items: LeadItem[]; totalCount: number } }>(query, { page, pageSize }).pipe(
+            map(res => res?.leadsPaged ?? { items: [], totalCount: 0 })
+        );
+    }
+
     GetInfLead(idLead: string): Observable<LeadItem | null> {
         const query = `
             query($id: UUID!) {

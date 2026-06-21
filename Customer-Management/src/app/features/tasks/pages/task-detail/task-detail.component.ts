@@ -202,7 +202,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   onBack(): void {
-    this.router.navigate(['/tasks']);
+    this.router.navigate(['/app/tasks']);
   }
 
   getPriorityClass(priority: string): string {
