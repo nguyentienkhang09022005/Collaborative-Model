@@ -1,69 +1,137 @@
 import { Routes } from '@angular/router';
-import { AuthenComponent } from './features/auth/pages/authen/authen.component';
-import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
-import { DashboardComponent } from './features/dashboard/pages/dashboard/dash-board.component';
-import { OtpRegisterComponent } from './features/auth/components/otp/otp-register.component';
-import { ForgotPasswordComponent } from './features/auth/pages/forgot-password/forgot-password.component';
-import { OtpForgotPasswordComponent } from './features/auth/components/otp/otp-forgot-password.component';
-import { ResetPasswordComponent } from './features/auth/pages/reset-password/reset-password.component';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { AuthGuard } from './guards/auth/auth.guard';
-import { ContactListComponent } from './features/contacts/pages/contact-list/contact-list.component';
-import { CustomerListComponent } from './features/customers/pages/customer-list/customer-list.component';
-import { DealListComponent } from './features/deals/pages/deal-list/deal-list.component';
-import { LeadListComponent } from './features/leads/pages/lead-list/lead-list.component';
-import { LeadDetailComponet } from './features/leads/pages/lead-detail/lead-detail.component';
-import { CustomerDetailComponet } from './features/customers/pages/customer-detail/customer-detail.component';
-import { ContactDetailComponent } from './features/contacts/pages/contact-detail/contact-detail.component';
-import { DealDetailComponent } from './features/deals/pages/deal-detail/deal-detail.component';
-import { LeadMarkComponent } from './features/leads/components/lead-mark/lead-mark.component';
-import { TaskListComponent } from './features/tasks/pages/task-list/task-list.component';
-import { TaskDetailComponent } from './features/tasks/pages/task-detail/task-detail.component';
-import { NotificationListComponent } from './features/notifications/pages/notification-list/notification-list.component';
-import { CalendarListComponent } from './features/calendar/pages/calendar-list/calendar-list.component';
-import { AuditLogListComponent } from './features/audit-log/pages/audit-log-list/audit-log-list.component';
-import { ReportListComponent } from './features/reports/pages/report-list/report-list.component';
-import { StaffListComponent } from './features/staff/pages/staff-list/staff-list.component';
-import { SettingsComponent } from './features/settings/pages/settings/settings.component';
 
 export const routes: Routes = [
     // Authen
-    { path: 'authen', component: AuthenComponent },
-    { path: 'forgot-password', component: ForgotPasswordComponent },
-    { path: 'otp-register', component: OtpRegisterComponent },
-    { path: 'otp-forgot-password', component: OtpForgotPasswordComponent },
-    { path: 'reset-password', component: ResetPasswordComponent },
+    {
+        path: 'authen',
+        loadComponent: () =>
+            import('./features/auth/pages/authen/authen.component').then(m => m.AuthenComponent),
+    },
+    {
+        path: 'forgot-password',
+        loadComponent: () =>
+            import('./features/auth/pages/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    },
+    {
+        path: 'otp-register',
+        loadComponent: () =>
+            import('./features/auth/components/otp/otp-register.component').then(m => m.OtpRegisterComponent),
+    },
+    {
+        path: 'otp-forgot-password',
+        loadComponent: () =>
+            import('./features/auth/components/otp/otp-forgot-password.component').then(m => m.OtpForgotPasswordComponent),
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () =>
+            import('./features/auth/pages/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    },
 
     // Mark
-    { path: 'lead-mark', component: LeadMarkComponent },
+    {
+        path: 'lead-mark',
+        loadComponent: () =>
+            import('./features/leads/components/lead-mark/lead-mark.component').then(m => m.LeadMarkComponent),
+    },
 
     // Main
     {
         path: '',
-        component: MainLayoutComponent,
+        loadComponent: () =>
+            import('./layouts/main-layout/main-layout.component').then(m => m.MainLayoutComponent),
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        children:
-        [
+        children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-            { path: 'dashboard', component: DashboardComponent },
-            { path: 'leads', component: LeadListComponent },
-            { path: 'lead-detail', component: LeadDetailComponet },
-            { path: 'customers', component: CustomerListComponent },
-            { path: 'customer-detail', component: CustomerDetailComponet },
-            { path: 'contacts', component: ContactListComponent },
-            { path: 'contact-detail', component: ContactDetailComponent },
-            { path: 'deals', component: DealListComponent },
-            { path: 'deal-detail', component: DealDetailComponent },
-            { path: 'staff', component: StaffListComponent },
-
-            // New routes
-            { path: 'tasks', component: TaskListComponent },
-            { path: 'tasks/:id', component: TaskDetailComponent },
-            { path: 'notifications', component: NotificationListComponent },
-            { path: 'calendar', component: CalendarListComponent },
-            { path: 'audit-log', component: AuditLogListComponent },
-            { path: 'reports', component: ReportListComponent },
-            { path: 'settings', component: SettingsComponent },
+            {
+                path: 'dashboard',
+                loadComponent: () =>
+                    import('./features/dashboard/pages/dashboard/dash-board.component').then(m => m.DashboardComponent),
+                providers: [provideCharts(withDefaultRegisterables())],
+            },
+            {
+                path: 'leads',
+                loadComponent: () =>
+                    import('./features/leads/pages/lead-list/lead-list.component').then(m => m.LeadListComponent),
+            },
+            {
+                path: 'lead-detail',
+                loadComponent: () =>
+                    import('./features/leads/pages/lead-detail/lead-detail.component').then(m => m.LeadDetailComponet),
+            },
+            {
+                path: 'customers',
+                loadComponent: () =>
+                    import('./features/customers/pages/customer-list/customer-list.component').then(m => m.CustomerListComponent),
+            },
+            {
+                path: 'customer-detail',
+                loadComponent: () =>
+                    import('./features/customers/pages/customer-detail/customer-detail.component').then(m => m.CustomerDetailComponet),
+            },
+            {
+                path: 'contacts',
+                loadComponent: () =>
+                    import('./features/contacts/pages/contact-list/contact-list.component').then(m => m.ContactListComponent),
+            },
+            {
+                path: 'contact-detail',
+                loadComponent: () =>
+                    import('./features/contacts/pages/contact-detail/contact-detail.component').then(m => m.ContactDetailComponent),
+            },
+            {
+                path: 'deals',
+                loadComponent: () =>
+                    import('./features/deals/pages/deal-list/deal-list.component').then(m => m.DealListComponent),
+            },
+            {
+                path: 'deal-detail',
+                loadComponent: () =>
+                    import('./features/deals/pages/deal-detail/deal-detail.component').then(m => m.DealDetailComponent),
+            },
+            {
+                path: 'staff',
+                loadComponent: () =>
+                    import('./features/staff/pages/staff-list/staff-list.component').then(m => m.StaffListComponent),
+            },
+            {
+                path: 'tasks',
+                loadComponent: () =>
+                    import('./features/tasks/pages/task-list/task-list.component').then(m => m.TaskListComponent),
+            },
+            {
+                path: 'tasks/:id',
+                loadComponent: () =>
+                    import('./features/tasks/pages/task-detail/task-detail.component').then(m => m.TaskDetailComponent),
+            },
+            {
+                path: 'notifications',
+                loadComponent: () =>
+                    import('./features/notifications/pages/notification-list/notification-list.component').then(m => m.NotificationListComponent),
+            },
+            {
+                path: 'calendar',
+                loadComponent: () =>
+                    import('./features/calendar/pages/calendar-list/calendar-list.component').then(m => m.CalendarListComponent),
+            },
+            {
+                path: 'audit-log',
+                loadComponent: () =>
+                    import('./features/audit-log/pages/audit-log-list/audit-log-list.component').then(m => m.AuditLogListComponent),
+            },
+            {
+                path: 'reports',
+                loadComponent: () =>
+                    import('./features/reports/pages/report-list/report-list.component').then(m => m.ReportListComponent),
+            },
+            {
+                path: 'settings',
+                loadComponent: () =>
+                    import('./features/settings/pages/settings/settings.component').then(m => m.SettingsComponent),
+            },
         ]
     },
 

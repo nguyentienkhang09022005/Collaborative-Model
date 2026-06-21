@@ -10,6 +10,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 import { NotificationService } from '../../core/services/notification.service';
 import { NotificationItem } from '../../core/models/notification.model';
 import { PreferenceService } from '../../core/services/preference.service';
+import { AiService } from '../../core/services/ai.service';
+import { HistoryMessageItem } from '../../core/models/ai.model';
 
 @Component({
   selector: 'app-main-layout',
@@ -34,6 +36,7 @@ export class MainLayoutComponent implements OnDestroy {
   newMessage: string = '';
   aiTyping: boolean = false;
   isChatThinking: boolean = false;
+  historyMessageItem: HistoryMessageItem[] = [];
 
   private notificationPollInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -43,7 +46,7 @@ export class MainLayoutComponent implements OnDestroy {
 
   constructor(
     private authenService: AuthService,
-    // private aiService: AiService,
+    private aiService: AiService,
     private router: Router,
     private toastService: ToastService,
     private notificationService: NotificationService
@@ -51,8 +54,8 @@ export class MainLayoutComponent implements OnDestroy {
 
   ngOnInit(): void {
     this.currentStaff = this.authenService.getCurrentStaff();
-    // AI Chat disabled - pending refactor
-    // this.onListHistoryMessage(this.currentStaff?.id || "");
+    this.onListHistoryMessage(this.currentStaff?.id || "");
+    this.loadWelcomeMessage();
 
     // setInterval(() => {
     //   this.showChatThinking();
@@ -271,56 +274,70 @@ export class MainLayoutComponent implements OnDestroy {
     this.showLogoutDialog = false;
   }
 
-  // onListHistoryMessage(idStaff: string){
-  //   this.aiService.ListHistoryMessage(idStaff).subscribe({
-  //     next: (res) => {
-  //       if (res.errors && res.errors.length > 0) {
-  //         this.toastService.error(res.errors[0].message);
-  //         return;
-  //       }
+  onListHistoryMessage(idStaff: string){
+    if (!idStaff) return;
+    this.aiService.ListHistoryMessage(idStaff).subscribe({
+      next: (res) => {
+        this.historyMessageItem = res ?? [];
+      },
+      error: (err) => {
+        console.log("Error: ", err);
+      }
+    });
+  }
 
-  //       this.historyMessageItem = res.data?.historyMessage ?? [];
-  //     },
-  //     error: (err) => {
-  //       console.log("Error: ", err);
-  //     }
-  //   });
-  // }
+  loadWelcomeMessage() {
+    this.aiService.GetWelcomeMessage().subscribe({
+      next: (msg) => {
+        if (msg && this.historyMessageItem.length === 0) {
+          this.historyMessageItem.push({ role: 'model', message: msg });
+        }
+      },
+      error: (err) => {
+        console.log("Error loading welcome: ", err);
+      }
+    });
+  }
 
-  // sendMessage() {
-  //   const message = this.newMessage.trim();
-  //   if (!message || !this.currentStaff) return;
+  clearChatHistory() {
+    if (!this.currentStaff?.id) return;
+    this.aiService.DeleteMessage(this.currentStaff.id).subscribe({
+      next: () => {
+        this.historyMessageItem = [];
+        this.loadWelcomeMessage();
+        this.toastService.success('Đã xóa lịch sử trò chuyện');
+      },
+      error: (err) => {
+        console.log("Error clearing: ", err);
+        this.toastService.error('Xóa lịch sử thất bại');
+      }
+    });
+  }
 
-  //   this.historyMessageItem.push({ role: 'user', message: message });
-  //   this.newMessage = '';
+  sendMessage() {
+    const message = this.newMessage.trim();
+    if (!message || !this.currentStaff) return;
 
-  //   this.aiTyping = true;
+    this.historyMessageItem.push({ role: 'user', message: message });
+    this.newMessage = '';
 
-  //   const chatRequest: ChatRequest = {
-  //     idStaff: this.currentStaff.id,
-  //     userMessage: message
-  //   };
+    this.aiTyping = true;
 
-  //   this.aiService.ChatWithAI(chatRequest).subscribe({
-  //     next: (res) => {
-  //       this.aiTyping = false;
-
-  //       if (res.errors && res.errors.length > 0) {
-  //         this.toastService.error(res.errors[0].message);
-  //         return;
-  //       }
-
-  //       const aiMsg = res.data?.sendChatMessage;
-  //       if (aiMsg) {
-  //         this.historyMessageItem.push({ role: 'model', message: aiMsg.aiResponse });
-  //       }
-  //     },
-  //     error: (err) => {
-  //       this.aiTyping = false;
-  //       console.log("Error: ", err);
-  //     }
-  //   });
-  // }
+    this.aiService.ChatWithAI(this.currentStaff.id, message).subscribe({
+      next: (aiMsg) => {
+        this.aiTyping = false;
+        if (aiMsg?.aiResponse) {
+          this.historyMessageItem.push({ role: 'model', message: aiMsg.aiResponse });
+          setTimeout(() => this.scrollToBottom(), 50);
+        }
+      },
+      error: (err) => {
+        this.aiTyping = false;
+        console.log("Error: ", err);
+        this.historyMessageItem.push({ role: 'model', message: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.' });
+      }
+    });
+  }
 
   toggleChat() {
     this.isChatOpen = !this.isChatOpen;

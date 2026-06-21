@@ -5,7 +5,7 @@ export interface ChatRequest {
 }
 
 //----------Response Models----------
-export interface ChatResponse{
+export interface ChatResponse {
     errors?: {
         message: string
     }[];
@@ -23,11 +23,29 @@ export interface HistoryMessageResponse {
         message: string
     }[];
     data: {
-        historyMessage: HistoryMessageItem[];
+        getHistoryMessage: HistoryMessageItem[];
     }
 }
 
 export interface HistoryMessageItem {
     role: string,
     message: string
+}
+
+export interface WelcomeMessageResponse {
+    errors?: {
+        message: string
+    }[];
+    data: {
+        getChatWelcomeMessage: string;
+    }
+}
+
+export interface DeleteMessageResponse {
+    errors?: {
+        message: string
+    }[];
+    data: {
+        deleteMessage: string;
+    }
 }

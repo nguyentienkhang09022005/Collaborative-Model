@@ -279,4 +279,139 @@
       <router-outlet></router-outlet>
     </section>
   </main>
+
+  <!-- Floating AI Chat Button -->
+  <button
+    (click)="toggleChat()"
+    [class]="'fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 ' +
+             (isChatOpen ? 'bg-gradient-to-br from-red-500 to-rose-500' : 'bg-gradient-to-br from-sky-500 to-emerald-500')"
+    title="CRMie AI Assistant">
+    <svg *ngIf="!isChatOpen" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+    </svg>
+    <svg *ngIf="isChatOpen" class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+    </svg>
+  </button>
+
+  <!-- AI Chat Panel -->
+  <div *ngIf="isChatOpen"
+    [class]="'fixed bottom-24 right-6 z-50 w-[28rem] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] rounded-2xl shadow-2xl border flex flex-col overflow-hidden transition-colors duration-300 ' +
+             themeConfig().cardBg + ' ' + themeConfig().borderColor">
+
+    <!-- Chat Header -->
+    <div [class]="'flex items-center justify-between px-5 py-4 border-b ' + themeConfig().borderColor + ' ' +
+                  (themeConfig().id === 'dark' ? 'bg-gradient-to-r from-slate-800 to-slate-900' : 'bg-gradient-to-r from-sky-50 to-emerald-50')">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center shadow-lg">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-base" [class]="themeConfig().textPrimary">CRMie</h3>
+          <p class="text-xs" [class]="themeConfig().textSecondary">Trợ lý AI Bất động sản</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          (click)="clearChatHistory()"
+          [class]="'p-2 rounded-lg transition-colors ' +
+                  (themeConfig().id === 'dark' ? 'text-slate-400 hover:text-red-400 hover:bg-slate-700' : 'text-slate-500 hover:text-red-500 hover:bg-slate-100')"
+          title="Xóa lịch sử">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/>
+          </svg>
+        </button>
+        <button
+          (click)="toggleChat()"
+          [class]="'p-2 rounded-lg transition-colors ' +
+                  (themeConfig().id === 'dark' ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100')"
+          title="Đóng">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div #chatContainer [class]="'flex-1 overflow-y-auto px-4 py-4 space-y-4 ' +
+                                (themeConfig().id === 'dark' ? 'bg-slate-900/50' : 'bg-slate-50/50')">
+      <div *ngIf="historyMessageItem.length === 0" class="flex items-center justify-center h-full">
+        <p class="text-sm" [class]="themeConfig().textSecondary">Đang tải...</p>
+      </div>
+
+      <div *ngFor="let msg of historyMessageItem" class="flex gap-2"
+        [class.justify-end]="msg.role === 'user'">
+        <!-- AI Avatar (left) -->
+        <div *ngIf="msg.role !== 'user'" class="flex-shrink-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center shadow">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Message Bubble -->
+        <div [class]="'max-w-[75%] px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words shadow-sm ' +
+                       (msg.role === 'user'
+                         ? (themeConfig().id === 'dark' ? 'bg-sky-600 text-white' : 'bg-gradient-to-br from-sky-500 to-emerald-500 text-white')
+                         : (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-100' : 'bg-white text-slate-800 border border-slate-200'))">
+          {{ msg.message }}
+        </div>
+
+        <!-- User Avatar (right) -->
+        <div *ngIf="msg.role === 'user'" class="flex-shrink-0">
+          <div [class]="'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow ' +
+                        (themeConfig().id === 'dark' ? 'bg-slate-600' : 'bg-slate-400')">
+            {{ (currentStaff?.person?.fullname || 'U').charAt(0).toUpperCase() }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div *ngIf="aiTyping" class="flex gap-2">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-emerald-400 flex items-center justify-center shadow">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        </div>
+        <div [class]="'px-4 py-3 rounded-2xl shadow-sm flex items-center gap-1 ' +
+                      (themeConfig().id === 'dark' ? 'bg-slate-700' : 'bg-white border border-slate-200')">
+          <span class="w-2 h-2 rounded-full animate-bounce" [class]="themeConfig().id === 'dark' ? 'bg-slate-400' : 'bg-slate-500'" style="animation-delay: 0s"></span>
+          <span class="w-2 h-2 rounded-full animate-bounce" [class]="themeConfig().id === 'dark' ? 'bg-slate-400' : 'bg-slate-500'" style="animation-delay: 0.2s"></span>
+          <span class="w-2 h-2 rounded-full animate-bounce" [class]="themeConfig().id === 'dark' ? 'bg-slate-400' : 'bg-slate-500'" style="animation-delay: 0.4s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div [class]="'border-t p-3 ' + themeConfig().borderColor + ' ' +
+                  (themeConfig().id === 'dark' ? 'bg-slate-800' : 'bg-white')">
+      <form (submit)="$event.preventDefault(); sendMessage()" class="flex items-end gap-2">
+        <textarea
+          [(ngModel)]="newMessage"
+          name="newMessage"
+          rows="1"
+          placeholder="Nhập câu hỏi cho CRMie..."
+          (keydown.enter)="$event.preventDefault(); sendMessage()"
+          [class]="'flex-1 resize-none px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 max-h-24 ' +
+                    (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-100 placeholder-slate-400 border border-slate-600' : 'bg-slate-50 text-slate-800 placeholder-slate-400 border border-slate-200')"></textarea>
+        <button
+          type="submit"
+          [disabled]="!newMessage.trim() || aiTyping"
+          [class]="'p-2.5 rounded-xl shadow transition-all ' +
+                   (!newMessage.trim() || aiTyping
+                     ? (themeConfig().id === 'dark' ? 'bg-slate-700 text-slate-500' : 'bg-slate-200 text-slate-400')
+                     : 'bg-gradient-to-br from-sky-500 to-emerald-500 text-white hover:shadow-lg hover:scale-105')">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
 </div>
